@@ -1,0 +1,111 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+<title>LinkShare Web Application</title>
+<link href="<?= $this->app_link; ?>/css/style.css" rel="stylesheet" type="text/css">
+<script src="<?= $this->app_link; ?>/js/d3.v3.min.js"></script>
+<script src="<?= $this->app_link; ?>/js/jquery-1.9.1.js"></script>
+<script src="<?= $this->app_link; ?>/js/handlebars.js"></script>
+<script src="<?= $this->app_link; ?>/js/ember-1.0.0-rc.6.js"></script>
+<script src="<?= $this->app_link; ?>/js/app.js"></script>
+
+<link rel="stylesheet" type="text/css" href="<?= $this->app_link; ?>/css/d3LineChart.css">
+<script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.tipsy.js"></script>
+<link href="<?= $this->app_link; ?>/css/tipsy.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">
+	body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #DDDDDD;
+  stroke-dasharray: 4px, 3px;
+  stroke-width:1.5;
+  /*shape-rendering: crispEdges;*/
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+.tick .line {
+stroke: #dddddd;
+stroke-width: 2px;
+}
+
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 60px;                  
+  height: 28px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: lightsteelblue;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+</style>
+</head>
+<body>
+<script type="text/x-handlebars" id="application">
+	<div id="bodywrap">	
+        <div id="mainheader">
+
+		<div class="mainheaderlogo"></div>
+		<a href="#" class="mainheaderlogout">LOGOUT</a>
+		<a href="#" class="mainheaderdocs">DOCUMENTATION</a>
+	</div>
+	<div class="blueheader">
+		<!--<a href="" class="buildcampaignbutton">Build Campaign <div class="buildarrow"></div></a>-->		<select name="url" class="buildcampaignbutton" onchange="document.location.href=$(this).val();" style="background: #2489C4;">
+
+			<option>-Select-</option>
+                        <option value="build-campaign.html">Build Campaign</option>
+			<option value="build-manual-campaign.html">Build Manual Campaign</option>
+		</select>
+		<div class="buildline"></div>
+		
+		<div class="networkactive"><div class="networkline"></div><div class="greennetwork"></div>Network Active</div>
+		<div class="networkactive"><div class="networkline"></div><div class="greennetwork"></div>Crawler Active</div>
+		<div class="networkactive"><div class="networkline"></div><div class="greennetwork"></div>Backup Active</div>
+	</div>
+	<div class="mainbody">
+		<div class="leftsidebar">
+			<div class="navtitle">NAVIGATION</div>
+			<ul id="leftnavlist">
+			<!--<li href="#" class="navlink" id="active"><span class="navicon"><img src="images/dashboardicon.png" width="15px" height="14px"></span> Dashboard</li><li href="/test" class="navlink"><span class="navicon"><img src="images/campaignsicon.png" width="15px" height="13px"></span> Campaigns</li><li href="#" class="navlink"><span class="navicon"><img src="images/analyticsicon.png" width="15px" height="15px"></span> Analytics</li><li href="#" class="navlink"><span class="navicon"><img src="images/importicon.png" width="15px" height="14px"></span> Import / Export</li><li href="#" class="navlink"><span class="navicon"><img src="images/adminicon.png" width="15px" height="12px"></span> Administration</li>-->
+				<a href="index.html" style="color:#545454;"><li href="#" class="navlink" id="active"><span class="navicon"><img src="images/dashboardicon.png" width="15px" height="14px"/></span> Dashboard</li></a>
+				<a href="build-campaign.html" style="color:#545454;"><li href="/test" class="navlink"><span class="navicon"><img src="images/campaignsicon.png" width="15px" height="13px"/></span> Campaigns</li></a>
+				<a href="analytics.html" style="color:#545454;"><li href="#" class="navlink"><span class="navicon"><img src="images/analyticsicon.png" width="15px" height="15px"/></span> Analytics</li></a>
+				<a href="import.html" style="color:#545454;"><li href="#" class="navlink"><span class="navicon"><img src="images/importicon.png" width="15px" height="14px"></span> Import / Export</li></a>
+				<a href="administration.html" style="color:#545454;"><li href="#" class="navlink"><span class="navicon"><img src="images/adminicon.png" width="15px" height="12px"></span> Administration</li></a>
+			</ul>
+		</div>
+            <div class="mainbodywrap">
+                <?php echo $this->getContent() ?>
+            </div>
+            
+    </div>
+</div>
+    
+    </script>
+
+    <script type="text/x-handlebars" id="components/bar-chart">
+        <g {{bindAttr transform=transformG}}>
+        <g class="x axis" {{bindAttr transform=transformX}}></g>
+        <g class="y axis"><text transform="rotate(-90)" y="6" dy=".71em" style="text-anchor:end;"></text></g>
+        <g class="rects"></g>
+    </g>
+    </script>
+    
+</body>
+</html>
+            

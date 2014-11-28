@@ -1,0 +1,540 @@
+<?php
+$is_admin = false;
+if ($this->session->get("user-role") !== "normal") {
+    $is_admin = true;
+}
+
+$user_domains = $this->session->get("user-domains");
+if(!is_array($user_domains)) {
+    $user_domains = array();
+}
+?>
+<script type="text/javascript">
+var total_domains;
+var domains = [];
+
+$(document).on('click', '.popup_checkbox', function () {
+    if ($(this).is(':checked')) {
+        $('#textboxG5').val('');
+        $('#textboxG5').show();
+    } else {
+        $('#textboxG5').hide();
+    }
+});
+function getSentiment(id) {
+    $.ajax({
+        url: "<?= $this->app_link;?>/campaign/SentimentValue",
+        dataType: "json",
+        type: "POST",
+        data: {
+            page_url: $('#actual_url_' + id).text()
+        },
+        success: function (data) {
+            $('#sentimental_value_' + id).text(data.KWSentiment);
+        }
+    });
+}
+
+function getPreviousKeywords(id) {
+    $('#keyword_lists_' + id).html('');
+    $('#current_id').val(id);
+    $.ajax({
+        url: "<?= $this->app_link;?>/campaign/getPreviousKeywords",
+        dataType: "json",
+        type: "POST",
+        data: {
+            page_url: $('#actual_url_' + id).text()
+        },
+        success: function (data) {
+            $('#keyword_lists_' + id).html(data.record);
+        }
+    });
+}
+function setKeywords(id) {
+    $('#textbox_anchor_text' + $('#current_id').val()).val($('#achor_text_' + id).val());
+    $('#textbox_html' + $('#current_id').val()).val($('#html_text_' + id).val());
+}
+
+function get_domain_pages(type, page) {
+    domains = new Array();
+    total_domains = document.getElementById('total_domains').value; // total number of domains
+    for (var i = 0; i < total_domains; i++) {
+        if ($('#domain_checkbox_' + i + ':checked').val() == 'on') // get checked checkbox
+        {
+            domains.push(document.getElementById('domain_' + i).value); // assign values to the array
+        }
+
+    }
+}
+
+$(document).ready(function () {
+    $("#auto_complete_text").autocomplete({
+        source: function (request, response) {
+            $("#page_urls_with_id").val('');
+            $('#loadmore_div').show();
+            $.ajax({
+                url: "<?= $this->app_link;?>/manual_campaign/getAutocomplete",
+                dataType: "json",
+                type: "POST",
+                data: {
+                    cat_text: $('#auto_complete_text').val(),
+                    domains: "" + JSON.stringify(domains) + ""
+                },
+                success: function (data) {
+                    response(data);
+                    $('#loadmore_div').hide();
+                }
+            });
+        },
+        select: function (event, ui) {
+            $("#auto_complete_text").val(ui.item.label)
+            $("#page_urls_with_id").val(ui.item.id);
+            get_categories();
+        }
+    })
+});
+
+// Get all categories
+function get_categories() {
+
+    return false;
+    var total_domains = document.getElementById('total_domains').value;
+    var domains = [];
+    for (var i = 0; i < total_domains; i++) {
+        if ($('#domain_checkbox_' + i + ':checked').val() == 'on') // Checkbox checked
+        {
+            domains.push(document.getElementById('domain_' + i).value);
+        }
+    }
+    var pages = [];
+    pages.push($('#auto_complete_text').val());
+
+    /*for(var i=0; i < total_pages; i++)
+     {
+     if($('#page_checkbox_'+i+':checked').val()=='on')
+     {
+     var temp_url = document.getElementById('page_'+i).value.split("@#")
+     pages.push(temp_url[0]);
+     }
+     }*/
+    if (domains.length > 0 && pages.length > 0) {
+        document.getElementById('choose_categories').innerHTML = '';
+        $.post('<?= $this->app_link?>/campaign/get_categories', {domains: "" + JSON.stringify(domains) + "", pages: "" + JSON.stringify(pages) + ""}, function (data) {
+            var categories = jQuery.parseJSON(data);
+
+            for (var i = 0; i < categories.length; i++) {
+                document.getElementById('choose_categories').innerHTML += '<div class="modal-listbox"><input type="checkbox" name="category_checkbox_' + i + '" id="category_checkbox_' + i + '" class="css-checkbox" /><label for="category_checkbox_' + i + '" class="css-label"></label><div class="modallisttext">' + categories[i] + '</div><input type="hidden" name="category_' + i + '" id="category_' + i + '" value="' + categories[i] + '" /></div>';
+            }
+            document.getElementById('choose_categories').innerHTML += '<input type="hidden" name="total_categories" id="total_categories" value="' + i + '" />';
+        });
+    }
+    return false;
+}
+
+function automated_campaign_search() {
+    var campaign_name = $('#campaign_name').val();
+    var end_date = $('#end_date').val()
+    var start_date = $('#start_date').val();
+    var keywords = $('#keywords').val();
+    var total_domains = $('#total_domains').val();
+    var main_domain_url = [];
+
+    var domain_ids = [];
+    for (var i = 0; i < total_domains; i++) {
+        if ($('#domain_checkbox_' + i + ':checked').val() == 'on') {
+            domain_ids.push($('#domain_' + i).val());
+            main_domain_url.push($('#main_domain_url_' + i).val());
+        }
+    }
+    if (campaign_name == '') {
+        alert("Enter campaign Name");
+        $('#campaign_name').focus();
+        return false;
+    }
+    else if (domain_ids.length <= 0) {
+        alert("Select base url");
+        return false;
+    }
+    else if (start_date == '') {
+        alert("Select Start Date");
+        $('#start_date').focus();
+        return false;
+    }
+    else if (end_date == '') {
+        alert("Select End Date");
+        $('#end_date').focus();
+        return false;
+    }
+
+    if (campaign_name != '' && end_date != '' && start_date != '' && domain_ids.length > 0) {
+        if ($.trim($('#page_urls_with_id').val()) == "") {
+            alert("Please select a page to campaign");
+            return false
+        }
+
+        $.ajax({
+            url: "<?= $this->app_link;?>/campaign/isCampaignExists",
+            dataType: "json",
+            type: "POST",
+            data: {
+                campaign_name: campaign_name
+            },
+            success: function (data) {
+                if (data.status == "error") {
+                    alert("Campaign Name Already Exists");
+                    return false;
+                }
+                else {
+                    var total_pages = $('#total_pages').val();
+                    var page_urls = [];
+                    var page_urls_with_id = [];
+                    page_urls.push($('#auto_complete_text').val());
+                    page_urls_with_id.push($('#page_urls_with_id').val());
+                    for (var i = 0; i < total_pages; i++) {
+                        if ($('#page_checkbox_' + i + ':checked').val() == 'on') {
+                            var temp_url = $('#page_' + i).val().split("@#");
+
+                            page_urls.push(temp_url[0]);
+                            page_urls_with_id.push($('#page_' + i).val());
+                        }
+                    }
+
+                    var radios = document.getElementsByName('pages_per_domain_radio');
+                    var pages_per_domain = 3;
+                    for (var i = 0, length = radios.length; i < length; i++) {
+                        if (radios[i].checked) {
+                            pages_per_domain = radios[i].value;
+                            break;
+                        }
+                    }
+
+
+                    var total_categories = $('#total_categories').val();
+                    var categories = [];
+                    for (var i = 0; i < total_categories; i++) {
+                        if ($('#category_checkbox_' + i + ':checked').val() == 'on') {
+                            categories.push($('#category_' + i).val());
+                        }
+                    }
+
+                    document.getElementById('searched_pages_result').innerHTML = '<img src="<?= $this->app_link;?>images/loading.gif" alt="Loading..." />';
+
+                    $.post('<?= $this->app_link;?>/campaign/generate', {
+                        main_domain_url: "" + JSON.stringify(main_domain_url) + "",
+                        keywords: "" + keywords + "",
+                        campaign_name: "" + campaign_name + "",
+                        start_date: "" + start_date + "",
+                        end_date: "" + end_date + "",
+                        domain_ids: "" + JSON.stringify(domain_ids) + "",
+                        page_urls: "" + JSON.stringify(page_urls) + "",
+                        page_urls_with_id: "" + JSON.stringify(page_urls_with_id) + "",
+                        categories: "" + JSON.stringify(categories) + "",
+                        pages_per_domain: "" + pages_per_domain + "",
+                        list_of_domains: $("#list_of_domains").val()
+                    }, function (data) {
+                        document.getElementById('searched_pages_result').innerHTML = data;
+
+                        if (CKEDITOR) {
+                            if (CKEDITOR.instances.ckeditor) {
+                                CKEDITOR.instances.ckeditor.destroy();
+                            }
+                        }
+
+                        $(".ckeditor").ckeditor();
+
+                        $('.droparrow').click(function () {
+                            var content_id = $(this).attr('href');
+                            var toggle_switch = $(this);
+                            $(content_id).toggle(function () {
+                                if ($(this).css('display') == 'none') {
+                                    toggle_switch.html('');
+                                } else {
+                                    toggle_switch.html('');
+                                }
+                            });
+                        });
+                    });
+                }
+            }
+        });
+
+
+    }
+    else
+        alert('Bitte füllen Sie das Formular zuerst.');
+    return false;
+}
+
+/* handle unique selection of 'ziel url' */
+$(document).ready(function() {
+    var domain_checkboxs = $('input[id^="domain_checkbox_"]'),
+        temp_selector = null;
+
+    domain_checkboxs.on('change', function() {
+        var el = $(this);
+        if(this.checked) {
+            for(var i=0;i<domain_checkboxs.length;i++) {
+                temp_selector = $(domain_checkboxs[i]);
+                if(temp_selector.attr('id') != el.attr('id')) {
+                    temp_selector.attr('checked', false);
+                }
+            }
+        }
+    });
+});
+</script>
+<style>
+    .dropdownbox {
+        width: 177px;
+    }
+</style>
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">BUILD EINE NEUE KAMPAGNE</div>
+    <a href="<?= $this->app_link; ?>/manual_campaign" style="margin-left:343px" class="pagetitlebar-manualbuild">BUILD A HANDBUCH KAMPAGNE</a>
+
+    <div class="buildicon"></div>
+</div>
+<div class="whitepagewrap">
+<?php echo $this->getContent() ?>
+<form name="generate_list" action="<?= $this->app_link; ?>/campaign/generate" method="post" onsubmit="return automated_campaign_search()">
+<div class="whitepageblueheader"></div>
+<div class="longwhitepagegraybg">
+    <input type="text" name="campaign_name" id="campaign_name" class="longwhiteformfield" placeholder="Kampagnen Name" value="<?php echo @$_POST['campaign_name'] ?>">
+</div>
+
+<div style="float:left;width:333px;">
+    <div class="smallwhitepageblueheader"></div>
+    <div class="smallwhitepagegraybg">
+        <div class="boxtitle">ZIEL URL</div>
+        <a href="#" class="dropdownbox" data-reveal-id="choosedomainModal" data-animation="none">Wählen Sie Domäne <span class="dropdownbox-arrow"></span></a>
+    </div>
+</div>
+
+<div style="float:right;width:333px;">
+    <div class="smallwhitepageblueheader"></div>
+    <div class="smallwhitepagegraybg">
+        <div class="boxtitle">DOMAIN SEITE</div>
+        <!--<a href="#" class="dropdownbox" data-reveal-id="choosepageModal" data-animation="none">Wählen Sie Seite <span class="dropdownbox-arrow"></span></a> !-->
+        <input type="text" id="auto_complete_text" class="autocompleteinputform"/>
+
+        <div id="loadmore_div" style="display: none;" class="loading">
+        </div>
+    </div>
+</div>
+
+<div style="float:left;width:333px;clear:both;">
+    <div class="smallwhitepageblueheader"></div>
+    <div class="smallwhitepagegraybg">
+        <div class="dropdowncal">
+            <input type="hidden" name="end_date" id="end_date" value="">
+            <span id="e_date_cal">ENDE DATUM</span>
+
+            <div class="dropdowncal-arrow"></div>
+        </div>
+
+
+        <div class="dropdowncal">
+            <input type="hidden" name="start_date" id="start_date" value="">
+            <span id="s_date_cal">START DATUM</span>
+
+            <div class="dropdowncal-arrow"></div>
+        </div>
+    </div>
+</div>
+
+<div style="float:right;width:333px;">
+    <div class="smallwhitepageblueheader"></div>
+    <div class="smallwhitepagegraybg">
+        <div class="boxtitle">Seiten pro Domain</div>
+        <a href="#" class="dropdownbox" data-reveal-id="choosepages_per_domainModal" data-animation="none">Wählen Sie Seiten pro Domain <span class="dropdownbox-arrow"></span></a>
+    </div>
+</div>
+
+<div style="float:left;width:333px;clear:both;">
+</div>
+
+<div class="whitepageblueheader"></div>
+<div class="longwhitepagegraybg">
+    <input type="text" name="keywords" id="keywords" value="" placeholder="Kampagne erstellen" class="mediumwhiteformfield">
+    <button type="submit" class="campaigngeneratelist" name="submit" style="border:none; cursor:pointer;"></button>
+</div>
+
+<?php if ($page == "campaign"): ?>
+    <!-- choose domain modal window -->
+    <div id="choosedomainModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie Domäne:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap">
+                <?php if (!empty($get_domains)) {
+                    $i = 0;
+                    $listOfDomains = array();
+
+                    foreach ($get_domains as $domain) {
+                        if (!in_array($domain->DomainURLIDX, $user_domains) and !$is_admin) {
+                            continue;
+                        }
+
+                        $listOfDomains[$domain->DomainURLIDX] = $domain->DomainURL;
+                        ?>
+                        <div class="modal-listbox">
+                            <input type="checkbox" name="domain_checkbox_<?php echo $i; ?>" id="domain_checkbox_<?php echo $i; ?>" class="css-checkbox"/>
+                            <label for="domain_checkbox_<?php echo $i; ?>" class="css-label"></label>
+
+                            <div class="modallisttext"><?php echo $domain->DomainURL; ?></div>
+                            <input type="hidden" name="domain_<?php echo $i; ?>" id="domain_<?php echo $i; ?>" value="<?php echo $domain->DomainURLIDX; ?>"/>
+                            <input type="hidden" name="main_domain_url_<?php echo $i; ?>" id="main_domain_url_<?php echo $i; ?>" value="<?php echo strtolower($domain->DomainURL); ?>"/>
+                        </div>
+                        <?php $i++;
+                    }
+                } ?>
+                <input type="hidden" name="total_domains" id="total_domains" value="<?php echo $i; ?>"/>
+                <input type="hidden" name="list_of_domains" id="list_of_domains" value='<?php echo json_encode($listOfDomains, true);?>'>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="close-reveal-modal modal-savecontent" onClick=" return get_domain_pages('new', '1');">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose page modal window -->
+    <div id="choosepageModal" class="reveal-modal" style="width:818px;left:31%;">
+        <div class="modal-blueheadline" style="width:818px;"></div>
+        <div class="modal-midline" style="width:818px;">
+            <div class="modal-midlinetext">Wählen Sie Seite:</div>
+        </div>
+        <div class="modal-bodyarea" style="width:750px;">
+            <div class="modallistwrap" id="choose_pages_id">
+            </div>
+            <!--<div id="loadmore_div">
+            </div>!-->
+        </div>
+        <div class="modal-bottomline" style="width:818px;">
+            <div class="close-reveal-modal modal-savecontent" onClick=" return get_categories();" style="margin-left:361px;">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose list modal window -->
+    <div id="chooselistModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie Liste:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap">
+                <?php if (!empty($get_lists)) {
+                    $j = 0;
+                    foreach ($get_lists as $list) {
+                        ?>
+                        <div class="modal-listbox">
+                            <input type="checkbox" name="list_checkbox_<?php echo $j; ?>" id="list_checkbox_<?php echo $j; ?>" class="css-checkbox"/>
+                            <label for="list_checkbox_<?php echo $j; ?>" class="css-label"></label>
+
+                            <div class="modallisttext"><?php echo $list->Name; ?></div>
+                            <input type="hidden" name="list_<?php echo $j; ?>" id="list_<?php echo $j; ?>" value="<?php echo $list->Name; ?>"/>
+                        </div>
+                        <?php $j++;
+                    }
+                } ?>
+                <input type="hidden" name="total_lists" id="total_lists" value="<?php echo $j; ?>"/>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="close-reveal-modal modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose category modal window -->
+    <div id="choosecatModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie Kategorie:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap" id="choose_categories">
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="close-reveal-modal modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose pages per domain modal window -->
+    <div id="choosepages_per_domainModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie Seiten pro Domain:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <?php $k = 2; ?>
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="radio" name="pages_per_domain_radio" id="pages_per_domain_checkbox_<?php echo $k; ?>" value="<?php echo $k; ?>" class="css-checkbox"/>
+                    <label for="pages_per_domain_checkbox_<?php echo $k; ?>" class="css-label"></label>
+
+                    <div class="modallisttext"><?php echo $k; ?></div>
+                </div>
+            </div>
+            <?php $k = 5; ?>
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="radio" name="pages_per_domain_radio" id="pages_per_domain_checkbox_<?php echo $k; ?>" value="<?php echo $k; ?>" class="css-checkbox"/>
+                    <label for="pages_per_domain_checkbox_<?php echo $k; ?>" class="css-label"></label>
+
+                    <div class="modallisttext"><?php echo $k; ?></div>
+                </div>
+            </div>
+            <?php $k = 10; ?>
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="radio" name="pages_per_domain_radio" id="pages_per_domain_checkbox_<?php echo $k; ?>" value="<?php echo $k; ?>" class="css-checkbox"/>
+                    <label for="pages_per_domain_checkbox_<?php echo $k; ?>" class="css-label"></label>
+
+                    <div class="modallisttext"><?php echo $k; ?></div>
+                </div>
+            </div>
+            <?php $k = 15; ?>
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="radio" name="pages_per_domain_radio" id="pages_per_domain_checkbox_<?php echo $k; ?>" value="<?php echo $k; ?>" class="css-checkbox"/>
+                    <label for="pages_per_domain_checkbox_<?php echo $k; ?>" class="css-label"></label>
+
+                    <div class="modallisttext"><?php echo $k; ?></div>
+                </div>
+            </div>
+            <?php $k = 20; ?>
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="radio" name="pages_per_domain_radio" id="pages_per_domain_checkbox_<?php echo $k; ?>" value="<?php echo $k; ?>" class="css-checkbox"/>
+                    <label for="pages_per_domain_checkbox_<?php echo $k; ?>" class="css-label"></label>
+
+                    <div class="modallisttext"><?php echo $k; ?></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="close-reveal-modal modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+<?php endif; ?>
+
+</form>
+</div>
+<div id="searched_pages_result">
+    <div class="listtitlebar" style="border:none;"></div>
+</div>
+<input type="hidden" id="current_id"/>
+<input type="hidden" id="page_urls_with_id"/>

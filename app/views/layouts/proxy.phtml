@@ -1,0 +1,171 @@
+<style type="text/css">
+    .proxies_table {
+        margin: 0 auto;
+    }
+
+    .proxies_table tr:nth-child(even) {
+        background-color: #F1F3F7;
+    }
+
+    .proxies_table tr:nth-child(odd) {
+        background-color: #e8eaee;
+    }
+
+    .table_input {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 1px solid #C2C2D3;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px #EEEEEE inset;
+        height: 20px;
+        width: 100px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .table_td {
+        vertical-align: middle;
+        text-align: center;
+        height: 26px;
+    }
+
+    .table_titles {
+        font-weight: bold;
+        text-align: center;
+    }
+
+    #proxy-table-container {
+        /*width: 100%;
+        /*text-align: center;
+        background-color: red;*/
+    }
+</style>
+<div class="whitepagewrap" style="margin-top:17px;width: 100%;"><?php echo $this->getContent(); ?></div>
+
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">Upload Proxies</div>
+</div>
+
+<form id="proxies-form" action="<?= $this->app_link . '/' . $page; ?>/upload" method="post" enctype="multipart/form-data" onsubmit="AJAXSubmit(this); return false;">
+    <div class="whitepagewrap" style="margin-bottom: 50px;width: 100%;">
+        <div id="proxies-form-loading" style="display: none;" class="loading"></div>
+        <div style="height:auto; padding-bottom: 15px;" class="longwhitepagegraybg">
+            <div class="boxtitle" style="float: left;">STANDARD LIST:
+                <textarea cols="30" rows="10" style="width:450px;line-height:15px;height:160px;padding:10px 0 0 10px;float:left;" name="list_text" class="dropdownbox" onkeyup="toggleWordsAction(this, 'proxy_action');"></textarea>
+            </div>
+
+            <div class="boxtitle">OR Upload TEXT:
+                <input type="file" name="file_text" onchange="toggleWordsAction(this, 'proxy_action')">
+            </div>
+
+            <div class="boxtitle">
+                <input type="hidden" name="action" id="proxy_action" value="">
+                <input type="submit" value="SUBMIT">
+            </div>
+            <div id="proxies-form-result" style="margin-left: 20px;float: left;width: 100%;"></div>
+        </div>
+    </div>
+</form>
+
+
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">CURRENT PROXIES</div>
+</div>
+
+<div id="proxy-table-container">
+    <?php
+    if (count($proxies_list) < 1) {
+        echo "No proxies!";
+    } else {
+        $table = "<table class='proxies_table'><tr class='table_titles'><td>No. #</td><td>IP</td><td>PORT</td><td>Username</td><td>Password</td><td>Actions</td></tr>\n";
+        foreach ($proxies_list as $p_no => $proxy) {
+            $id = $proxy["idx"];
+            $ip = $proxy["ProxyIP"];
+            $port = $proxy["ProxyPort"];
+            $user = $proxy["user"];
+            $pass = $proxy["password"];
+
+            $table .= "<tr id='row_" . $id . "'>
+                    <td class='table_td'>" . ($p_no + 1) . "</td>
+                    <td class='table_td'><input class='table_input' value='" . $ip . "' name='ip_" . $id . "' ></td>
+                    <td class='table_td' style='width: 100px;'><input class='table_input' value='" . $port . "' name='port_" . $id . "' ></td>
+                    <td class='table_td'><input class='table_input' value='" . $user . "' name='user_" . $id . "' ></td>
+                    <td class='table_td'><input class='table_input' value='" . $pass . "' name='pass_" . $id . "' ></td>
+                    <td class='table_td' style='background-color: #FFFFFF;'>
+                    <!--<input style='float: right;' type='checkbox' title='Select' name='cb_" . $id . "'>
+                    <a href=\"javascript:saveRecord('" . $id . "')\" title='Save'><div class=\"userlock\" style='margin-top: 5px;'></div></a>-->
+                    <a href=\"javascript:delRecord('" . $id . "')\" title='Delete'><div class=\"userdelete\" style='margin-top: 5px;'></div></a>
+                    </td>
+                    </tr>\n";
+        }
+        $table .= "</table>";
+
+        echo $table;
+    }
+    ?>
+</div>
+
+<div id="del_dialog" style="display: none;">
+    <p>Are you Sure Want to Delete this PROXY?</p>
+</div>
+
+<script type="text/javascript">
+    function toggleWordsAction(el, id) {
+        document.getElementById(id).value = el.getAttribute("name");
+    }
+
+    function AJAXSubmit(form) {
+        var action = form.getAttribute("action"),
+            formId = form.getAttribute("id"),
+            loading = $("#" + formId + "-loading"),
+            result = $("#" + formId + "-result"),
+            oReq = new XMLHttpRequest();
+
+        //action before load:
+        loading.show();
+
+        oReq.onload = function () {
+            //hide loading:
+            loading.hide();
+            form.reset();
+
+            result.html(this.responseText);
+        };
+
+        oReq.open("post", action, true);
+        oReq.send(new FormData(form));
+    }
+
+    function delRecord(id) {
+        $('#del_dialog').dialog({
+            modal: true,
+            resizable: false, autoOpen: true,
+
+            title: 'Delete User',
+            draggable: false,
+            width: 'auto',
+            buttons: {
+                "Delete": function () {
+                    $.ajax({
+                        url: "<?= $this->app_link;?>/proxy/delete/" + id,
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                        },
+                        success: function (data) {
+                            if (data.deleted == "sucss") {
+                                $('#row_' + id).remove();
+                            }
+
+                            //close dialog:
+                            $('#del_dialog').dialog('close');
+                        }
+                    });
+                },
+                "Close": function () {
+                    $('#del_dialog').dialog('close');
+                }
+            }
+        });
+    }
+
+</script>

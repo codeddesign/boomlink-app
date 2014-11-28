@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+    <title>LinkShare Web Application</title>
+    <link href="<?= $this->app_link; ?>/css/style.css" rel="stylesheet" type="text/css">
+
+    <!-- modal box css -->
+    <link rel="stylesheet" href="<?= $this->app_link; ?>/css/reveal.css">
+
+</head>
+<body>
+
+<div id="bodywrap">
+    <div id="mainheader">
+        <a href="<?= $this->app_link;?>" class="mainheaderlogo"></a>
+        <a href="javascript:history.back()" class="mainheaderlogout">ZURÜCK</a>
+        <a href="<?= $this->app_link;?>/questions" class="mainheaderdocs">Q&A</a>
+        <a href="<?= $this->app_link;?>/documentation" class="mainheaderdocs">DOKUMENTATION</a>
+    </div>
+
+    <div class="mainbody" style="border-top:1px solid #BFC2C5;border-radius:4px;padding:40px;width:860px;font-family:sans-serif;line-height:22px;font-size:14px;">
+
+        <h2>Dashboard</h2>
+        <strong>Dashboard</strong>: Das Dashboard ist eine schnelle Übersicht der aktuellen Änderungen in der Applikation. Es ist nicht dafür gedacht um detaillierte Informationen wiederzugeben, sondern globale Veränderungen der letzten 24 Stunden.
+        <p>
+            <strong>Grüne Leuchten:</strong> Die grünen Leuchten an der oberen rechten Seite des Dashboards zeigen an, ob die Server aktiv oder inaktiv sind. Wenn ein Server inaktiv ist, leuchtet dieser rot, um ihnen mitzuteilen, dass er offline ist.
+        <p>
+            <strong>Globale Rankänderungen:</strong> Rankänderungen + /- aller aktuell aktiven Kampagnen. Dies wird alle 24 Stunden aktualisiert und basiert auf den gleichen Statistiken wie auf der Analytics Seite abgebildet.
+        <p>
+            <strong>Aktive Netz Seiten:</strong> Dies zeigt die aktuelle Anzahl von Seiten, die im Netzwerk zur Verfügung stehen, die aus den zur Verfügung gestellten Domänen gecrawlt kamen.
+        <p>
+            <strong>Aktive Links Netz:</strong> Dies zeigt die Anzahl der backlinks, die zur Zeit in Kampagnen aktiv sind.
+        <p>
+            <strong>(Übersicht) Traffic Bericht:</strong> CVS-download der Traffic Statistiken der letzten 24 Stunden in 20 Minütigen Abständen.
+        <p>
+            <strong>(Übersicht) Rank Bericht:</strong> CSV-Download der aktuellen Rankänderungen für jede aktive Domain(s) /Seite(n), die in den letzten 24 Stunden in Kampagnen aktiv sind/waren.
+        <p>
+            <strong>Traffic Analytics Grafik:</strong> Zeigt einen schnellen Überblick der Traffic Statistik der letzten 24 Stunden.
+        <p>
+            <strong>Seiten durchsucht:</strong> Dies ist eine grafische Übersicht der Seiten, die vom Crawl Server in den letzten 7 Tagen erzeugt wurde.
+        <p>
+            <strong>Globale Rankänderungs Grafik:</strong> Die globale Rankänderung aller aktiven Keywords, die in den letzten 7 Tagen in Kampagnen aktiv waren.
+
+        <p>
+            <br>
+        </p>
+        <h2>Kampagnen</h2>
+        <strong>Kampagnen:</strong> Es gibt 2 Arten von Kampagnen. Standard Kampagnen und Manuelle Kampagnen. Eine Standard Kampagne wird wahrscheinlich am häufigsten benutzt werden. Wenn Domains in die Applikation hochgeladen werden, wird der Crawl Server über die neuen Domains notifiziert und beginnt relative Informationen aus der zur Verfügung gestellten Domäne zu generieren, wie z. b. interne Seiten, in-bound links, out-bound links, pagerank, domain alter, Inhalt, Content Keywords, social Wahrnehmung und Metainformationen. In einer Manuellen Kampagne, umgeht der Crawl Server diese Informations Anfrage da Sie eine vorbestimmte Gruppe von Domains/Seiten eingeben, die Sie verwenden möchten.
+        <p>
+            <strong>Standard Kampagnen:</strong> Dies ist der Haupteinstellungsbereich in dem Sie  ihre Kampagnen erstellen und Domains sowie Seiten verlinken. Im Gegensatz zu Google, die  Ergebnisse Anzeigen basierend auf was sie für die best möglichen Quellen von relevanten Informationen für den Benutzer halten, zeigt die Standard Kampagne  Ergebnisse auf der Grundlage der relevantesten Ergebnisse um bei Suchmaschinen höher zu Ranken mit den Informationen, die Sie anbieten. Alle Informationen, die sie uns zur Verfügung stellen wie die Domain, Seite, Kategorie und Stichwort wird im derzeitigen Algorithmus berücksichtigt um die Ergebnisliste zu generieren.
+        <p>
+            <strong>Algorithmus:</strong> Der Algorithmus basiert auf Google Pagerank, eingehende Links, ausgehende Links, Keyword Relevanz, inhaltliche Kategorisierung, Stimmung, Domänen age und social awareness.
+        <p>
+            <strong>Kampagnen Titel:</strong> Der Titel der Kampagne ist das erste Eingabefeld bei der Erstellung einer Kampagne. In diesem Eingabefeld geben sie der Kampagne den Namen den Sie in der Webapplikation angezeigt haben möchten.
+        <p>
+            <strong>Base Domain:</strong> Die base Domain ist die Stamm-URL der Domäne. Da eine Seite Millionen von Seiten haben kann, wählen Sie am besten zuerst die Stamm-URL (base domain) um eine Seite zu finden.
+        <p>
+            <strong>Domänen Seite:</strong> Das Domänen Seiten Dropdown zeigt alle gecrawlten Seiten in der base Domain die von Ihnen ausgewählt wurden.
+        <p>
+            <strong>Kategorie:</strong>  Die Kategorie dropdown zeigt Inhalts Kategorisierungs Typen aus der von Ihnen ausgewählten Domain/Seite. Aufgrund des Google Rank Algorithmus
+            "Hummingbird ", setzt Google auf verschiedene neue Methoden fürs ranking wie semantische Informationen. Durch die Verknüpfung der entsprechenden semantischen Werte und Seitenkategorisierung, wird die Webapplikation Ihnen bei der Suche nach besseren und relevanteren Entscheidungen um Webseiten zu verlinken behilflich sein.
+        <p>
+            <strong>Start/Enddatum:</strong>  Mit dem Start- und Enddatum können Sie den Server wissen lassen, wann Sie mit der Kampagne beginnen und wann Sie sie beenden wollen.
+        <p>
+            <strong>Eingabe der Keywörter:</strong> Das letzte Eingabefeld auf der Standard Kampagnen Erstellungsseite ist das Keyword Eingabefeld (links von der "Liste generieren" Taste). Durch die Eingabe eines Keywords, geben Sie der Webapplikation zusätzliche Informationen um eine möglichst genaue Liste der potenziell besten Webseiten zu erstellen.
+        <p>
+            <strong>Liste generieren:</strong> Durch das Betätigen der "Liste generieren" Taste, wird der Web Server die relevantesten Seiten der Website auf der Grundlage der Informationen, die von Ihnen oben zur Verfügung gestellt wurden, aufspüren und diese in den aktuellen Suchalgorithmus hineinrechnen.
+        <p>
+            <strong>Ergebnisse:</strong> Kampagnen Ergebnisse werden auf der Grundlage der meist relevanten Websites Seiten auf der Oberseite und der am wenigsten relevant an der Unterseite auf einer Skala von 0 % bis 100 % angegeben.
+        <p>
+            <strong>Check Box:</strong> Mit der Check Box, links von jedem Seiten-URL, in der Suchergebnis Liste können Sie wählen, welche Seiten Sie in Ihre Kampagne miteinbeziehen möchten. Auch wenn sie einen Backlink, Bild-, Video- und integrierbares Skript auf eine Domain platziert haben müssen sie immer noch die Box auf der linken Seite der Domain abchecken um sie in Ihre Kampagne miteinzubeziehen.
+        <p>
+            <strong>Internet Adresse:</strong> Die Internet Adresse ist die Seiten-URL der Domains die durch den Crawl Server gecrawlt wurden.
+        <p>
+            <strong>Blaue "+" Taste:</strong> Durch klicken dieses Buttons, wird ein popup-Fenster erscheinen, das Ihnen die Eingabe eines anchor Textes, Bild-URL’s, Youtube Video-ID, oder irgendein beliebiges  HTML/Javascript ermöglicht, welches Sie in die von Ihnen gewählte Website einbinden wollen.
+        <p>
+            <strong>Best Match:</strong> Die Best-Match Anzeige, ist eine Anzeige der Relevanz der jeweiligen Seite basierend auf 0 % - 100 %.
+        <p>
+            <strong>Rechte Seite Nach-unten-Taste:</strong> Durch einen Klick auf dieses nach-unten-Taste können Sie die vollständige URL-Adresse der Seite, Google Pagerank, Inhaltskategorie, Backlinks, ausgehende Links, Domain Age, sentimentaler Wert, und insgesamte Anteilszahl.
+        <p>
+            <strong>Kampagne erstellen Taste:</strong>  Nachdem Sie die Seite die Sie in Ihre Kampagne miteinbeziehen wollen gewählt haben, sind Sie anschließend in der Lage, um auf die "Kampagne erstellen" -Taste zu klicken um Ihre neue Kampagne zu Starten und zu speichern. Wenn Sie auf diese Taste klicken, werden alle Links, Bilder, Videos, sowie zusätzliche Informationen werden an die gewählten Website Seiten verschickt.
+
+        <p>
+            <br>
+        </p>
+        <h2>Manuelle Kampagnen:</h2>
+        <strong>Manuelle Kampagnen:</strong> Eine Manuelle Kampagne ermöglicht es Ihnen, die Seiten zu wählen die Sie im Ergebnisbereich nach dem Klick auf die "Liste generieren" Taste anzeigen wollen. Im Gegensatz zu einer Standard Kampagne, zeigt eine manuelle Kampagne keine Ergebnisse von Seiten, die durch den Algorithmus der Webapplikation oder durch den Crawl Server gehen da sie ihnen die Möglichkeit bietet, Ihre eigenen, individuellen Ergebnisse zu wählen.
+        <p>
+            Ähnlich wie bei einer Standard Kampagne, muss auch bei einer manuellen Kampagne ein Titel, die base domain, domain Seite, und das Start/Enddatum der Kampagne gewählt werden. Allerdings müssen Sie auch entscheiden, welche upload Liste, Sie verwenden möchten um Seiten Ergebnisse anzuzeigen.
+        <p>
+            <strong>Upload Liste:</strong>  Im Upload Liste drop-down -Menü können Sie die Liste welche Sie verwenden möchten aus dem pre-uploaded manuelle Listen Verzeichnis wählen.
+        <p>
+            <strong>Verbindung hergestellt:</strong>  Im Rahmen einer manuellen Kampagne, sind die Ergebnisse sehr ähnlich, aber in einer manuellen Kampagne sehen Sie einen Abschnitt mit der Überschrift "Verbindung hergestellt". Dies zeigt an, ob eine Seite den cURL Code in sich hat und ob es eine aktive Verbindung gibt. Wenn es keine aktive Verbindung gibt werden der Text und das Bild in rot dargestellt, um ihnen mitzuteilen, dass keine aktive Verbindung zu dieser Seite zur Verfügung steht.
+
+        <p>
+            <br>
+        </p>
+        <h2>Laufende Kampagnen</h2>
+        <strong>Laufende Kampagnen:</strong> die laufende Kampagnen Seite zeigt alle aktuellen aktiven Kampagnen innerhalb der Webapplikation. Auf dieser Seite sehen Sie die Liste der Kampagne Titel, die erstellt wurden. Auf der linken Seite des Titels sehen Sie eine "X" -Taste. Durch Klicken dieser Taste, kann diese Kampagne gelöscht werden. Auf der rechten-Seite sehen Sie einen Dropdown Pfeil. Mit diesem Dropdown Pfeil sind Sie in der Lage sich Kampagnen Details wie Datum, Kampagne, base domain/Seite, und die Seiten, die Sie ausgewählt haben anzusehen.
+        <p>
+            <strong>Aktive Kampagnen bearbeiten:</strong>  Zum Bearbeiten einer laufenden Kampagne, wählen Sie die blaue “+” Taste  auf der rechten Seite der Website URL. Durch auf diese Taste zu Klicken, wird ein Popup Fenster erscheinen womit Sie Ihren Anchor Text, Bilder, Videos oder HTML/Javascript Bearbeiten können.
+
+        <p>
+            <br>
+        </p>
+        <h2>Analytics</h2>
+        <p>
+            <strong>Analytics Grafik:</strong> Die Grafik auf der Analytics Seite erlaubt Ihnen den eingehenden Traffic einer bestimmten Seite über einen Zeitraum von 24 Stunden, 7 Tagen, 28 Tagen, 3 Monaten, und 6 Monaten einzusehen.
+        <p>
+            <strong>Website Rankings:</strong>  Website ranking zeigt die aktuelle Rangliste für das Keyword pro Seite und die Rankänderungen (nach oben oder nach unten) über den Zeitraum von 1 Stunde, 24 Stunden, 7 Tagen und 28 Tagen.
+
+        <p>
+            <br>
+        </p>
+        <h2>Crawl Liste</h2>
+        <br>
+        <strong>Crawl Liste:</strong> Die Crawl Liste erlaubt Ihnen die aktuellen Domäne einzuschauen, die vom Crawl Server durchsucht werden, sowie die zur Verfügung stehenden Seiten. Durch die Dropdown Option auf der rechten Seite des Domain-URL’s zu wählen, sind Sie in der Lage, alle Ihre Seiten innerhalb einer bestimmten Domäne einzuschauen, und die Anzahl der zulässigen Links bei der Erstellung Ihrer Kampagnen einzustellen. Wenn eine Seite innerhalb der Domäne die zugelassene Anzahl von Links erreicht hat, wird die Seite nicht mehr über die Standard Kampagne Suche Ergebnisse erreichbar sein. Sie sind auch in der Lage jederzeit eine Domäne, aus der Liste der gecrawlten Domänen durch einen Klick auf die "X"  Taste auf der linken Seite des main domain-URL zu löschen.
+
+        <p>
+            <br>
+        </p>
+        <h2>Import / Export</h2>
+        <strong>Import/Export:</strong> Auf der Import / Export Seite können Sie Domäne/Seiten Importieren sowie Domäne und Kampagneninformationen in einer CSV-Datei Exportieren.
+        <p>
+            <strong>Standard Liste:</strong>  Dies ist Ihr wichtigstes Domänen Upload Feld, welches zum Crawl Server geschickt wird. Alle hier hochgeladenen Domänen werden nur in den Suchergebnissen einer Standard Kampagne angezeigt werden. Beim Upload neuer Domänen, können Sie diese entweder manuell eingeben oder sie mit Paste in ihre Domänen Liste einfügen. Jedoch, jede Domäne muss auf einer separaten Zeile stehen, und der abschließende Schrägstrich muss weggelassen werden ( d. h. .com/ sollte .com sein).
+        <p>
+            Unter der Standard Liste hochladen, finden Sie die manuelle Upload Liste. Hier müssen Sie Ihre Liste, wie auch Ihre Domänen Liste mit einem einzigartigen Titel alle auf einer eigenen Zeile eingeben.
+        <p>
+            <strong>Exportfunktion:</strong> Von dieser Seite aus haben Sie die Möglichkeit einzelne Kampagnen, Kampagnen nach Datum, und domain-spezifische Statistiken zu exportieren.
+
+        <p>
+            <br>
+        </p>
+        <h2>Management</h2>
+        <strong>Management:</strong> In der Management Seite können Sie Login Accounts Hinzufügen, Bearbeiten oder Entfernen. Unter "Liste der Benutzer" sehen Sie ein "Schloss" und ein "X". Mit dem "Schloss" können Sie Benutzerinformationen bearbeiten. Mit dem "X" wird der Benutzer gelöscht.
+
+
+
+    </div>
+</div>
+
+
+
+</body>
+</html>

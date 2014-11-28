@@ -1,0 +1,820 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
+    <title>LinkShare Web Application</title>
+    <link href="<?= $this->app_link; ?>/css/style.css" rel="stylesheet" type="text/css">
+    <link href="<?= $this->app_link; ?>/css/jquery-ui.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="<?= $this->app_link; ?>/css/reveal.css">
+    <link href="<?= $this->app_link; ?>/css/redmond/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+    <script src="<?= $this->app_link; ?>/js/d3.v3.min.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-1.9.1.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-ui.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jqBarGraph.1.1.js"></script>
+    <link rel="stylesheet" type="text/css" href="<?= $this->app_link; ?>/css/d3LineChart.css">
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.tipsy.js"></script>
+
+    <link href="<?= $this->app_link; ?>/css/tipsy.css" rel="stylesheet" type="text/css"/>
+
+
+    <script type="text/javascript" src="<?= $this->app_link; ?>/ckeditor/ckeditor.js"></script>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/ckeditor/adapters/jquery.js"></script>
+
+    <style type="text/css">
+        body {
+            font: 10px sans-serif;
+        }
+
+        line {
+            fill: none;
+            stroke: #DDDDDD;
+            stroke-dasharray: 4px, 3px;
+            stroke-width: 1.5;
+            /*shape-rendering: crispEdges;*/
+        }
+
+        .area {
+            /*fill:none;*/
+
+        }
+
+        path {
+            stroke: none;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #DDDDDD;
+            stroke-dasharray: 4px, 3px;
+            stroke-width: 1.5;
+            /*shape-rendering: crispEdges;*/
+        }
+
+        .bar {
+            fill: steelblue;
+        }
+
+        .x.axis path {
+            display: none;
+        }
+
+        .tick .line {
+            stroke: #dddddd;
+            stroke-width: 2px;
+        }
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 60px;
+            height: 28px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .tooltip {
+            position: absolute;
+            width: 100px;
+            height: 20px;
+            line-height: 20px;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
+            color: rgb(113, 157, 171);
+            background: rgb(255, 255, 255);
+            border: 4px solid rgb(255, 255, 255);
+            border-radius: 5px;
+            text-shadow: rgba(0, 0, 0, 0.0980392) 1px 1px 1px;
+            box-shadow: rgba(0, 0, 0, 0.0980392) 1px 1px 2px 0px;
+        }
+
+        .graphBarmain_graph {
+            background: url('<?= $this->app_link; ?>/images/bar_gradient.png');
+            background-repeat: repeat-y;
+            background-size: 100%;
+        }
+
+        .loading {
+            border-bottom: 6px solid #eee;
+            border-left: 6px solid #eee;
+            border-right: 6px solid #34aadc;
+            border-top: 6px solid #34aadc;
+            border-radius: 100%;
+            height: 16px;
+            width: 16px;
+            -webkit-animation: spin .5s infinite linear;
+            -moz-animation: spin .5s infinite linear;
+            -ms-animation: spin .5s infinite linear;
+            -o-animation: spin .5s infinite linear;
+            animation: spin .5s infinite linear;
+            position: absolute;
+        }
+
+        @keyframes "spin" {
+            from {
+                -webkit-transform: rotate(0deg);
+                -moz-transform: rotate(0deg);
+                -o-transform: rotate(0deg);
+                -ms-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            to {
+                -webkit-transform: rotate(359deg);
+                -moz-transform: rotate(359deg);
+                -o-transform: rotate(359deg);
+                -ms-transform: rotate(359deg);
+                transform: rotate(359deg);
+            }
+
+        }
+
+        @-moz-keyframes spin {
+            from {
+                -moz-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            to {
+                -moz-transform: rotate(359deg);
+                transform: rotate(359deg);
+            }
+
+        }
+
+        @-webkit-keyframes "spin" {
+            from {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            to {
+                -webkit-transform: rotate(359deg);
+                transform: rotate(359deg);
+            }
+
+        }
+
+        @-ms-keyframes "spin" {
+            from {
+                -ms-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            to {
+                -ms-transform: rotate(359deg);
+                transform: rotate(359deg);
+            }
+
+        }
+
+        @-o-keyframes "spin" {
+            from {
+                -o-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            to {
+                -o-transform: rotate(359deg);
+                transform: rotate(359deg);
+            }
+
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="bodywrap">
+    <div id="mainheader">
+
+        <a href="<?= $this->app_link; ?>">
+            <div class="mainheaderlogo"></div>
+        </a>
+        <a href="<?= $this->app_link; ?>/logout" class="mainheaderlogout">LOGOUT</a>
+        <a href="<?= $this->app_link; ?>/questions" class="mainheaderdocs">Q&A</a>
+        <a href="<?= $this->app_link; ?>/documentation" class="mainheaderdocs">DOKUMENTATION</a>
+    </div>
+    <div class="blueheader">
+        <!--<a href="" class="buildcampaignbutton">Build Campaign <div class="buildarrow"></div></a>--> <select
+            name="url" class="buildcampaignbutton" onchange="document.location.href=$(this).val();"
+            style="background: #2489C4;">
+
+            <option>-wählen-</option>
+            <option value="campaign">Kampagne</option>
+            <option value="manual_campaign">manuelle Kampagne</option>
+        </select>
+
+        <div class="buildline"></div>
+
+        <div class="networkactive">
+            <div class="networkline"></div>
+            <div class="greennetwork"></div>
+            Netzwerk Aktiv
+        </div>
+
+        <?php
+        # todo - next code commented/disabled by boovad
+        if (function_exists('curl_init')) {
+            /*
+            $url = "http://146.185.183.9/web_services/check_crawler_status.php";
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            $timeout = 5;
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, array("protocol" => ($_SERVER['SERVER_PORT'] == 443) ? "https" : "http" . "://", "host" => $_SERVER['HTTP_HOST'],
+                "REQUEST_URI" => $_SERVER['REQUEST_URI']));
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $crawler_status = curl_exec($ch);
+            curl_close($ch);
+            */
+        }?>
+        <?php /*
+		<div class="networkactive"><div class="networkline"></div><?php if($crawler_status == 1){?><div class="greennetwork"></div>Crawler Aktive<?php }else{?><div class="rednetwork"></div>Crawler Inaktive<?php }?></div>
+		  */
+        ?>
+        <div class="networkactive">
+            <div class="networkline"></div>
+            <div class="greennetwork"></div>
+            Crawler Aktive
+        </div>
+        <div class="networkactive">
+            <div class="networkline"></div>
+            <div class="greennetwork"></div>
+            Backup-Aktiv
+        </div>
+    </div>
+    <div class="mainbody">
+        <div class="leftsidebar">
+            <div class="navtitle">NAVIGATION</div>
+            <ul id="leftnavlist">
+
+                <?php
+                if (count($this->session->get("user-pages")) > 0) {
+                    $blocked_pages = $this->session->get("user-pages");
+
+                    //add extra case:
+                    if (in_array("campaign", $blocked_pages)) {
+                        $blocked_pages[count($blocked_pages)] = "manual_campaign";
+                    }
+                } else {
+                    $blocked_pages = array();
+                }
+
+                $show_full_nav = false;
+                if ($this->session->get("user-role") !== "normal") {
+                    $show_full_nav = true;
+                }
+                ?>
+
+                <?php
+                if ($show_full_nav OR !in_array("dashboard", $blocked_pages)) {
+                    ?>
+                    <a href="<?= $this->app_link; ?>/" style="color:#545454;">
+                        <li href="#" class="navlink" <?php echo ($page == "dashboard") ? "id='active'" : ""; ?>><span
+                                class="navicon"><img src="<?= $this->app_link; ?>/images/dashboardicon.png" width="15px"
+                                                     height="14px"/></span> Dashboard
+                        </li>
+                    </a>
+                <?php
+                }
+                if ($show_full_nav OR !in_array("density", $blocked_pages))
+                    if (1 == 1) {
+                        ?>
+                        <a href="<?= $this->app_link; ?>/density" style="color:#545454;">
+                            <li href="#" class="navlink" <?php echo ($page == "density") ? "id='active'" : ""; ?>><span
+                                    class="navicon"><img src="<?= $this->app_link; ?>/images/importicon.png"
+                                                         width="15px" height="14px"></span> Keyword Density
+                            </li>
+                        </a>
+                    <?php
+                    }
+                if ($show_full_nav OR !in_array("manual_campaign", $blocked_pages) OR !in_array("campaign", $blocked_pages)) {
+                    ?>
+                    <a href="<?= $this->app_link; ?>/campaign" style="color:#545454;">
+                        <li href="/test"
+                            class="navlink" <?php echo ($page == "campaign" || $page == "manual_campaign") ? "id='active'" : ""; ?>>
+                            <span class="navicon"><img src="<?= $this->app_link; ?>/images/campaignsicon.png"
+                                                       width="15px" height="13px"/></span> Kampagnen
+                        </li>
+                    </a>
+                <?php
+                }
+                if ($show_full_nav OR !in_array("runningcampaigns", $blocked_pages)) {
+                    ?>
+                    <a href="<?= $this->app_link; ?>/runningcampaigns" style="color:#545454;">
+                        <li href="/test"
+                            class="navlink" <?php echo ($page == "runningcampaigns") ? "id='active'" : ""; ?>><span
+                                class="navicon"><img src="<?= $this->app_link; ?>/images/campaignsicon.png" width="15px"
+                                                     height="13px"/></span>Laufende Kampagnen
+                        </li>
+                    </a>
+                <?php
+                }
+                if ($show_full_nav OR !in_array("analytics", $blocked_pages)) {
+                    ?>
+                    <a href="<?= $this->app_link; ?>/analytics" style="color:#545454;">
+                        <li href="#" class="navlink" <?php echo ($page == "analytics") ? "id='active'" : ""; ?>><span
+                                class="navicon"><img src="<?= $this->app_link; ?>/images/analyticsicon.png" width="15px"
+                                                     height="15px"/></span> Analytics
+                        </li>
+                    </a>
+                <?php
+                }
+                if ($show_full_nav OR !in_array("crawllist", $blocked_pages)) {
+                    ?>
+                    <a href="<?= $this->app_link; ?>/crawllist" style="color:#545454;">
+                        <li href="#" class="navlink" <?php echo ($page == "crawllist") ? "id='active'" : ""; ?>><span
+                                class="navicon"><img src="<?= $this->app_link; ?>/images/campaignsicon.png" width="15px"
+                                                     height="12px"></span>Crawlliste
+                        </li>
+                    </a>
+                <?php
+                }
+                if ($show_full_nav OR !in_array("import", $blocked_pages)) {
+                    ?>
+                    <a href="<?= $this->app_link; ?>/import" style="color:#545454;">
+                        <li href="#" class="navlink" <?php echo ($page == "import") ? "id='active'" : ""; ?>><span
+                                class="navicon"><img src="<?= $this->app_link; ?>/images/importicon.png" width="15px"
+                                                     height="14px"></span> Upload/Download
+                        </li>
+                    </a>
+                <?php } ?>
+                <a href="<?= $this->app_link; ?>/administration" style="color:#545454;">
+                    <li href="#" class="navlink" <?php echo ($page == "administration") ? "id='active'" : ""; ?>><span
+                            class="navicon"><img src="<?= $this->app_link; ?>/images/adminicon.png" width="15px"
+                                                 height="12px"></span> Userverwaltung
+                    </li>
+                </a>
+            </ul>
+            <?php if ($show_full_nav) { ?>
+                <div class="navtitle">ADMIN ONLY</div>
+                <ul id="leftnavlist">
+                    <?php if (1 == 1) : ?>
+                        <a href="<?= $this->app_link; ?>/proxy" style="color:#545454;">
+                            <li href="#" class="navlink" <?php echo ($page == "proxy") ? "id='active'" : ""; ?>><span
+                                    class="navicon"><img src="<?= $this->app_link; ?>/images/timericon.png" width="10px"
+                                                         height="9px"></span> Proxies
+                            </li>
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?= $this->app_link; ?>/export/log" style="color:#545454;">
+                        <li href="#" class="navlink"><span class="navicon"><img
+                                    src="<?= $this->app_link; ?>/images/buildarrow.png" width="9px" height="6px"></span>
+                            Download Logs
+                        </li>
+                    </a>
+                </ul>
+            <?php } ?>
+        </div>
+        <div class="mainbodywrap">
+            <?php echo $this->getContent(); ?>
+        </div>
+
+    </div>
+</div>
+<?php if ($page == "campaign"): ?>
+    <!-- choose domain modal window -->
+    <div id="choosedomainModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">wählen ein Domäne:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG9" id="checkboxG9" class="css-checkbox"/>
+                    <label for="checkboxG9" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG10" id="checkboxG10" class="css-checkbox"/>
+                    <label for="checkboxG10" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG11" id="checkboxG11" class="css-checkbox"/>
+                    <label for="checkboxG11" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose page modal window -->
+    <div id="choosepageModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie Seite:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG12" id="checkboxG12" class="css-checkbox"/>
+                    <label for="checkboxG12" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG13" id="checkboxG13" class="css-checkbox"/>
+                    <label for="checkboxG13" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG14" id="checkboxG14" class="css-checkbox"/>
+                    <label for="checkboxG14" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose list modal window -->
+    <div id="chooselistModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie Liste:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG15" id="checkboxG15" class="css-checkbox"/>
+                    <label for="checkboxG15" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG16" id="checkboxG16" class="css-checkbox"/>
+                    <label for="checkboxG16" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG17" id="checkboxG17" class="css-checkbox"/>
+                    <label for="checkboxG17" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- choose category modal window -->
+    <div id="choosecatModal" class="reveal-modal">
+        <div class="modal-blueheadline"></div>
+        <div class="modal-midline">
+            <div class="modal-midlinetext">Wählen Sie eine Kategorie:</div>
+        </div>
+        <div class="modal-bodyarea">
+            <div class="modallistwrap">
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG18" id="checkboxG18" class="css-checkbox"/>
+                    <label for="checkboxG18" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG19" id="checkboxG19" class="css-checkbox"/>
+                    <label for="checkboxG19" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+                <div class="modal-listbox">
+                    <input type="checkbox" name="checkboxG20" id="checkboxG20" class="css-checkbox"/>
+                    <label for="checkboxG20" class="css-label"></label>
+
+                    <div class="modallisttext">http://mysite.com/category/news</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-bottomline">
+            <div class="modal-savecontent">
+                <div class="modalcheckbox"></div>
+            </div>
+        </div>
+    </div>
+
+<?php endif; ?>
+
+<?php if ($page == "campaign"): ?>
+
+    <!-- page javascript -->
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.min.js"></script>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.reveal.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-ui-1.10.3.custom.js"></script>
+
+    <script type="text/javascript">
+        $.noConflict(); // avoid jquery conflict
+        $('.ckeditor').ckeditor(); // Use CKEDITOR.replace() if element is <textarea>.
+
+        // Code for date picker(calender)
+        $("#start_date").datepicker({
+            buttonImage: '<?= $this->app_link; ?>/images/timericon.png',
+            buttonImageOnly: true,
+            buttonText: 'Start Date',
+            changeMonth: true,
+            changeYear: true,
+            showOn: 'both',
+            onSelect: function (dateText, inst) {
+                document.getElementById('s_date_cal').innerHTML = dateText;
+            }
+        });
+
+        $("#end_date").datepicker({
+            buttonImage: '<?= $this->app_link; ?>/images/timericon.png',
+            buttonImageOnly: true,
+            buttonText: 'End Date',
+            minDate: 0,
+            changeMonth: true,
+            changeYear: true,
+            showOn: 'both',
+            onSelect: function (dateText, inst) {
+                document.getElementById('e_date_cal').innerHTML = dateText;
+            }
+        });
+        $(".ui-datepicker-trigger").mouseover(function () {
+            $(this).css('cursor', 'pointer');
+        });
+
+        // get domain pages
+        /*function get_domain_pages(type, page)
+         {
+         var total_domains = document.getElementById('total_domains').value; // total number of domains
+         var domains = [];
+         $('#loadmore_div').append($('<div>').addClass('loading'));
+         for(var i=0; i < total_domains; i++)
+         {
+         if($('#domain_checkbox_'+i+':checked').val()=='on') // get checked checkbox
+         {
+         domains.push(document.getElementById('domain_'+i).value); // assign values to the array
+         }
+
+         }
+
+         if(domains.length > 0) // if length of array greater than '0'
+         {
+         if(type == "new")
+         {
+         document.getElementById('choose_pages_id').innerHTML ='';
+         }
+         // ajax call for get all matched domain pages
+         $.post('<?= $this->app_link; ?>/manual_campaign/get_domain_pages',{domains:""+JSON.stringify(domains)+"", page: ""+page+""},function(data)
+         {
+         var pages = jQuery.parseJSON(data);// getting responds from server
+
+         for(var i=0; i < pages['record'].length; i++)
+         {
+         var temp_url = pages['record'][i].split("@#") // splitting string using the delimeter @#
+         document.getElementById('choose_pages_id').innerHTML += '<div class="modal-listbox"><input type="checkbox" name="page_checkbox_'+i+'" id="page_checkbox_'+i+'" class="css-checkbox" /><label for="page_checkbox_'+i+'" class="css-label"></label><div class="modallisttext">'+temp_url[0]+'</div><input type="hidden" name="page_'+i+'" id="page_'+i+'" value="'+pages['record'][i]+'" /></div>';
+         }
+         document.getElementById('choose_pages_id').innerHTML += '<input type="hidden" name="total_pages" id="total_pages" value="'+i+'" />';
+         $('#loadmore_div').html('');
+         if(parseInt(pages['options']['button_enable']))
+         {
+         $('#loadmore_div').append($('<span>').text('Load More').css('cursor', 'pointer').attr('OnClick', 'javascript:get_domain_pages("append", "'+pages['options']['current_page']+'");'));
+         }
+         });
+         }
+         return false;
+         }*/
+
+
+        function check_domain_selected() {
+            if ($(".page_url_checkbox:checked").length === 0) {
+                alert('Bitte wählen Sie ein atleast url von Suchergebnis, um zu bauen');
+                return false;
+            }
+
+        }
+
+    </script>
+<?php endif; ?>
+
+<?php if ($page == "import"): ?>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.reveal2.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-ui-1.10.3.custom.js"></script>
+    <script type="text/javascript">
+        $("#start_date").datepicker({
+            buttonImage: '<?= $this->app_link; ?>/images/timericon.png',
+            buttonImageOnly: true,
+            buttonText: 'Start Date',
+            changeMonth: true,
+            changeYear: true,
+            showOn: 'both',
+            onSelect: function (dateText, inst) {
+                document.getElementById('s_date_cal').innerHTML = dateText;
+            }
+        });
+
+        $("#end_date").datepicker({
+            buttonImage: '<?= $this->app_link; ?>/images/timericon.png',
+            buttonImageOnly: true,
+            buttonText: 'End Date',
+            changeMonth: true,
+            changeYear: true,
+            showOn: 'both',
+            onSelect: function (dateText, inst) {
+                document.getElementById('e_date_cal').innerHTML = dateText;
+            }
+        });
+        $(".ui-datepicker-trigger").mouseover(function () {
+            $(this).css('cursor', 'pointer');
+        });
+    </script>
+<?php endif; ?>
+
+<?php if ($page == "density"): ?>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.min.js"></script>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.reveal.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-ui-1.10.3.custom.js"></script>
+<?php endif ?>
+
+<?php if ($page == "manual_campaign"): ?>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.min.js"></script>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.reveal.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-ui-1.10.3.custom.js"></script>
+
+    <script type="text/javascript">
+        $.noConflict();
+        $("#start_date").datepicker({
+            buttonImage: '<?= $this->app_link; ?>/images/timericon.png',
+            buttonImageOnly: true,
+            buttonText: 'Start Date',
+            changeMonth: true,
+            changeYear: true,
+            showOn: 'both',
+            onSelect: function (dateText, inst) {
+                document.getElementById('s_date_cal').innerHTML = dateText;
+            }
+        });
+
+        $("#end_date").datepicker({
+            buttonImage: '<?= $this->app_link; ?>/images/timericon.png',
+            buttonImageOnly: true,
+            buttonText: 'End Date',
+            minDate: 0,
+            changeMonth: true,
+            changeYear: true,
+            showOn: 'both',
+            onSelect: function (dateText, inst) {
+                document.getElementById('e_date_cal').innerHTML = dateText;
+            }
+        });
+
+        $(".ui-datepicker-trigger").mouseover(function () {
+            $(this).css('cursor', 'pointer');
+        });
+        /*
+         function get_domain_pages(type, page)
+         {
+         var total_domains = document.getElementById('total_domains').value;
+         var domains = [];
+         $('#loadmore_div').append($('<div>').addClass('loading'));
+         for(var i=0; i < total_domains; i++)
+         {
+         if($('#domain_checkbox_'+i+':checked').val()=='on')
+         {
+         domains.push(document.getElementById('domain_'+i).value);
+         }
+
+         }
+
+         if(domains.length > 0)
+         {
+         if(type == "new")
+         {
+         document.getElementById('choose_pages_id').innerHTML ='';
+         }
+         $.post('<?= $this->app_link; ?>/manual_campaign/get_domain_pages',{domains:""+JSON.stringify(domains)+"", page: ""+page+""},function(data)
+         {
+         var pages = jQuery.parseJSON(data);
+         for(var i=0; i < pages['record'].length; i++)
+         {
+         var temp_url = pages['record'][i].split("@#")
+         document.getElementById('choose_pages_id').innerHTML += '<div class="modal-listbox"><input type="checkbox" name="page_checkbox_'+i+'" id="page_checkbox_'+i+'" class="css-checkbox" /><label for="page_checkbox_'+i+'" class="css-label"></label><div class="modallisttext">'+temp_url[0]+'</div><input type="hidden" name="page_'+i+'" id="page_'+i+'" value="'+pages['record'][i]+'" /></div>';
+         }
+         document.getElementById('choose_pages_id').innerHTML += '<input type="hidden" name="total_pages" id="total_pages" value="'+i+'" />';
+         $('#loadmore_div').html('');
+         if(parseInt(pages['options']['button_enable']))
+         {
+         $('#loadmore_div').append($('<span>').text('Load More').css('cursor', 'pointer').attr('OnClick', 'javascript:get_domain_pages("append", "'+pages['options']['current_page']+'");'));
+         }
+         //document.getElementById('choose_pages_id').innerHTML += pages['options']['load_more'];
+         });
+         }
+         return false;
+         }
+
+         */
+
+        function setPageUrls() {
+
+        }
+        /*
+         function manual_campaign_search()
+         {
+         var campaign_name = document.getElementById('campaign_name').value;
+         var end_date = document.getElementById('end_date').value;
+         var start_date = document.getElementById('start_date').value;
+         var total_domains = document.getElementById('total_domains').value;
+         var total_lists = document.getElementById('total_lists').value;
+         var main_domain_url=[];
+
+         var domain_ids = [];
+         for(var i=0; i< total_domains; i++)
+         {
+         if($('#domain_checkbox_'+i+':checked').val()=='on')
+         {
+         domain_ids.push(document.getElementById('domain_'+i).value);
+         main_domain_url.push($('#main_domain_url_'+i).val());
+         }
+         }
+
+         var lists = [];
+         for(var i=0; i< total_lists; i++)
+         {
+         if($('#list_checkbox_'+i+':checked').val()=='on')
+         {
+         lists.push(document.getElementById('list_'+i).value);
+         }
+         }
+
+         if(campaign_name!='' && end_date!='' && start_date!='' && domain_ids.length > 0 && lists.length > 0)
+         {
+         var total_pages = document.getElementById('total_pages').value;
+         var page_urls = [];
+         for(var i=0; i < total_pages; i++)
+         {
+         if($('#page_checkbox_'+i+':checked').val()=='on')
+         {
+         page_urls.push(document.getElementById('page_'+i).value);
+         }
+         }
+         if(page_urls.length > 0)
+         {
+         document.getElementById('searched_pages_result').innerHTML='<img src="<?= $this->app_link; ?>/images/loading.gif" alt="Loading..." />';
+         $.post('<?= $this->app_link; ?>/manual_campaign/generate',{main_domain_url:""+JSON.stringify(main_domain_url)+"",campaign_name: ""+campaign_name+"", start_date: ""+start_date+"",end_date: ""+end_date+"",domain_ids:""+JSON.stringify(domain_ids)+"",page_urls:""+JSON.stringify(page_urls)+"",lists:""+JSON.stringify(lists)+""},function(data)
+         {
+         document.getElementById('searched_pages_result').innerHTML=data;
+
+         $('.droparrow').click(function(){
+         var content_id = $(this).attr('href');
+         var toggle_switch = $(this);
+         $(content_id).toggle(function(){
+         if($(this).css('display')=='none'){
+         toggle_switch.html('');
+         }else{
+         toggle_switch.html('');
+         }
+         });
+         });
+         });
+         }
+         else
+         alert('Bitte wählen Sie zunächst Domain Seite.');
+         }
+         else
+         alert('Bitte füllen Sie zunächst das Formular aus.');
+         return false;
+         }*/
+    </script>
+<?php endif; ?>
+<script type="text/javascript">
+    $('.droparrow').click(function () {
+        var content_id = $(this).attr('href');
+        var toggle_switch = $(this);
+        $(content_id).toggle(function () {
+            if ($(this).css('display') == 'none') {
+                toggle_switch.html('');
+            } else {
+                toggle_switch.html('');
+            }
+        });
+    });
+</script>
+</body>
+</html>

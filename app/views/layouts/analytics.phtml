@@ -1,0 +1,834 @@
+<?php
+$is_admin = false;
+if ($this->session->get("user-role") !== "normal") {
+    $is_admin = true;
+}
+
+$user_domains = $this->session->get("user-domains");
+if(!is_array($user_domains)) {
+    $user_domains = array();
+}
+?>
+
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">Analytics</div>
+</div>
+
+<div class="whitepagewrap">
+    <div class="analyticsbox">
+        <div class="analyticsbuttonwrap">
+            <form action="" method="post">
+                <?php echo $domain_drop_down1 ?>
+            </form>
+            <form action="" method="post">
+                <?php echo $domain_drop_down2; ?>
+            </form>
+        </div>
+        <div class="analyticsgreybox"></div>
+        <div class="analyticswhitebox" id="chart"></div>
+    </div>
+</div>
+
+<div class="listtitlebar">
+    <div class="pagetitlebar-title">Website-Rankings</div>
+</div>
+<div class="listtitlesubbar">
+    <div class="analyticswebaddressbar">INTERNET ADRESSE</div>
+    <div class="analyticswebaddresstime">NEUESTE</div>
+    <div class="analyticswebaddresstwentyfour">24 STUNDEN</div>
+    <div class="analyticswebaddressseven">7 TAGE</div>
+    <div class="analyticswebaddressthirty">4 WOCHEN</div>
+</div>
+<form name="export_csv_file" action="<?= $this->app_link; ?>/analytics/export_csv" method="post">
+<?php
+$i = 0;
+$j = 1;
+$end_date = date('m/d/Y h:i:s');
+//$end = new MongoDate(strtotime($end_date));
+//$rangeQuery = array('conditions' => array('EndDate' => array('$gte' => $end)));
+$get_domains = PagesToCampaign::find("EndDate >= '$end_date'");
+
+$domainss = array();
+foreach ($get_domains as $domain) {
+    if ($domain->DomainURLIDX) {
+        $domainss[] = $domain->DomainURLIDX;
+    }
+}
+
+$domains = array_unique($domainss);
+
+$enabled_user_export = false;
+if (!empty($domains)) {
+    //default for all users:
+    $enabled_user_export = true;
+
+    foreach ($domains as $value) {
+
+        //filter domains:
+        if (!in_array($value, $user_domains) and !$is_admin) {
+            //continue;
+        } else {
+            //$enabled_user_export = true;
+        }
+
+        $i++;
+        //Latest
+        //$query = array('conditions' => array('DomainURLIDX' => (int)$value),"sort" => array('Date'=>-1),'limit'=>2);
+        $get_domain_ranks = DomainRankings::find("DomainURLIDX = '$value' ORDER BY Date DESC LIMIT 2");
+        $diff = 0;
+        $latest_rank = 0;
+        if (count($get_domain_ranks) > 0) {
+            $domain_rank = array();
+            foreach ($get_domain_ranks as $domain_r) {
+                $domain_rank[] = $domain_r->Rank;
+            }
+            if (@is_numeric($domain_rank[1]) && @is_numeric($domain_rank[0]))
+                $diff = ($domain_rank[0] - $domain_rank[1]);
+            else
+                $diff = $domain_rank[0];
+            if (is_numeric($domain_rank[0]))
+                $latest_rank = $domain_rank[0];
+        }
+        //24 Hours
+        $yesterday = date('m/d/Y', strtotime("-1 days"));
+        $yest_end = date('m/d/Y');
+
+        //$query = array('conditions' => array('DomainURLIDX' => (int)$value,'Date' => array('$gte' => $yest,'$lt' => $yest_end)),'sort'=>array('Date'=>-1),'limit'=>1);
+        $get_domain_ranks_24 = DomainRankings::find("DomainURLIDX = '$value' AND Date >= '$yesterday' AND Date <= '$yest_end'");
+        $diff_24 = 0;
+        if (count($get_domain_ranks_24) > 0) {
+            $domain_rank = array();
+            foreach ($get_domain_ranks_24 as $domain_r) {
+                $domain_rank[] = $domain_r->Rank;
+            }
+            if (is_numeric($domain_rank[0]) && is_numeric($latest_rank))
+                $diff_24 = ($latest_rank - $domain_rank[0]);
+            else
+                $diff_24 = $domain_rank[0];
+        }
+        //7 DAYS
+        $dyas7 = date('m/d/Y', strtotime("-7 days"));
+        $day7_end = date('m/d/Y', strtotime("-6 days"));
+
+        //$query = array('conditions' => array('DomainURLIDX' => (int)$value,'Date' => array('$gte' => $day7,'$lt' => $day7_end)),'sort'=>array('Date'=>-1),'limit'=>1);
+        $get_domain_ranks_7 = DomainRankings::find("DomainURLIDX = '$value' AND Date >= '$dyas7' AND  Date <= '$day7_end' ORDER BY Date DESC LIMIT 1");
+        $diff_7 = 0;
+        if (count($get_domain_ranks_7) > 0) {
+            $domain_rank = array();
+            foreach ($get_domain_ranks_7 as $domain_r) {
+                $domain_rank[] = $domain_r->Rank;
+            }
+            if (is_numeric($domain_rank[0]) && is_numeric($latest_rank))
+                $diff_7 = ($latest_rank - $domain_rank[0]);
+            else
+                $diff_7 = $domain_rank[0];
+        }
+        //4 Weeks
+        $weeks4 = date('m/d/Y', strtotime("-4 weeks"));
+        $week_end = date('m/d/Y', strtotime("-4 weeks +1 Days"));
+
+        //$week4_end = new MongoDate($week_end);
+        //$query = array('conditions' => array('DomainURLIDX' => (int)$value,'Date' => array('$gte' => $week4,'$lt'=>$week4_end)),'sort'=>array('Date'=>-1),'limit'=>1);
+        $get_domain_ranks_4 = DomainRankings::find("DomainURLIDX = '$value' AND Date >= '$weeks4' AND Date <= '$week_end' ORDER BY Date DESC LIMIT 1");
+        $diff_30 = 0;
+        if (count($get_domain_ranks_4) > 0) {
+            $domain_rank = array();
+            foreach ($get_domain_ranks_4 as $domain_r) {
+                $domain_rank[] = $domain_r->Rank;
+            }
+            if (is_numeric($domain_rank[0]) && is_numeric($latest_rank))
+                $diff_30 = ($latest_rank - $domain_rank[0]);
+            else
+                $diff_30 = $domain_rank[0];
+        }
+        ?>
+        <div class="resultslist">
+            <div class="analyticslisturl">
+                <?php
+                $get_domain_url = PageMainInfo::findFirst("DomainURLIDX ='$value'");
+                if (!empty($get_domain_url))
+                    echo wordwrap($get_domain_url->DomainURL, 28, "<br>", true);?></div>
+            <div <?php if ($diff > 0 || $diff == 0) {
+                echo 'class="analyticsrankspot"';
+            } else {
+                echo 'class="analyticsrankspotdown"';
+            } ?>><span <?php if ($diff > 0 || $diff == 0) {
+                    echo 'class="analyticsrankarrow"';
+                } else {
+                    echo 'class="analyticsrankarrowdown"';
+                } ?>></span><?php echo $diff; ?></div>
+
+            <div <?php if ($diff_24 > 0 || $diff_24 == 0) {
+                echo 'class="analyticsrankspot"';
+            } else {
+                echo 'class="analyticsrankspotdown"';
+            } ?>><span <?php if ($diff_24 > 0 || $diff_24 == 0) {
+                    echo 'class="analyticsrankarrow"';
+                } else {
+                    echo 'class="analyticsrankarrowdown"';
+                } ?>></span><?php echo $diff_24; ?></div>
+
+            <div <?php if ($diff_7 > 0 || $diff_7 == 0) {
+                echo 'class="analyticsrankspot"';
+            } else {
+                echo 'class="analyticsrankspotdown"';
+            } ?>><span <?php if ($diff_7 > 0 || $diff_7 == 0) {
+                    echo 'class="analyticsrankarrow"';
+                } else {
+                    echo 'class="analyticsrankarrowdown"';
+                } ?>></span><?php echo $diff_7; ?></div>
+
+            <div <?php if ($diff_30 > 0 || $diff_30 == 0) {
+                echo 'class="analyticsrankspot"';
+            } else {
+                echo 'class="analyticsrankspotdown"';
+            } ?>><span <?php if ($diff_30 > 0 || $diff_30 == 0) {
+                    echo 'class="analyticsrankarrow"';
+                } else {
+                    echo 'class="analyticsrankarrowdown"';
+                } ?>></span><?php echo $diff_30; ?></div>
+            <!--<div class="droparrow"></div>-->
+            <a href="#site<?php echo $i ?>" class="droparrow"></a>
+        </div>
+        <!-- begin drop list -->
+        <div class="analyticsdroplist-bg" id="site<?php echo $i ?>" style="display:none;">
+            <?php $end_date = date('m/d/Y h:i:s');
+            //$end = new MongoDate(strtotime($end_date));
+            //$rangeQuery = array('conditions' => array('EndDate' => array('$gte' => $end),'DomainURLIDX' => $value));
+            $get_campaigns = PagesToCampaign::find("EndDate >= '$end_date' AND DomainURLIDX = '$value'");
+            $repeating_pages = array();
+            if (count($get_campaigns) > 0) {
+                foreach ($get_campaigns as $camp) {
+                    if (in_array($camp->campaign_url, $repeating_pages)) {
+                        continue;
+                    }
+                    ?>
+                    <div class="dropdownbluebg dropbganalyticspage">
+                        <div class="sitesactualurl actualurledits"><?php echo $camp->campaign_url ?></div>
+                        <a href="#keyword<?php echo $j ?>" class="droppagearrow"></a>
+                    </div>
+                    <div id="keyword<?php echo $j ?>" style="display:none;">
+                        <?php
+                        $keyword = '';
+                        if (@$camp->keywords_for_analytics != '')
+                            $keyword = @$camp->keywords_for_analytics;
+
+                        if ($keyword != '') {
+                            //Latest
+                            //$query = array('conditions' => array('Keyword'=>$keyword,'PageURL'=>$camp->main_url),"sort" => array('Date'=>-1),'limit'=>2);
+                            $get_keyword_ranks = KeywordRankings::find("Keyword = '$keyword' AND PageURL ='$camp->main_url' ORDER BY Date DESC LIMIT 2");
+
+                            $key_diff = 0;
+                            $latest_key_rank = 0;
+                            if (count($get_keyword_ranks) > 0) {
+                                $keyword_rank = array();
+                                foreach ($get_keyword_ranks as $key_r) {
+                                    $keyword_rank[] = $key_r->Rank;
+                                }
+                                if (@is_numeric($keyword_rank[1]) && @is_numeric($keyword_rank[0]))
+                                    $key_diff = ($keyword_rank[0] - $keyword_rank[1]);
+                                else
+                                    $key_diff = $keyword_rank[0];
+                                if (is_numeric($keyword_rank[0]))
+                                    $latest_key_rank = $keyword_rank[0];
+                            }
+
+                            //24 Hours
+                            $yesterday = date('m/d/Y', strtotime("-1 days"));
+                            //$yest = new MongoDate(strtotime($yesterday));
+                            $yest_end = date('m/d/Y');
+
+                            //$query = array('conditions' => array('Date' => array('$gte' => $yest,'$lt' => $yest_end),'Keyword'=>$keyword,'PageURL'=>$camp->main_url),'sort'=>array('Date'=>-1),'limit'=>1);
+                            $get_keyword_ranks_24 = KeywordRankings::find("Date >='$yesterday' AND Date <= '$yest_end' AND Keyword='$keyword' AND PageURL='$camp->main_url' ORDER BY Date DESC LIMIT 1");
+                            $key_diff_24 = 0;
+                            if (count($get_keyword_ranks_24) > 0) {
+                                $keyword_rank = array();
+                                foreach ($get_keyword_ranks_24 as $key_r) {
+                                    $keyword_rank[] = $key_r->Rank;
+                                }
+                                if (is_numeric($keyword_rank[0]) && is_numeric($latest_key_rank))
+                                    $key_diff_24 = ($latest_key_rank - $keyword_rank[0]);
+                                else
+                                    $key_diff_24 = $keyword_rank[0];
+                            }
+
+                            //7 DAYS
+                            $dyas7 = date('m/d/Y', strtotime("-7 days"));
+                            //$day7 = new MongoDate(strtotime($dyas7));
+                            $day7_end = date('m/d/Y', strtotime("-6 days"));
+                            //$query = array('conditions' => array('Date' => array('$gte' => $day7,'$lt' => $day7_end),'Keyword'=>$keyword,'PageURL'=>$camp->main_url),'sort'=>array('Date'=>-1),'limit'=>1);
+                            $get_keyword_ranks_7 = KeywordRankings::find("Date >='$dyas7' AND Date <= '$day7_end' AND Keyword='$keyword' AND PageURL='$camp->main_url' ORDER BY Date DESC LIMIT 1");
+                            $key_diff_7 = 0;
+                            if (count($get_keyword_ranks_7) > 0) {
+                                $keyword_rank = array();
+                                foreach ($get_keyword_ranks_7 as $key_r) {
+                                    $keyword_rank[] = $key_r->Rank;
+                                }
+                                if (is_numeric($keyword_rank[0]) && is_numeric($latest_key_rank))
+                                    $key_diff_7 = ($latest_key_rank - $keyword_rank[0]);
+                                else
+                                    $key_diff_7 = $keyword_rank[0];
+                            }
+                            //4 Weeks
+                            $weeks4 = date('m/d/Y', strtotime("-4 weeks"));
+                            //$week4 = new MongoDate(strtotime($weeks4));
+                            $week_end = date('m/d/Y', strtotime("-4 weeks +1 Days"));
+
+                            //$query = array('conditions' => array('Date' => array('$gte' => $week4,'$lt' => $week4_end),'Keyword'=>$keyword,'PageURL'=>$camp->main_url),'sort'=>array('Date'=>-1),'limit'=>1);
+                            $get_keyword_ranks_4 = KeywordRankings::find("Date >='$weeks4' AND Date <= '$week_end' AND Keyword='$keyword' AND PageURL='$camp->main_url' ORDER BY Date DESC LIMIT 1");
+                            $key_diff_30 = 0;
+                            if (count($get_keyword_ranks_4) > 0) {
+                                $keyword_rank = array();
+                                foreach ($get_keyword_ranks_4 as $key_r) {
+                                    $keyword_rank[] = $key_r->Rank;
+                                }
+                                if (is_numeric($keyword_rank[0]) && is_numeric($latest_key_rank))
+                                    $key_diff_30 = ($latest_key_rank - $keyword_rank[0]);
+                                else
+                                    $key_diff_30 = $keyword_rank[0];
+                            }
+                            ?>
+                            <div class="analyticsdroplist">
+                                <div class="analyticslisturl"><?php echo $keyword; ?></div>
+                                <div <?php if ($key_diff > 0 || $key_diff == 0) {
+                                    echo 'class="analyticsrankspot"';
+                                } else {
+                                    echo 'class="analyticsrankspotdown"';
+                                } ?>><span <?php if ($key_diff > 0 || $key_diff == 0) {
+                                        echo 'class="analyticsrankarrow"';
+                                    } else {
+                                        echo 'class="analyticsrankarrowdown"';
+                                    } ?>></span><?php echo $key_diff; ?></div>
+                                <div <?php if ($key_diff_24 > 0 || $key_diff_24 == 0) {
+                                    echo 'class="analyticsrankspot"';
+                                } else {
+                                    echo 'class="analyticsrankspotdown"';
+                                } ?>><span <?php if ($key_diff_24 > 0 || $key_diff_24 == 0) {
+                                        echo 'class="analyticsrankarrow"';
+                                    } else {
+                                        echo 'class="analyticsrankarrowdown"';
+                                    } ?>></span><?php echo $key_diff_24; ?></div>
+                                <div <?php if ($key_diff_7 > 0 || $key_diff_7 == 0) {
+                                    echo 'class="analyticsrankspot"';
+                                } else {
+                                    echo 'class="analyticsrankspotdown"';
+                                } ?>><span <?php if ($key_diff_7 > 0 || $key_diff_7 == 0) {
+                                        echo 'class="analyticsrankarrow"';
+                                    } else {
+                                        echo 'class="analyticsrankarrowdown"';
+                                    } ?>></span><?php echo $key_diff_7; ?></div>
+                                <div <?php if ($key_diff_30 > 0 || $key_diff_30 == 0) {
+                                    echo 'class="analyticsrankspot"';
+                                } else {
+                                    echo 'class="analyticsrankspotdown"';
+                                } ?>><span <?php if ($key_diff_30 > 0 || $key_diff_30 == 0) {
+                                        echo 'class="analyticsrankarrow"';
+                                    } else {
+                                        echo 'class="analyticsrankarrowdown"';
+                                    } ?>></span><?php echo $key_diff_30; ?></div>
+
+
+                            </div>
+                        <?php } ?>
+                    </div>
+                    <?php $j++;
+                    $repeating_pages[] = $camp->campaign_url;
+                }?>
+            <?php } ?>
+        </div><!-- analyticsdroplist-bg -->
+        <!-- end drop list -->
+    <?php
+    }
+} ?>
+<div class="underlistbar"></div>
+<?php if ($enabled_user_export) { ?>
+    <button type="submit" name="export" class="exportcsvbutton" style="border:none; cursor:pointer;"></button>
+<?php } ?>
+</form>
+<script type="text/javascript">
+
+    $('.droppagearrow').click(function () {
+        var content_id = $(this).attr('href');
+        var toggle_switch = $(this);
+        $(content_id).toggle(function () {
+            if ($(this).css('display') == 'none') {
+                toggle_switch.html('');
+            } else {
+                toggle_switch.html('');
+            }
+        });
+    });
+</script>
+
+
+<script type="text/javascript">
+function jumbScreen() {
+    if ($.trim($('#analyticschoosedomain').find(":selected").val()) != "" && $.trim($('#analyticschoosetime').find(":selected").val()) == "") {
+        window.location.href = '<?= $this->app_link; ?>/analytics/show/' + $('#analyticschoosedomain').find(":selected").val();
+    }
+    else if ($.trim($('#analyticschoosedomain').find(":selected").val()) != "" && $.trim($('#analyticschoosetime').find(":selected").val()) != "") {
+        window.location.href = '<?= $this->app_link; ?>/analytics/show/' + $('#analyticschoosedomain').find(":selected").val() + "/" + $('#analyticschoosetime').find(":selected").val();
+    }
+}
+
+function getGraphValues() {
+    $.ajax({
+        url: "<?= $this->app_link; ?>/analytics/getGraphDetails/" + $('#analyticschoosetime').find(":selected").val(),
+        dataType: "json",
+        type: "POST",
+        data: {},
+        success: function (data) {
+            response(data);
+        }
+    });
+}
+
+
+<?php if($record_type == "bytime"):?>
+/**
+ * User: nross
+ */
+var w = 634,
+    h = 405;
+
+var monthNames = ["1", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+
+var maxDataPointsForDots = 50,
+    transitionDuration = 1000;
+
+var svg = null,
+    yAxisGroup = null,
+    xAxisGroup = null,
+    dataCirclesGroup = null,
+    dataLinesGroup = null;
+
+function draw() {
+    var data = generateData();
+    var margin = 45;
+    var max = 100;
+    var min = 0;
+    var pointRadius = 4;
+    var x = d3.scale.linear().range([0, w - margin * 2]).domain([data[0].hour, data[data.length - 1].hour]);
+    var y = d3.scale.linear().range([h - margin * 2, 0]).domain([min, max]);
+
+    var xAxis = d3.svg.axis().scale(x).tickSize(h - margin * 2).tickPadding(10).ticks(6);
+    var yAxis = d3.svg.axis().scale(y).orient('left').tickSize(-w + margin * 2).tickPadding(10).ticks(5);
+    var t = null;
+
+    svg = d3.select('#chart').select('svg').select('g');
+    if (svg.empty()) {
+        svg = d3.select('#chart')
+            .append('svg:svg')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('class', 'viz')
+            .append('svg:g')
+            .attr('transform', 'translate(' + margin + ',' + margin + ')');
+    }
+
+    t = svg.transition().duration(transitionDuration);
+
+    // y ticks and labels
+    if (!yAxisGroup) {
+        yAxisGroup = svg.append('svg:g')
+            .attr('class', 'yTick')
+            .call(yAxis);
+    }
+    else {
+        t.select('.yTick').call(yAxis);
+    }
+
+    // x ticks and labels
+    if (!xAxisGroup) {
+        xAxisGroup = svg.append('svg:g')
+            .attr('class', 'xTick')
+            .call(xAxis);
+    }
+    else {
+        t.select('.xTick').call(xAxis);
+    }
+
+    // Draw the lines
+    if (!dataLinesGroup) {
+        dataLinesGroup = svg.append('svg:g');
+    }
+
+    var dataLines = dataLinesGroup.selectAll('.data-line')
+        .data([data]);
+
+    var line = d3.svg.line()
+        // assign the X function to plot our line as we wish
+        .x(function (d, i) {
+            return x(d.hour);
+        })
+        .y(function (d) {
+            return y(d.value);
+        })
+        .interpolate("linear");
+
+    var garea = d3.svg.area()
+        .interpolate("linear")
+        .x(function (d) {
+            // verbose logging to show what's actually being done
+            return x(d.hour);
+        })
+        .y0(h - margin * 2)
+        .y1(function (d) {
+            // verbose logging to show what's actually being done
+            return y(d.value);
+        });
+
+    dataLines
+        .enter()
+        .append('svg:path')
+        .attr("class", "area")
+        .attr("d", garea(data));
+
+    dataLines.enter().append('path')
+        .attr('class', 'data-line')
+        .style('opacity', 0.3)
+        .attr("d", line(data));
+
+    dataLines.transition()
+        .attr("d", line)
+        .duration(transitionDuration)
+        .style('opacity', 1)
+        .attr("transform", function (d) {
+            return "translate(" + x(d.hour) + "," + y(d.value) + ")";
+        });
+
+    dataLines.exit()
+        .transition()
+        .attr("d", line)
+        .duration(transitionDuration)
+        .attr("transform", function (d) {
+            return "translate(" + x(d.hour) + "," + y(0) + ")";
+        })
+        .style('opacity', 1e-6)
+        .remove();
+
+    d3.selectAll(".area").transition()
+        .duration(transitionDuration)
+        .attr("d", garea(data));
+
+    d3.selectAll("line")
+        .attr("y2", "0");
+
+    d3.select('.yTick').selectAll("path")
+        .attr("style", "display:none;");
+
+
+    // Draw the points
+    if (!dataCirclesGroup) {
+        dataCirclesGroup = svg.append('svg:g');
+    }
+
+    var circles = dataCirclesGroup.selectAll('.data-point')
+        .data(data);
+
+    circles
+        .enter()
+        .append('svg:circle')
+        .attr('class', 'data-point')
+        .style('opacity', 1e-6)
+        .attr('cx', function (d) {
+            return x(d.hour)
+        })
+        .attr('cy', function () {
+            return y(0)
+        })
+        .attr('r', function () {
+            return (data.length <= maxDataPointsForDots) ? pointRadius : 0
+        })
+        .transition()
+        .duration(transitionDuration)
+        .style('opacity', 1)
+        .attr('cx', function (d) {
+            return x(d.hour)
+        })
+        .attr('cy', function (d) {
+            return y(d.value)
+        });
+
+    circles
+        .transition()
+        .duration(transitionDuration)
+        .attr('cx', function (d) {
+            return x(d.hour)
+        })
+        .attr('cy', function (d) {
+            return y(d.value)
+        })
+        .attr('r', function () {
+            return (data.length <= maxDataPointsForDots) ? pointRadius : 0
+        })
+        .style('opacity', 1);
+
+    circles
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .attr('cy', function () {
+            return y(0)
+        })
+        .style("opacity", 1e-6)
+        .remove();
+
+    $('svg circle').tipsy({
+        gravity: 'w',
+        html: true,
+        title: function () {
+            var d = this.__data__;
+            var pDate = d.hour;
+            return 'Hour: ' + pDate + '<br>Tracked People: ' + d.value;
+        }
+    });
+}
+
+function generateData() {
+    var data = [];
+    var i = 0;
+    <?php foreach ($time_array as $key => $value):?>
+    <?php if($key):?>
+    data.push({'value': <?php echo $value?>, 'hour': "<?php echo $key?>"});
+
+    <?php endif?>
+    <?php endforeach;?>
+    console.log(data);
+    return data;
+}
+
+d3.select('#button').on('click', draw);
+
+draw();
+
+<?php else:?>
+
+/**
+ * User: nross
+ */
+var w = 634,
+    h = 405;
+
+var monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+
+var maxDataPointsForDots = 185,
+    transitionDuration = 1000;
+
+var svg = null,
+    yAxisGroup = null,
+    xAxisGroup = null,
+    dataCirclesGroup = null,
+    dataLinesGroup = null;
+
+function draw() {
+    var data = generateData();
+    var margin = 45;
+    var max = 5;
+    var min = 0;
+    var pointRadius = 4;
+    var x = d3.time.scale().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
+    var y = d3.scale.linear().range([h - margin * 2, 0]).domain([min, max]);
+
+    var xAxis = d3.svg.axis().scale(x).tickSize(h - margin * 2).tickPadding(10).ticks(6).tickFormat(d3.time.format("%b%d"));
+    ;
+    var yAxis = d3.svg.axis().scale(y).orient('left').tickSize(-w + margin * 2).tickPadding(10).ticks(5);
+    var t = null;
+
+    svg = d3.select('#chart').select('svg').select('g');
+    if (svg.empty()) {
+        svg = d3.select('#chart')
+            .append('svg:svg')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('class', 'viz')
+            .append('svg:g')
+            .attr('transform', 'translate(' + margin + ',' + margin + ')');
+    }
+
+    t = svg.transition().duration(transitionDuration);
+
+    // y ticks and labels
+    if (!yAxisGroup) {
+        yAxisGroup = svg.append('svg:g')
+            .attr('class', 'yTick')
+            .call(yAxis);
+    }
+    else {
+        t.select('.yTick').call(yAxis);
+    }
+
+    // x ticks and labels
+    if (!xAxisGroup) {
+        xAxisGroup = svg.append('svg:g')
+            .attr('class', 'xTick')
+            .call(xAxis);
+    }
+    else {
+        t.select('.xTick').call(xAxis);
+    }
+
+    // Draw the lines
+    if (!dataLinesGroup) {
+        dataLinesGroup = svg.append('svg:g');
+    }
+
+    var dataLines = dataLinesGroup.selectAll('.data-line')
+        .data([data]);
+
+    var line = d3.svg.line()
+        // assign the X function to plot our line as we wish
+        .x(function (d, i) {
+            return x(d.date);
+        })
+        .y(function (d) {
+            return y(d.value);
+        })
+        .interpolate("linear");
+
+    var garea = d3.svg.area()
+        .interpolate("linear")
+        .x(function (d) {
+            // verbose logging to show what's actually being done
+            return x(d.date);
+        })
+        .y0(h - margin * 2)
+        .y1(function (d) {
+            // verbose logging to show what's actually being done
+            return y(d.value);
+        });
+
+    dataLines
+        .enter()
+        .append('svg:path')
+        .attr("class", "area")
+        .attr("d", garea(data));
+
+    dataLines.enter().append('path')
+        .attr('class', 'data-line')
+        .style('opacity', 0.3)
+        .attr("d", line(data));
+
+    dataLines.transition()
+        .attr("d", line)
+        .duration(transitionDuration)
+        .style('opacity', 1)
+        .attr("transform", function (d) {
+            return "translate(" + x(d.date) + "," + y(d.value) + ")";
+        });
+
+    dataLines.exit()
+        .transition()
+        .attr("d", line)
+        .duration(transitionDuration)
+        .attr("transform", function (d) {
+            return "translate(" + x(d.date) + "," + y(0) + ")";
+        })
+        .style('opacity', 1e-6)
+        .remove();
+
+    d3.selectAll(".area").transition()
+        .duration(transitionDuration)
+        .attr("d", garea(data));
+
+    d3.selectAll("line")
+        .attr("y2", "0");
+
+
+    d3.select('.yTick').selectAll("path")
+        .attr("style", "display:none;");
+
+
+    // Draw the points
+    if (!dataCirclesGroup) {
+        dataCirclesGroup = svg.append('svg:g');
+    }
+
+    var circles = dataCirclesGroup.selectAll('.data-point')
+        .data(data);
+
+    circles
+        .enter()
+        .append('svg:circle')
+        .attr('class', 'data-point')
+        .style('opacity', 1e-6)
+        .attr('cx', function (d) {
+            return x(d.date)
+        })
+        .attr('cy', function () {
+            return y(0)
+        })
+        .attr('r', function () {
+            return (data.length <= maxDataPointsForDots) ? pointRadius : 0
+        })
+        .transition()
+        .duration(transitionDuration)
+        .style('opacity', 1)
+        .attr('cx', function (d) {
+            return x(d.date)
+        })
+        .attr('cy', function (d) {
+            return y(d.value)
+        });
+
+    circles
+        .transition()
+        .duration(transitionDuration)
+        .attr('cx', function (d) {
+            return x(d.date)
+        })
+        .attr('cy', function (d) {
+            return y(d.value)
+        })
+        .attr('r', function () {
+            return (data.length <= maxDataPointsForDots) ? pointRadius : 0
+        })
+        .style('opacity', 1);
+
+    circles
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .attr('cy', function () {
+            return y(0)
+        })
+        .style("opacity", 1e-6)
+        .remove();
+
+    $('svg circle').tipsy({
+        gravity: 'w',
+        html: true,
+        title: function () {
+            var d = this.__data__;
+            var pDate = d.date;
+            return 'Date: ' + pDate.getDate() + " " + monthNames[pDate.getMonth()] + " " + pDate.getFullYear() + '<br>Value: ' + d.value;
+        }
+    });
+}
+
+function generateData() {
+    var data_array = [];
+
+
+    var data = '<?php echo $date_array; ?>';
+    var json = JSON.parse(data);
+    console.log(json);
+
+    $.each(json, function (key, value) {
+        var date = new Date(value.date);
+        data_array.push({'value': value.value, 'date': date});
+    });
+
+    return data_array;
+}
+
+d3.select('#button').on('click', draw);
+
+draw();
+
+
+<?php endif?>
+
+</script>		

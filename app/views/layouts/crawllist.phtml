@@ -1,0 +1,152 @@
+<?php
+echo $this->getContent();
+
+$is_admin = false;
+if ($this->session->get("user-role") !== "normal") {
+    $is_admin = true;
+}
+$user_domains = $this->session->get("user-domains");
+if (!is_array($user_domains)) {
+    $user_domains = array();
+}
+?>
+    <form action="<?= $this->app_link; ?>/crawllist/export_csv" method="post">
+        <div class="pagetitlebar">
+            <div class="pagetitlebar-title">GECRAWLTE SEITEN</div>
+        </div>
+
+        <div class="listtitlesubbar">
+            <div class="analyticswebaddressbar">INTERNET ADRESSE</div>
+            <div class="bestmatchbar" style="margin-right:10px;">LINK LIMIT</div>
+        </div>
+        <?php
+        //export for everyone:
+        $enabled_user_export = true;
+
+        //enable or disable JS function for editing:
+        $enabled_edit = false;
+        if ($is_admin) {
+            $enabled_edit = true;
+        }
+
+        $i = 0;
+        //needed ?
+        $user_domains = array_flip($user_domains);
+
+        foreach ($domain_details as $value) {
+            $i++;
+
+            if (!array_key_exists($value["DomainURLIDX"], $user_domains)) {
+                //continue;
+                $edit_this_one = false;
+            } else {
+                $edit_this_one = true;
+                $enabled_edit = true; // show JS function for editing:
+            }
+            ?>
+            <div id="<?php echo $value['DomainURLIDX']; ?>">
+                <div class="resultslist">
+                    <div class="analyticslisturl" style="width:690px;border-right:none;">
+                        <?php if ($edit_this_one or $is_admin) { ?>
+                            <a href="javascript:delRecord(<?php echo $value['DomainURLIDX']; ?>,'<?php echo str_replace("http://", "", $value['main_url']); ?>')"
+                               style="float: left;">
+                                <div class="userdelete"></div>
+                            </a>
+                        <?php } ?>
+                        <?php echo $value['main_url'] ?>
+                        <span style="float:right;"><?php echo $value['total_suburls']; ?></span>
+                    </div>
+
+                    <a class="droparrow" href="#site<?php echo $i ?>"></a>
+                </div>
+                <div id="site<?php echo $i ?>" style="display: none;">
+                    <?php foreach ($value['suburls'] as $value2) { ?>
+
+                        <div class="analyticsdroplist" style="width:100%;">
+                            <div class="analyticslisturl"
+                                 style="width:690px;border-right:none;"><?php echo $value2['PageURL'] ?></div>
+                            <?php if ($edit_this_one or $is_admin) { ?>
+                                <select style="margin-top:12px;" class="select_limit"
+                                        name="<?php echo $value2['_id'] ?>">
+                                    <option
+                                        value="1" <?php if ($value2['link_limit'] == 1) echo "selected = selected" ?>>1
+                                    </option>
+                                    <option
+                                        value="2" <?php if ($value2['link_limit'] == 2) echo "selected = selected" ?>>2
+                                    </option>
+                                    <option
+                                        value="3" <?php if ($value2['link_limit'] == 3) echo "selected = selected" ?>>3
+                                    </option>
+                                    <option
+                                        value="4" <?php if ($value2['link_limit'] == 4) echo "selected = selected" ?>>4
+                                    </option>
+                                </select>
+                            <?php
+                            } else {
+                                echo '<div style="margin-top: 13px; color: #6B9AB5; font-size: 13px; font-weight: bold;">' . $value2['link_limit'] . '</div>';
+                            } ?>
+                        </div>
+
+                    <?php } ?>
+                </div>
+            </div>
+        <?php } ?>
+
+        <div class="underlistbar"></div>
+        <?php if ($enabled_user_export) { ?>
+            <button type="submit" class="exportcsvbutton" style="cursor:pointer;"></button>
+        <?php } else echo "No data for export."; ?>
+    </form>
+
+    <div id="del_dialog" style="display: none;">
+        <p>Sind Sie sicher, Sie möchten diese löschen ?</p>
+    </div>
+<?php if ($enabled_edit) { ?>
+    <script>
+        jQuery(document).ready(function ($) {
+            $('.select_limit').change(function () {
+                $.ajax({
+                    url: "<?= $this->app_link?>/crawllist/setLimits/" + $(this).find(":selected").val() + "/" + $(this).attr('name'),
+                    dataType: "json",
+                    type: "POST",
+                    data: {},
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            });
+        });
+
+        function delRecord(DomainURLIDX, MainURL) {
+            $('#del_dialog').dialog({
+                autoOpen: true,
+                modal: true,
+                resizable: false,
+                title: 'Delete',
+                draggable: false,
+                width: 'auto',
+                buttons: {
+                    "Delete": function () {
+                        $.ajax({
+                            url: "<?= $this->app_link?>/crawllist/delPages/" + DomainURLIDX + "/" + MainURL,
+                            dataType: "json",
+                            type: "POST",
+                            data: {
+                                request: "delAd"
+                            },
+                            success: function (data) {
+                                alert(data);
+
+                            }
+                        });
+                        $('#del_dialog').dialog('close');
+                        document.getElementById("" + DomainURLIDX + "").style.display = 'none';
+                    },
+                    "Close": function () {
+                        $('#del_dialog').dialog('close');
+                    }
+                }
+            });
+        }
+    </script>
+<?php } ?>

@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+    <title>LinkShare Web Application</title>
+    <link href="<?= $this->app_link; ?>/css/style.css" rel="stylesheet" type="text/css">
+    <link href="<?= $this->app_link; ?>/css/questions.css" rel="stylesheet" type="text/css">
+    <style>
+        .mainbody { min-height:0px; }
+    </style>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.accordion.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.accordion').accordion({speed: 'fast'}); //some_id section1 in demo
+        });
+    </script>
+
+</head>
+<body>
+
+<div id="bodywrap">
+    <div id="mainheader">
+        <a href="<?= $this->app_link;?>" class="mainheaderlogo"></a>
+        <a href="javascript:history.back()" class="mainheaderlogout">ZURÜCK</a>
+        <a href="<?= $this->app_link;?>/questions" class="mainheaderdocs">Q&A</a>
+        <a href="<?= $this->app_link;?>/documentation" class="mainheaderdocs">DOKUMENTATION</a>
+    </div>
+
+    <div class="mainbody" style="border-top:1px solid #BFC2C5;border-radius:4px;padding:40px;width:860px;font-family:sans-serif;line-height:22px;font-size:14px;">
+
+        <div class="accordion" id="section1">Linkatory<span></span></div>
+        <div class="container">
+            <div class="content">
+
+                <p><strong>Was passiert mit den alten Linkatory Links?</strong></p>
+                <p>Die alten Linkatory Links werden nach SEO-Kennzahlen bewertet und gefiltert.
+                    Die ca. 15% besten Links werden ins Boomlink migriert und bleiben dann nach der Abschaltung von Linkatory bestehen.
+                    Durch die Migrierung entstehen keine zus&auml;tzlichen Kosten.
+                    Die restlichen 85% "f&uuml;r schlecht" befundenden Links werden nicht migriert und fliegen nach Abschaltung von Linkatory raus.</p><br />
+
+                <p><strong>Wann und wie kann Linkatory abgeschaltet werden?</strong></p>
+                <p>Linkatory sollte erst abgeschaltet werden, nachdem die 15% besten Links in Boomlink migriert wurden und die ersten Boomlink Kampagnen anlaufen.
+                    Nach derzeitigen Stand w&auml;re dies der 1.4.2014.</p><br/>
+
+                <p><strong>Wo ist der Unterschied zwischen Boomlink und Linkatory?</strong></p>
+                <p>Boomlink basiert auf einem eigens entwickelten Algorithmus, der nach SEO Richtlinien Seiten crawlt und bewertet.
+                    Es werden Kampagnen mit redaktionellem Hintergrund ausgespielt (vormals Textlinks z.B. im Footer Bereich)</p><br/>
+            </div>
+        </div>
+
+        <div class="accordion" id="section2">Technisches<span></span></div>
+        <div class="container">
+            <div class="content">
+
+                <p><strong>Wie lange dauert es bis die eingestellte Kampagne online geht?</strong></p>
+                <p>Durch das serverseitige Caching der Portale kann es bis zu 24h dauern bis eine "live"-Kampagne auch tats&auml;chlich auf den Quellseiten erscheint.</p><br/>
+
+                <p><strong>Wie genau funktioniert der Boomlink-Algo, welche Kennzahlen werden ber&uuml;cksichtigt?</strong></p>
+                <p>Um die besten Vorschl&auml;ge f&uuml;r Quellseiten zu ermitteln, wurde ein auf die Anwendung spezifizierterAlgorithmus entwickelt, der sich aus folgenden Metriken zusammensetzt: Google PageRank,  Kategorie, Site Traffic, Incoming Links, Outgoing Links, Alter der Seite, Page Speed, Social metrics (share count).
+                    Aus den Metriken wird ein sogenanntes "URL Power Level" Ranking generiert.
+                    Die Top Seiten der URL Power Level Auswertung werden dem User als Auswahl zur Verf&uuml;gung gestellt und alle Metriken sind als Zusatzinformationen nochmals sichtbar. </p><br/>
+
+            </div>
+        </div>
+
+        <div class="accordion" id="section3">Kampagnen<span></span></div>
+        <div class="container">
+            <div class="content">
+                <p><strong> Was gibt es f&uuml;r Kampagnen? </strong></p>
+                <p> Es gibt 3 verschiedene Kampagnensorten: Small, Medium & Large </p><br/>
+
+                <p><strong> Wie unterscheiden sich diese Kampagnen? </strong></p>
+                <p> Die Small-Kampagne beinhaltet 3 Links, Medium 6 Links und die Large-Kampagne 9 Links. </p><br/>
+                <p><strong> Wie viel kostet eine Kampagne? </strong></p>
+                <p> Ein Small-Kampagne wird mit 1/3 Manntag berechnet, dementsprechent kostet eine Medium-Kampagne 2/3 MT und Large = 1 MT. </p><br/>
+
+                <p><strong> Wie lange bleiben die Links/Kampagnen bestehen? </strong></p>
+                <p> Jede Kampagne l&auml;uft per Default 4 Wochen. </p><br/>
+
+                <p><strong> K&ouml;nnen Kampagnen vorzeitig beendet werden? </strong></p>
+                <p> Ja, die anfallenden Kosten werden dennoch berechnet. </p><br/>
+
+                <p><strong> K&ouml;nnen Kampagnen bei Erfolg verl&auml;ngert werden? </strong></p>
+                <p> Ja, jede Kampagne kann um weitere 4 Wochen/8 Wochen/12 Wochen etc. verl&auml;ngert werden - f&uuml;r jeden weiteren Monat fallen die Initialkosten an. </p><br/>
+
+                <p><strong> Werden Kampagnen billiger wenn sie verl&auml;ngert werden? </strong></p>
+                <p> Nein </p><br/>
+
+                <p><strong> Sollte ich eine erfolgreiche Kampagne monatlich verl&auml;ngern? </strong></p>
+                <p> Nein, sofern sich abzeichnet, dass eine Kampagne aus SEO-Sicht erfolgreich ist, kann die Verlinkung &uuml;ber einen normalen Linktausch (in Abstimmung mit den jeweiligen Portalverantwortlichen) vollzogen werden.
+                    Der Kampagnenslot kann dann f&uuml;r weitere Kampagnen genutzt werden w&auml;hrend dier alte Link hardcodiert und unabh&auml;ngig von Boomlink bestehen bleibt. </p><br/>
+
+                <p><strong> K&ouml;nnen andere Portale auf meine Seite zugreifen? </strong></p>
+                <p> Alle im Boomlink Netzwerk teilnehmenden Seiten, bekommen Kampagnen anderer PSD Seiten &uuml;ber das System zugewiesen, um die Seiten gegenseitig und dadurch das Netzwerk zu st&auml;rken. </p><br/>
+
+                <p><strong> Kann ich die Kampagnen auf meiner Seite beinflussen? </strong></p>
+                <p> Die Kampagnenverteilung wird durch das Boomlink-System nach SEO-Richtlinien sorgf&auml;ltig ausgew&auml;hlt. </p><br/>
+
+                <p><strong> Wie viele Kampagnen werden auf meinen Seiten eingebaut? </strong></p>
+                <p> Jede Seite/URL jedes Portals steht im ersten Schritt nur zweimal zur Verf&uuml;gung und ist danach nicht mehr im Auswahlverfahren bis die Kampagne ausgelaufen ist.
+                    Die Kampagnenpl&auml;tze werden nach der Regel "first-come-first-served" vergeben. </p><br/>
+
+                <p><strong> Wie erstelle/starte ich eine Kampagne? </strong></p>
+                <p> Bis zum 01.07.2014 (betreute Phase) werden die Kampagnen von Booming bzw. PSD-SEOs eingepflegt.
+                    Der Ansprechpartner pro Portal ist f&uuml;r die Anlieferung und die Freigabe des Contents verantwortlich. </p><br/>
+
+                <p><strong>Woher wei&szlig; ich, wie viele offene Kampagnenslots pro Portal noch vorhanden sind?</strong></p>
+                <p> Es gibt f&uuml;r alle Portale einen Jahresplan (ging per E-Mail an alle Verantwortlichen raus) wer, wieviele Kampagnen wann zur Verf&uuml;gung hat.
+                    Sollten 2 Wochen vor dem 1. eines Monats noch nicht alle Kampagnen f&uuml;r den kommenden Monat verbraucht sein, wird eine Erinnerungsmail von Booming &uuml;ber die anstehenden, offenen Kampagnen an den jeweiligen Portal-Verantwortlichen geschickt. </p><br/>
+
+                <p><strong> K&ouml;nnen Redakteure selbst Kampagnen einstellen? </strong></p>
+                <p> Ja, ab 01.07.2014 wird das User-Management implementiert. </p><br/>
+
+                <p><strong> K&ouml;nnen Redakteure fehlerhafte/minderwertige Kampagnen auf meinen Seiten einsteuern? </strong></p>
+                <p> Der Algorithmus des Boomlink-Systems w&auml;hlt f&uuml;r jedes Keyword nach SEO-Richtlinien die passende Quellseite.
+                    Jede Kampagne wird vor Freischaltung durch Booming auf Sinn/Qualit&auml;t/Funktionalit&auml;t gepr&uuml;ft. </p><br/>
+
+                <p><strong> Haben andere Portale mehr Kampagnen zur Verf&uuml;gung? </strong></p>
+                <p> Jedes Portal erh&auml;lt entsprechend des Budgets eine bestimmte Anzahl an Kampagnen. </p><br/>
+
+                <p><strong> Wer liefert den Content f&uuml;r die Kampagnen? </strong></p>
+                <p> Jeder Redakteur liefert seinen Content (Bild, Text, Video) pro Kampagne selbst und stellt deren Verwendungs-Freigabe sicher.
+                    Content in Bild- oder Videoform m&uuml;ssen bereits online verf&uuml;gbar sein (erreichbar &uuml;ber eine URL).
+                    Boomlink/Booming l&auml;d hierf&uuml;r keine Dateien hoch. Die Dateiformate m&uuml;ssen den g&auml;ngigen Browserstandards entsprechen und f&uuml;rdas online-Publishing optimiert sein.</p><br/>
+
+                <p><strong> Die Redaktion von Portal XY m&ouml;chte Kampagnen &uuml;ber Contentfleet erstellen lassen. </strong></p>
+                <p> Das ist m&ouml;glich, der definierte Redakteur des Portals &uuml;bernimmt die Freigabe f&uuml;r extern zusammengestellten Content. </p><br/>
+
+                <p><strong> Kann ich ad hoc Kampagnen buchen/einstellen? </strong></p>
+                <p> Ja, wenn der gew&uuml;nschte Bild, Text- und Video Content freigegeben sowie bereitgestellt wird und noch offenes Budget f&uuml;r eine Kampagne vorhanden ist. </p><br/>
+
+                <p><strong> Warum sind Kampagnen nicht dauerhaft? </strong></p>
+                <p> Kampagnen sollen aktuelle Themen nach vorne bringen und st&auml;rken. Da anaolog zur Highlightplanung gearbeitet wird, ist ein Thema aus Q1 in Q3 vermutlich nicht mehr relevant.
+                    Der freigewordene Platz wird f&uuml;r neue, frische Kampagnen freiger&auml;umt.</p><br/>
+
+
+            </div>
+        </div>
+
+
+        <div class="accordion" id="section4">SEO/Google<span></span></div>
+        <div class="container">
+            <div class="content">
+                <p><strong> Verursacht Boomlink aus Google-Sicht ein Link-Netzwerk? </strong></p>
+                <p> Nein, nicht im klassischem Sinne. Das PSD-Netzwerk besteht aus gesunden Seiten mit eigenen, unterschiedlichen Backlinkprofilen.
+                    Es entstehen keine nachvollziehbaren, ringf&ouml;rmige, oder pyramiden&auml;hnliche Linkstrukturen. Au&szlig;erdem unterbindet Boomlink die Verlinkung innerhalb einer gleichen IP-C-Class (gleicher Webserver).
+                    Zus&auml;tzlich handelt es sich hier um ein geschlossenes Netzwerk mit begrenztem Kampagnenbudget, Link-Spam und sog. Blackhat-Techniken sind also ausgeschlossen.
+                    Zugleich hielt das Netzwerk 3 Jahre die offensichtliche Footerverlinkung von Linkatory-Links stand (diese werden derzeit abgebaut).
+                    Ein weiterer entkr&auml;ftender Fakt ist, dass Boomlink-Kampagnen nicht dauerhaft sind und eher Trend-Themen st&auml;rken soll. </p><br/>
+
+                <p><strong> Ist Boomlink ein vollautomatisiertes Linktauschprogramm? </strong></p>
+                <p> Nein, die Links aus dem Boomlink-System sind moderiert, limitiert und redaktionell aufbereitet.
+                    Es dient lediglich zur Findung von passenden Quellseiten und zur St&auml;rkung aktueller Themen/Seiten.
+                    Boomlink erleichtert die Arbeit eines Inhouse-SEOs und bietet zudem Vorteile wie Reporting, Ranktracking oder Traffic&uuml;berblick u.v.m.</p><br/>
+
+                <p><strong> Funktioniert der klassische Linktausch &uuml;berhaupt noch? </strong></p>
+                <p> Es ist nicht m&ouml;glich per Boomlink wertlose, reziproke (A nach B, B nach A) Links zu setzen.
+                    Die Links sind SEO-wirksam und thematisch relevant sowie redaktionell aufbereitet und nicht als Anzeige o.&auml;. gekennzeichnet. </p><br/>
+
+                <p><strong> Warum brauche ich Boomlink wenn ich auch &uuml;ber externes Linkbuilding an Links komme? </strong></p>
+                <p> Kampagnen &uuml;ber das Boomlink-System kommen exklusiv aus dem PSD-Netzwerk und sind nicht von anderen externen Linkbuildern "kaufbar". </p><br/>
+
+                <p><strong> Externer Linkkauf vs. Boomlink, was ist besser? </strong></p>
+                <p> Es verst&ouml;&szlig;t gegen Googles Richtlinien, wenn Links nur dazu dienen um PageRank zu vererben.
+                    Solange es Webmaster gibt die Links verkaufen, wird Google gegen die linkkaufenden Seiten vorgehen.
+                    Kaum ein Webmaster verkauft seine Links an nur eine(n) Kunden/Linkbuilder/Agentur.
+                    Sobald Linklisten &ouml;ffentlich auftauchen oder die Machenschaften von sog. Linkbrokern (die sich an Linkvermittlungen bereichern) oder kommerzielle Linktools aufgedeckt werden, wird Google versuchen dagegen vorzugehen.
+                    Die Links aus dem PSD-Netzwerk bleiben innerhalb des Konzerns, befinden sich quasi "unter dem Radar" und sind nicht f&uuml;r Externe zug&auml;nglich/k&auml;uflich.
+                    Folglich ist das Risiko entdeckt bzw. abgestraft zu werden, im PSD-Netzwerk wesentlich geringer als &uuml;ber externes Linkbuilding.
+                    Um komplett Google-konform zu agieren d&uuml;rfte man &uuml;berhaupt kein gezieltes Linkbuilding betreiben und Backlinks sollten nur auf organischem Wege freiwillig gesetzt werden.
+                    Nachteil dabei ist und bleibt, dass der linkbuildende Wettbewerb - sofern er nicht abgestraft wird - immer um ein(ig)e Nasenl&auml;nge(n) voraus sein wird.
+                    Boomlink dient dazu Linksignale und Freshness zu genieren.
+                    Sollte die Schraube seitens Google fester angezogen werden, k&ouml;nnten die Links in Boomlink jederzeit auf NoFollow gestellt werden und es entf&auml;llt im Gegensatz zu externen Linkbuildern/Agenturen der l&auml;stige Linkabbau.
+                </p><br/>
+
+            </div>
+
+
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+
+<!-- ///// saved for easy posting of new questions /////
+
+
+        <div class="accordion" id="section4">Lorem ipsum dolor sit amet, consectetur adipiscing elit?<span></span></div>
+            <div class="container">
+                <div class="content">
+                    <p>Content here....</p>
+                </div>
+            </div>
+    </div>
+
+
+ -->

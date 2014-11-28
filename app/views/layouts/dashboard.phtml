@@ -1,0 +1,612 @@
+<div class="homestatsback">
+				<div class="homestatsbox">
+					<div class="homestatsbox-top">
+						<span class="homestatsbox-topplus">+</span>
+                                                    <?php
+                                                        echo $global_rank;
+                                                    ?>
+					</div>
+					<div class="homestatsbox-bottom">Globale Rankänderung</div>
+				</div>
+				
+				<div class="homestatsbox">
+					<div class="homestatsbox-top">
+						<span class="homestatsbox-topplus">+</span>
+						<?php echo @$domains_crawled;?>
+					</div>
+					<div class="homestatsbox-bottom">Aktive Domains</div>
+				</div>
+				
+				<div class="homestatsbox">
+					<div class="homestatsbox-top">
+						<span class="homestatsbox-topplus">+</span>
+						<?php echo @$active_link ?>
+					</div>
+					<div class="homestatsbox-bottom">Aktive Links</div>
+				</div>
+			</div>
+			<div class="whitepagewrap">
+				<div class="homepagetitle">ÜBERBLICK</div>
+				<div class="homepagetitleline"></div>
+				<form name="generate_traffic_report" method="post" action="<?= $this->app_link;?>/index/generate_traffic_report">
+					<button type="submit" name="generate" class="homepagebuttons" style="cursor:pointer;">Trafficreport</button>
+				</form>
+				<form name="generate_rank_report" method="post" action="<?= $this->app_link;?>/index/generate_rank_report">
+					<button type="submit" name="generate_rank" class="homepagebuttons" style="cursor:pointer;">Rankreport</button>
+				</form>
+                <div class="homepagemaingraph" style="height:200px;">
+                    <g class="tick" style="opacity: 1;" transform="translate(0,15.329941642974717)"><line x2="650" y2="0"/><text x="-9" y="0" dy=".32em" style="display:none;">0.06</text></g>
+                    		<div style="font-weight:bold; margin-left:30px; margin-top: 8px; text-transform:uppercase;display: table;float: left;">Traffic Analytik</div>
+                                <div style="font-weight:bold; margin-right:30px; margin-top: 8px; text-transform:uppercase;display: table;float: right; color:#4B90D0;">derzeit Verfolgung <?php echo array_sum($main_graph);?> Benutzer</div>
+                <div id="main_graph" style="margin: 0 20px 20px">
+                    <div style="position:relative;left:0px;top:110px;width:100%;height:1px;background-color:#eeeeee;"></div>
+                    <div style="position:relative;left:0px;top:43px;width:100%;height:1px;background-color:#eeeeee;"></div>
+                    <div style="position:relative;left:0px;top:182px;width:100%;height:1px;background-color:#eeeeee;"></div>
+                </div> 
+                                   
+                </div>
+                <div class="homepagemaingraphone">
+                    <div width="333px" height="188px" frameborder="0" scrolling="no">
+                        
+                        <div style="font-weight:bold; margin-left:30px; margin-top:8px; text-transform:uppercase; font-family: sans-serif; font-size: 10px; font-style: normal; font-variant: normal; display: table;float: left;">seiten crawler</div>
+                        <div style="font-weight:bold; margin-right:30px; margin-top: 8px; text-transform:uppercase; font-family: sans-serif; font-size: 10px; font-style: normal; font-variant: normal; display: table;float: right; color:#4B90D0;">
+                        <?php 
+                        $total = 0;
+                            foreach ($crawled as $key => $value){
+                                $total = $total+$value;
+                            }
+                            echo $total." Letzte Woche";
+                        ?>
+                        </div>
+                        <div id="chart_small_first"></div>
+                       <script>
+/**
+ * User: nross
+ */
+var w = 330,
+    h = 170;
+var labels =new Array();
+var label_x_axis = new Array();
+var monthNames = [ "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Juli", "August", "September", "Oktober", "November", "Dezember" ];
+
+var maxDataPointsForDots = 50,
+	transitionDuration = 1000;
+
+var svg = null,
+	yAxisGroup = null,
+	xAxisGroup = null,
+	dataCirclesGroup = null,
+	dataLinesGroup = null;
+
+function draw() {
+	var data = generateData();
+	var margin = 25;
+	var max = d3.max(data, function(d) { return d.value });
+	var min = 0;
+	var pointRadius = 4;
+	var x = d3.time.scale().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
+	var y = d3.scale.linear().range([h - margin * 2, 0]).domain([min, max]);
+
+	var xAxis = d3.svg.axis().scale(x).tickSize(h - margin * 2).tickPadding(10).ticks(5);
+	var yAxis = d3.svg.axis().scale(y).orient('left').tickSize(-w + margin * 2).tickPadding(10).ticks(5);
+	var t = null;
+
+	svg = d3.select('#chart_small_first').select('svg').select('g');
+	if (svg.empty()) {
+		svg = d3.select('#chart_small_first')
+			.append('svg:svg')
+				.attr('width', w)
+				.attr('height', h)
+				.attr('class', 'viz')
+			.append('svg:g')
+				.attr('transform', 'translate(' + margin + ',' + margin + ')');
+	}
+
+	t = svg.transition().duration(transitionDuration);
+
+	// y ticks and labels
+	if (!yAxisGroup) {
+		yAxisGroup = svg.append('svg:g')
+			.attr('class', 'yTick')
+			.call(yAxis);
+	}
+	else {
+		t.select('.yTick').call(yAxis);
+	}
+
+	// x ticks and labels
+	if (!xAxisGroup) {
+		xAxisGroup = svg.append('svg:g')
+			.attr('class', 'xTick')
+			.call(xAxis);
+	}
+	else {
+		t.select('.xTick').call(xAxis);
+	}
+
+	// Draw the lines
+	if (!dataLinesGroup) {
+		dataLinesGroup = svg.append('svg:g');
+	}
+
+	var dataLines = dataLinesGroup.selectAll('.data-line')
+			.data([data]);
+
+	var line = d3.svg.line()
+		// assign the X function to plot our line as we wish
+		.x(function(d,i) { 
+			return x(d.date); 
+		})
+		.y(function(d) { 
+			return y(d.value); 
+		})
+		.interpolate("linear");
+
+		 
+
+	var garea = d3.svg.area()
+		.interpolate("linear")
+		.x(function(d) { 
+			// verbose logging to show what's actually being done
+			return x(d.date); 
+		})
+            	.y0(h - margin * 2)
+		.y1(function(d) { 
+			// verbose logging to show what's actually being done
+			return y(d.value); 
+		});
+
+	dataLines
+		.enter()
+		.append('svg:path')
+            	.attr("class", "area")
+            	.attr("d", garea(data));
+
+	dataLines.enter().append('path')
+		 .attr('class', 'data-line')
+		 .style('opacity', 0.3)
+		 .attr("d", line(data));
+
+	dataLines.transition()
+		.attr("d", line)
+		.duration(transitionDuration)
+			.style('opacity', 1)
+                        .attr("transform", function(d) { return "translate(" + x(d.date) + "," + y(d.value) + ")"; });
+
+	dataLines.exit()
+		.transition()
+		.attr("d", line)
+		.duration(transitionDuration)
+                        .attr("transform", function(d) { return "translate(" + x(d.date) + "," + y(0) + ")"; })
+			.style('opacity', 1e-6)
+			.remove();
+
+	d3.selectAll(".area").transition()
+		.duration(transitionDuration)
+		.attr("d", garea(data));
+		
+	d3.selectAll("line")
+	  .attr("y2","0");
+	  
+	d3.select('.xTick').selectAll("path")
+	  .attr("style","");
+	
+	d3.select('.xTick').selectAll("text")
+	  .attr("style","");
+	  
+	d3.select('.yTick').selectAll("path")
+	  .attr("style","");
+	  
+	d3.select('.yTick').selectAll("text")
+	  .attr("style","");
+
+	// Draw the points
+	if (!dataCirclesGroup) {
+		dataCirclesGroup = svg.append('svg:g');
+	}
+
+	var circles = dataCirclesGroup.selectAll('.data-point')
+		.data(data);
+
+	circles
+		.enter()
+			.append('svg:circle')
+				.attr('class', 'data-point')
+				.style('opacity', 1e-6)
+				.attr('cx', function(d) { return x(d.date) })
+				.attr('cy', function() { return y(0) })
+				.attr('r', function() { return (data.length <= maxDataPointsForDots) ? pointRadius : 0 })
+			.transition()
+			.duration(transitionDuration)
+				.style('opacity', 1)
+				.attr('cx', function(d) { return x(d.date) })
+				.attr('cy', function(d) { return y(d.value) });
+
+	circles
+		.transition()
+		.duration(transitionDuration)
+			.attr('cx', function(d) { return x(d.date) })
+			.attr('cy', function(d) { return y(d.value) })
+			.attr('r', function() { return (data.length <= maxDataPointsForDots) ? pointRadius : 0 })
+			.style('opacity', 1);
+
+	circles
+		.exit()
+			.transition()
+			.duration(transitionDuration)
+				// Leave the cx transition off. Allowing the points to fall where they lie is best.
+				.attr('cy', function() { return y(0) })
+				.style("opacity", 1e-6)
+				.remove();
+
+      $('svg circle').tipsy({ 
+        gravity: 'w', 
+        html: true, 
+        title: function() {
+          var d = this.__data__;
+	  var pDate = d.date;
+          return 'Datum: ' + pDate.getDate() + " " + monthNames[pDate.getMonth()] + " " + pDate.getFullYear() + '<br>Seiten: ' + d.value; 
+        }
+      });
+}
+
+function generateData() {
+	var data = [];
+	var i=0;
+        var count_array =6;
+        var graph_array=[];
+        <?php $i= 0; foreach ($crawled as $key => $value){ $i++?>
+            graph_array.push(<?php echo $value?>);
+            label_x_axis.push("<?php echo $key?>");
+            
+        <?php }?>
+
+       	while (i < 7) {
+
+		var date = new Date();
+		date.setDate(date.getDate() - count_array);
+                var temp_date = date.getDate();
+                var temp_month = date.getMonth();
+                var x_label = temp_month + "/" + temp_date;
+                //labels[i] = x_label;
+		date.setHours(0, 0, 0, 0);
+		//data.push({'value' : Math.round(Math.random()*1200), 'date' : date});
+                data.push({'value' : graph_array[count_array], 'date' : date});
+                count_array--;
+		i++;
+	}
+	return data;
+}
+
+d3.select('#button').on('click', draw);
+
+draw();
+
+                   
+               
+                        </script>
+                       
+                            <div class="nums" style="position:relative;height:20px;font-size:11px;color:gray;width: 93%;margin: 0 auto;top: -17px;">
+                            <div class="num num0" style="display:inline;" id="number6"></div>
+                            <div class="num num0" style="display:inline;margin-left: 16px;" id="number5"></div>
+                            <div class="num num1" style="display:inline;margin-left: 16px;" id="number4"></div>
+                            <div class="num num2" style="display:inline;margin-left: 16px;" id="number3"></div>
+                            <div class="num num3" style="display:inline;margin-left: 16px;" id="number2"></div>
+                            <div class="num num4" style="display:inline;margin-left: 16px;" id="number1"></div>
+                            <div class="num num5" style="display:inline;margin-left: 16px;" id="number0"></div>
+                            </div>
+
+                    </div>
+                </div>
+                	
+                
+				<div class="homepagemaingraphtwo">
+                                    <div style="font-weight:bold; margin-left:30px; margin-top:8px; text-transform:uppercase; font-family: sans-serif; font-size: 10px; font-style: normal; font-variant: normal; display: table;float: left;">Globale Rankänderung</div>
+                                    <div style="font-weight:bold; margin-right:30px; margin-top: 8px; text-transform:uppercase; font-family: sans-serif; font-size: 10px; font-style: normal; font-variant: normal; display: table;float: right; color:#4B90D0;">
+                                        <?php
+                                        $diff = 0;
+                                     foreach ($global_rank_changes as $value) 
+                                        {
+                                           if($value)
+                                           {
+                                               if(!$diff)
+                                               {
+                                                   $diff = $value;
+                                               }
+                                               else
+                                               {
+                                                   $diff = $diff - $value;
+                                               }
+                                           }
+                                        }
+                                            if($diff > 0)
+                                                echo $diff;
+                                            else
+                                                echo "0";
+                                        
+                                        ?>
+                                    </div>
+                                    <div id="chart_small_second"></div>
+<script>
+            /**
+            * User: nross
+            */
+            var w = 330,
+                h = 170;
+
+        var monthNames = [ "Januar", "Februar", "März", "April", "Mai", "Juni",
+            "Juli", "August", "September", "Oktober", "November", "Dezember" ];
+            var labels =new Array();;
+            var maxDataPointsForDots = 50,
+                    transitionDuration = 1000;
+
+            var svg = null,
+                    yAxisGroup = null,
+                    xAxisGroup = null,
+                    dataCirclesGroup = null,
+                    dataLinesGroup = null;
+
+            function draw1() {
+                    var data = generateData1();
+                    var margin = 25;
+                    var max = d3.max(data, function(d) {return d.value});
+                    var min = 0;
+                    var pointRadius = 4;
+                    var x = d3.time.scale().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
+                    var y = d3.scale.linear().range([h - margin * 2, 0]).domain([min, max]);
+
+                    var xAxis = d3.svg.axis().scale(x).tickSize(h - margin * 2).tickPadding(10).ticks(5);
+                    var yAxis = d3.svg.axis().scale(y).orient('left').tickSize(-w + margin * 2).tickPadding(10).ticks(5);
+                    var t = null;
+
+                    svg = d3.select('#chart_small_second').select('svg').select('g');
+                    if (svg.empty()) {
+                            svg = d3.select('#chart_small_second')
+                                    .append('svg:svg')
+                                            .attr('width', w)
+                                            .attr('height', h)
+                                            .attr('class', 'viz')
+                                    .append('svg:g')
+                                            .attr('transform', 'translate(' + margin + ',' + margin + ')');
+                    }
+
+                    t = svg.transition().duration(transitionDuration);
+
+                    // y ticks and labels
+                    if (!yAxisGroup) {
+                            yAxisGroup = svg.append('svg:g')
+                                    .attr('class', 'yTick')
+                                    .call(yAxis);
+                    }
+                    else {
+                            t.select('.yTick').call(yAxis);
+                    }
+
+                    // x ticks and labels
+                    if (!xAxisGroup) {
+                            xAxisGroup = svg.append('svg:g')
+                                    .attr('class', 'xTick')
+                                    .call(xAxis);
+                    }
+                    else {
+                            t.select('.xTick').call(xAxis);
+                    }
+
+                    // Draw the lines
+                    if (!dataLinesGroup) {
+                            dataLinesGroup = svg.append('svg:g');
+                    }
+
+                    var dataLines = dataLinesGroup.selectAll('.data-line')
+                                    .data([data]);
+
+                    var line = d3.svg.line()
+                            // assign the X function to plot our line as we wish
+                            .x(function(d,i) { 
+                                    // return the X coordinate where we want to plot this datapoint
+                                    return x(d.date); 
+                            })
+                            .y(function(d) { 
+                                    // return the Y coordinate where we want to plot this datapoint
+                                    return y(d.value); 
+                            })
+                            .interpolate("linear");
+
+
+                    var garea = d3.svg.area()
+                            .interpolate("linear")
+                            .x(function(d) { 
+                                    // verbose logging to show what's actually being done
+                                    return x(d.date); 
+                            })
+                            .y0(h - margin * 2)
+                            .y1(function(d) { 
+                                    // verbose logging to show what's actually being done
+                                    return y(d.value); 
+                            });
+
+                    dataLines
+                            .enter()
+                            .append('svg:path')
+                            .attr("class", "area1")
+                            .attr("d", garea(data));
+
+                    dataLines.enter().append('path')
+                            .attr('class', 'data-line')
+                            .style('opacity', 0.3)
+                            .attr("d", line(data));
+
+                    dataLines.transition()
+                            .attr("d", line)
+                            .duration(transitionDuration)
+                                    .style('opacity', 1)
+                                    .attr("transform", function(d) {return "translate(" + x(d.date) + "," + y(d.value) + ")";});
+
+                    dataLines.exit()
+                            .transition()
+                            .attr("d", line)
+                            .duration(transitionDuration)
+                                    .attr("transform", function(d) {return "translate(" + x(d.date) + "," + y(0) + ")";})
+                                    .style('opacity', 1e-6)
+                                    .remove();
+
+                    d3.selectAll(".area1").transition()
+                            .duration(transitionDuration)
+                            .attr("d", garea(data));
+
+                    d3.selectAll("line")
+                    .attr("y2","0");
+
+                    d3.select('.xTick').selectAll("path")
+                    .attr("style","display:none;");
+
+                    d3.select('.xTick').selectAll("text")
+                    .attr("style","display:none;");
+
+                    d3.select('.yTick').selectAll("path")
+                    .attr("style","display:none;");
+
+                    d3.select('.yTick').selectAll("text")
+                    .attr("style","display:none;");
+
+                    // Draw the points
+                    if (!dataCirclesGroup) {
+                            dataCirclesGroup = svg.append('svg:g');
+                    }
+
+                    var circles = dataCirclesGroup.selectAll('.data-point')
+                            .data(data);
+
+                    circles
+                            .enter()
+                                    .append('svg:circle')
+                                            .attr('class', 'data-point')
+                                            .style('opacity', 1e-6)
+                                            .attr('cx', function(d) {return x(d.date)})
+                                            .attr('cy', function() {return y(0)})
+                                            .attr('r', function() {return (data.length <= maxDataPointsForDots) ? pointRadius : 0})
+                                    .transition()
+                                    .duration(transitionDuration)
+                                            .style('opacity', 1)
+                                            .attr('cx', function(d) {return x(d.date)})
+                                            .attr('cy', function(d) {return y(d.value)});
+
+                    circles
+                            .transition()
+                            .duration(transitionDuration)
+                                    .attr('cx', function(d) {return x(d.date)})
+                                    .attr('cy', function(d) {return y(d.value)})
+                                    .attr('r', function() {return (data.length <= maxDataPointsForDots) ? pointRadius : 0})
+                                    .style('opacity', 1);
+
+                    circles
+                            .exit()
+                                    .transition()
+                                    .duration(transitionDuration)
+                                            // Leave the cx transition off. Allowing the points to fall where they lie is best.
+                                            .attr('cy', function() {return y(0)})
+                                            .style("opacity", 1e-6)
+                                            .remove();
+
+                $('svg circle').tipsy({ 
+                    gravity: 'w', 
+                    html: true, 
+                    title: function() {
+                    var d = this.__data__;
+                    var pDate = d.date;
+                    return 'Datum: ' + pDate.getDate() + " " + monthNames[pDate.getMonth()] + " " + pDate.getFullYear() + '<br>Rang Änderung: ' + d.value; 
+                    }
+                });
+            setXaxis();
+            }
+
+            function generateData1() {
+                    var data = [];
+                    var i=0;
+                    var count_array =6;
+                    var graph_array=[];
+                    <?php $i= 0; foreach ($global_rank_changes as $key => $value){ $i++?>
+                        graph_array.push(<?php echo $value?>);
+
+                    <?php }?>
+
+                    while (i < 7) {
+
+                            var date = new Date();
+                            date.setDate(date.getDate() - count_array);
+                            var temp_date = date.getDate();
+                            var temp_month = date.getMonth();
+                            var x_label = temp_month + "/" + temp_date;
+                            labels[i] = x_label;
+                            date.setHours(0, 0, 0, 0);
+                            data.push({'value' : graph_array[count_array], 'date' : date, 'label':x_label});
+                            count_array--;
+                            i++;
+                    }
+                    return data;
+            }
+
+            d3.select('#button').on('click', draw1);
+
+            draw1();
+
+            function setXaxis()
+            {
+                $( "#chart_small_second text[x='0']" ).css('display', 'none');
+            }                              
+                                
+                             
+                          
+</script>
+    <div class="nums" style="position:relative;height:20px;font-size:11px;color:gray;width: 93%;margin: 0 auto;top: -17px;">
+    <div class="num num0" style="display:inline;" id="second_number6"></div>
+    <div class="num num0" style="display:inline;margin-left: 16px;" id="second_number5"></div>
+    <div class="num num1" style="display:inline;margin-left: 16px;" id="second_number4"></div>
+    <div class="num num2" style="display:inline;margin-left: 16px;" id="second_number3"></div>
+    <div class="num num3" style="display:inline;margin-left: 16px;" id="second_number2"></div>
+    <div class="num num4" style="display:inline;margin-left: 16px;" id="second_number1"></div>
+    <div class="num num5" style="display:inline;margin-left: 16px;" id="second_number0"></div>
+    </div>
+				</div>
+				
+			</div>
+<script type="text/javascript">
+    var i= 6
+    var date = 0;
+    while(i >=0)
+    {
+        $('#number' +i).text(label_x_axis[i]);
+        $('#second_number' +i).text(label_x_axis[i]);
+        i--;
+    }
+</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+arrayOfData = new Array();
+<?php foreach ($main_graph as $key => $value):?>
+        
+arrayOfData.push([<?php echo $value;?>,"at <?php echo str_replace("-", ":", $key)?>",'']);
+<?php endforeach;?>
+
+    
+    $('#main_graph').jqbargraph({
+            data: arrayOfData,
+            width:660,
+            height:180,
+            barSpace:1,
+            legendWidth :8
+    });
+        
+      $('.graphBarmain_graph').tipsy({ 
+        gravity: 'w', 
+        html: true, 
+        title: function() {
+          return $(this).find('input[type="hidden"]').val();
+        }
+      });
+
+
+});
+</script>   

@@ -1,0 +1,259 @@
+<?php
+$user_type = $this->session->get("user-role");
+$user_id = $this->session->get("user-id");
+
+if($user_type !== "normal") {
+    $is_admin = true;
+} else {
+    $is_admin = false;
+}
+
+$user_domains = $this->session->get("user-domains");
+if(!is_array($user_domains)) {
+    $user_domains = array();
+}
+?>
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">UPLOAD / DOWNLOAD</div>
+</div>
+
+<div class="whitepagewrap">
+    <?php echo $this->getContent(); ?>
+    <?php if ($this->session->has("user-editing") && $this->session->get("user-editing") === true): ?>
+        <div class="whitepageblueheader"></div>
+        <form name="upload_standard_file" action="<?= $this->app_link; ?>/import/upload_file/STANDARD" method="post" enctype="multipart/form-data">
+            <div class="longwhitepagegraybg" style="height:200px;">
+                <div class="importlingwhitewrap" style="width:444px;">
+                    <div class="boxtitle">STANDARD LIST</div>
+                    <textarea cols="30" rows="10" style="width:300px;line-height:15px;height:160px;padding:10px 0 0 10px;" name="list_txt" class="dropdownbox"></textarea>
+                    <input type="hidden" name="list_type" value="STANDARD"/>
+                </div>
+                <div class="importuploadedtext">Website erfolgreich hochgeladen: <span class="importuloadedtext-blue"><?php echo $all_standard_lists; ?></span></div>
+            </div>
+            <button type="submit" name="upload" class="generatepdfbutton" style="cursor:pointer; border:none;"></button>
+        </form>
+
+        <div class="whitepageblueheader"></div>
+
+
+
+        <form name="upload_sitemap" action="<?= $this->app_link; ?>/import/sitemap" method="post" enctype="multipart/form-data">
+            <div class="longwhitepagegraybg" style="height:auto; padding-bottom: 15px;">
+                <div class="boxtitle">Domain URl</div>
+                <input type="text" class="dropdownbox" type="text" style="margin-left:35px;width:299px;float:left;" value="" name="DomainURL">
+
+                <div class="importlingwhitewrap" style="width:444px;">
+                    <div class="boxtitle">Site Maps :</div>
+                    <textarea cols="30" rows="10" style="width:300px;line-height:15px;height:160px;padding:10px 0 0 10px;" name="URL" class="dropdownbox"></textarea>
+
+                </div>
+                <div class="importuploadedtext"></div>
+            </div>
+            <button type="submit" name="upload" class="generatepdfbutton" style="cursor:pointer; border:none;"></button>
+        </form>
+
+
+
+
+
+        <div class="whitepageblueheader"></div>
+        <form name="upload_manual_file" action="<?= $this->app_link; ?>/import/upload_file/MANUAL" method="post" enctype="multipart/form-data">
+            <div class="longwhitepagegraybg" style="height:auto; padding-bottom: 15px;">
+                <div class="importlingwhitewrap" style="width:444px;">
+                    <div class="boxtitle">TITEL</div>
+                    <input type="text" name="list_title" value="<?php echo @$_POST['list_title'] ?>" class="dropdownbox" style="padding-right:149px;"/>
+
+                    <div style="clear:both;"></div>
+                    <div class="boxtitle">HAND LIST</div>
+                    <textarea cols="30" rows="10" style="width:300px;line-height:15px;height:170px;padding:10px 0 0 10px;" name="list_txt" class="dropdownbox"></textarea>
+                    <input type="hidden" name="list_type" value="MANUAL"/>
+                </div>
+                <div class="importuploadedtext" style="margin-bottom:170px;">Website erfolgreich hochgeladen: <span class="importuloadedtext-blue"><?php echo count($all_manual_lists); ?></span></div>
+                <div style="clear: both;"></div>
+                <div style="margin-left:15px; height: auto;">
+                    <?php $k = 1;
+                    $l = 1;
+
+                    foreach ($all_manual_lists as $list) {
+                        ?>
+                        <div class="importuploadedtext" style="float:left; width:30%" id="<?php echo $l; ?>">
+                            <?php if($is_admin or $list->user_id === $user_id) {?>
+                            <a href="javascript:delRecord('<?php echo $list->id ?>',<?php echo $l; ?>)" style="float: left;">
+                                <div class="userdelete" style="float:left; margin-top:2px;"></div>
+                            </a>
+                            <?php } ?>
+                            <?php echo $list->Name; ?>
+                        </div>
+                        <?php if ($k % 3 == 0) {
+                            echo '<div style="clear: both;"></div>';
+                        }
+                        $k++;
+                    } ?>
+                </div>
+            </div>
+            <button type="submit" name="upload" class="generatepdfbutton" style="cursor:pointer; border:none;"></button>
+        </form>
+    <?php endif; ?>
+    <div style="float:left;width:333px; margin-bottom:30px;">
+        <form name="generate_pdf" action="<?= $this->app_link; ?>/import/export_campaign" method="post" enctype="multipart/form-data">
+            <div class="smallwhitepageblueheader"></div>
+            <div class="smallwhitepagegraybg">
+                <div class="boxtitle">KAMPAGNE WÄHLEN</div>
+                <a href="#" class="dropdownbox" data-reveal-id="choosecampaignModal" data-animation="none">WÄHLEN KAMPAGNE <span class="dropdownbox-arrow"></span></a>
+            </div>
+
+            <!-- choose campaign modal window -->
+            <div id="choosecampaignModal" class="reveal-modal">
+                <div class="modal-blueheadline"></div>
+                <div class="modal-midline">
+                    <div class="modal-midlinetext">Wählen Sie eine Kampagne:</div>
+                </div>
+                <div class="modal-bodyarea">
+                    <div class="modallistwrap">
+                        <?php if (!empty($get_automated_campaigns)) {
+                            $i = 0;
+                            foreach (@$get_automated_campaigns as $campaign) {
+                                ?>
+                                <div class="modal-listbox">
+                                    <input type="checkbox" name="campaign_checkbox_<?php echo $i; ?>" id="campaign_checkbox_<?php echo $i; ?>" class="css-checkbox"/>
+                                    <label for="campaign_checkbox_<?php echo $i; ?>" class="css-label"></label>
+
+                                    <div class="modallisttext"><?php echo $campaign->Name; ?></div>
+                                    <input type="hidden" name="campaign_<?php echo $i; ?>" id="campaign_<?php echo $i; ?>" value="<?php echo $campaign->Name; ?>"/>
+                                </div>
+                                <?php $i++;
+                            }
+                        } ?>
+                        <?php if (!empty($get_manual_campaigns)) {
+                            foreach (@$get_manual_campaigns as $campaign) {
+                                ?>
+                                <div class="modal-listbox">
+                                    <input type="checkbox" name="campaign_checkbox_manual_<?php echo $i; ?>" id="campaign_checkbox_manual_<?php echo $i; ?>" class="css-checkbox"/>
+                                    <label for="campaign_checkbox_manual_<?php echo $i; ?>" class="css-label"></label>
+
+                                    <div class="modallisttext"><?php echo $campaign->Name; ?></div>
+                                    <input type="hidden" name="campaign_manual_<?php echo $i; ?>" id="campaign_manual_<?php echo $i; ?>" value="<?php echo $campaign->Name; ?>"/>
+                                </div>
+                                <?php $i++;
+                            }
+                        } ?>
+                        <input type="hidden" name="total_campaigns" id="total_campaigns" value="<?php echo $i; ?>"/>
+                    </div>
+                </div>
+                <div class="modal-bottomline">
+                    <div class="close-reveal-modal modal-savecontent">
+                        <div class="modalcheckbox"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- choose campaign modal window -->
+
+            <button type="submit" name="export_campaign" class="generatepdfsmall" style="cursor:pointer; border:none;"></button>
+        </form>
+    </div>
+
+    <div style="float:right;width:333px;">
+        <form name="generate_domain_stats" action="<?= $this->app_link; ?>/import/export_domain" method="post" enctype="multipart/form-data">
+            <div class="smallwhitepageblueheader"></div>
+            <div class="smallwhitepagegraybg">
+                <div class="boxtitle">DOMAIN STATS</div>
+                <a href="#" class="dropdownbox" data-reveal-id="choosedomainModal" data-animation="none">Wählen Sie Domäne <span class="dropdownbox-arrow"></span></a>
+            </div>
+
+            <!-- choose domain modal window -->
+            <div id="choosedomainModal" class="reveal-modal">
+                <div class="modal-blueheadline"></div>
+                <div class="modal-midline">
+                    <div class="modal-midlinetext">Wählen Sie Domäne:</div>
+                </div>
+                <div class="modal-bodyarea">
+                    <div class="modallistwrap">
+                        <?php if (!empty($get_domains)) {
+                            $i = 0;
+                            foreach ($get_domains as $domain) {
+                                ?>
+                                <div class="modal-listbox">
+                                    <input type="checkbox" name="domain_checkbox_<?php echo $i; ?>" id="domain_checkbox_<?php echo $i; ?>" class="css-checkbox"/>
+                                    <label for="domain_checkbox_<?php echo $i; ?>" class="css-label"></label>
+
+                                    <div class="modallisttext"><?php echo $domain->DomainURL; ?></div>
+                                    <input type="hidden" name="domain_<?php echo $i; ?>" id="domain_<?php echo $i; ?>" value="<?php echo $domain->DomainURLIDX; ?>"/>
+                                </div>
+                                <?php $i++;
+                            }
+                        } ?>
+                        <input type="hidden" name="total_domains" id="total_domains" value="<?php echo $i; ?>"/>
+                    </div>
+                </div>
+                <div class="modal-bottomline">
+                    <div class="close-reveal-modal modal-savecontent">
+                        <div class="modalcheckbox"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- choose domain modal window -->
+
+            <button type="submit" name="export_domain" class="generatepdfsmallright" style="cursor:pointer; border:none;"></button>
+        </form>
+    </div>
+    <div style="clear:both;"></div>
+    <!--Export Campaign By Date -->
+    <form name="export_campaign_bydate" action="<?= $this->app_link; ?>/import/export_campaign_by_date" method="post" enctype="multipart/form-data">
+        <div style="float:left;width:333px; margin-bottom:50px;">
+            <div class="smallwhitepageblueheader"></div>
+            <div class="smallwhitepagegraybg">
+                <div class="dropdowncal">
+                    <input type="hidden" name="end_date" id="end_date" value="">&nbsp;&nbsp;&nbsp;
+                    <span id="e_date_cal">END DATUM</span>
+
+                    <div class="dropdowncal-arrow"></div>
+                </div>
+                <div class="dropdowncal">
+                    <input type="hidden" name="start_date" id="start_date" value="">&nbsp;&nbsp;&nbsp;
+                    <span id="s_date_cal">START DATUM</span>
+
+                    <div class="dropdowncal-arrow"></div>
+                </div>
+            </div>
+            <button type="submit" name="export_campaign_bydate" class="generatepdfsmallright" style="cursor:pointer; border:none;"></button>
+        </div>
+    </form>
+</div>
+<div id="del_dialog" style="display: none;">
+    <p>Sind Sie sicher, um diese Liste läschen mächten?</p>
+</div>
+<script>
+    function delRecord(id, temp_id) {
+        $('#del_dialog').dialog({
+            autoOpen: true,
+            modal: true,
+            resizable: false,
+            title: 'Läschen Manuelle Liste',
+            draggable: false,
+            width: 'auto',
+            buttons: {
+                "lÃ¶schen": function () {
+                    $.ajax({
+                        url: "<?= $this->app_link; ?>/import/delete_manual_list/" + id,
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                        },
+                        success: function (data) {
+                            if (data.deleted == "sucss") {
+                                $('#result_set_' + temp_id).remove();
+                                $('#site' + temp_id).remove();
+                                $('#del_dialog').dialog('close');
+                                location.reload(false)
+                            }
+                        }
+                    });
+                },
+                "schlieÃŸen": function () {
+                    $('#del_dialog').dialog('close');
+                }
+            }
+        });
+    }
+</script>
+            

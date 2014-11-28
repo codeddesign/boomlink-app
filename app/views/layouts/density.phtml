@@ -1,0 +1,936 @@
+<?php
+$user_role = $this->session->get("user-role");
+if($user_role !== "normal") {
+    $is_admin = true;
+} else {
+    $is_admin = false;
+}
+?>
+<style type="text/css">
+    #tabs_container {
+    }
+
+    #tabs {
+        list-style: none;
+        padding: 5px 0 4px 0;
+        margin: 0 0 0 0px;
+    }
+
+    #tabs li {
+        display: inline;
+    }
+
+    #tabs li a {
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+        border: 1px solid #ccc;
+        padding: 10px 15px 4px;
+        text-decoration: none;
+        background-color: #2288C3;
+        border-bottom: none;
+        outline: none;
+        border-radius: 3px 3px 0 0;
+        -moz-border-radius: 3px 3px 0 0;
+        -webkit-border-top-left-radius: 3px;
+        -webkit-border-top-right-radius: 3px;
+    }
+
+    #tabs li a:hover {
+        color: black;
+        background-color: white;
+        padding: 10px 15px 4px;
+    }
+
+    #tabs li.active a {
+        color: black;
+        background-color: #F1F3F7;
+        padding: 10px 15px 5px;
+        border-bottom: none;
+    }
+
+    #tabs li.active a:hover {
+        padding: 10px 15px 7px;
+        border-bottom: none;
+    }
+
+    #tabs_content_container {
+        border: 1px solid #ccc;
+        border-top: none;
+        padding: 10px;
+        width: 400px;
+    }
+
+    .hidden_tab_content {
+        display: none;
+    }
+
+    .active_tab_content {
+
+    }
+
+    #operations_box {
+        padding-top: 20px;
+    }
+
+    #horiz_container_outer {
+        float: left;
+        height: auto;
+        margin: 5px auto 0;
+        overflow: hidden;
+        position: relative;
+        width: 762px;
+    }
+
+    #horiz_container {
+        margin: 0;
+        padding: 0;
+        width: 1720px;
+    }
+
+    .densitydownloadwrap {
+        float: left;
+        width: 100%;
+        height: 55px;
+        background: #F1F3F7;
+        border-top: 1px solid #C2C2D3;
+        margin-top: 715px;
+    }
+
+    .densityxmltitle {
+        color: #4A9FD0;
+        float: left;
+        font-family: Helvetica, Arial, Sans-serif;
+        font-size: 11px;
+        font-weight: bold;
+        margin-left: 202px;
+        margin-top: 21px;
+        text-decoration: none;
+    }
+
+    .densityxmllist {
+        float: left;
+        margin-left: 15px;
+        margin-top: 18px;
+    }
+
+    .status_online {
+        color: green;
+    }
+
+    .status_offline {
+        color: red;
+    }
+</style>
+<link rel="stylesheet" type="text/css" media="all" href="<?= $this->app_link; ?>/css/jquery.horizontal.scroll.css"/>
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">Keyword Density</div>
+</div>
+
+<div class="whitepagewrap" style="margin-top:17px;">
+<?php echo $this->getContent(); ?>
+
+<!-- start background modal -->
+<div class="reveal-modal-bg" id="chosed-page-bg" style="display: none; cursor: pointer;"></div>
+<!-- end background modal -->
+
+<div id="operations_box" style="height: auto;">
+    <div id="tabs_container">
+        <ul id="tabs">
+            <?php if($user_editing) :?>
+            <li class="active" id="tab1" onclick='toggle_tabs(this);'><a>Upload site map</a></li>
+            <?php
+            endif;
+            ?>
+            <li id="tab4" <?php if(!$user_editing) echo 'class="active"';?> onclick='toggle_tabs(this);'><a>Page Data</a></li>
+            <li id="tab2" onclick='toggle_tabs(this);'><a>Check words</a></li>
+            <li id="tab3" onclick='toggle_tabs(this);'><a>History</a></li>
+            <?php if($is_admin): ?>
+            <li id="tab5" onclick='toggle_tabs(this);'><a>Crawler Settings</a></li>
+            <?php endif;?>
+        </ul>
+    </div>
+</div>
+
+
+<div class="longwhitepagegraybg" style="height:auto;border-top:0px;border-top:1px solid #C2C2D3;min-height:50px;padding:10px;">
+<?php if($is_admin) : ?>
+<!-- crawler settings: -->
+<div id="tab5a" class="hidden_tab_content">
+    <div id="tab5f-loading" style="display: none;" class="loading"></div>
+    <!-- settings -->
+    <table style="padding-bottom: 15px;">
+        <th colspan="3" style="text-align: left;">SETTINGS:</th>
+        <tr>
+            <td>BREAK TIME CRAWLER</td>
+            <td>
+                <select name="hours_to_sleep" id="hours_to_sleep">
+                    <?php for($i=1;$i<=23;$i++) {?>
+                    <option value="<?php echo $i;?>" <?php if($current_hours == $i) echo "selected";?>> <?php echo $i;?> </option>
+                    <?php  } ?>
+                </select>
+            </td>
+            <td>*number of hours</td>
+        </tr>
+        <tr>
+            <td>BREAK TIME BETWEEN PROXY BLOCKS</td>
+            <td>
+
+                <select name="seconds_to_sleep" id="seconds_to_sleep">
+                <?php for($i=1;$i<=10;$i++) {?>
+                    <option value="<?php echo $i;?>" <?php if($current_seconds == $i) echo "selected";?>> <?php echo $i;?> </option>
+                <?php  } ?>
+                </select>
+            </td>
+            <td>*number of seconds</td>
+        </tr>
+        <tr>
+            <td>Crawler Browser</td>
+            <td colspan="2">
+                <select name="crawler_browser" id="crawler_browser" style="width: 200px;">
+                    <?php foreach($available_browsers as $b_no => $browser){
+                        $name = $browser["name"];
+                        $id = $browser["id"];
+                    ?>
+                        <option value="<?php echo $id;?>" <?php if($current_browser == $name) echo "selected";?>> <?php echo $name;?> </option>
+                    <?php  } ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="text-align: left;">
+                <a href="#" class="dropdownbox" id="cron_save_changes" style="float:left;">SAVE CHANGES</a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="hidden" id="cron_special_id" value="<?php echo $cron_config_id;?>">
+                <div class="boxtitle" id="tab5f-result" style="color: green; font-family: 10px sans-serif;font-family: Arial;width:500px;"></div>
+            </td>
+        </tr>
+    </table>
+    <!-- end settings -->
+    <hr>
+    <!-- status -->
+    <table style="padding-top: 15px;">
+        <th style="text-align: left;width: 150px;">SERVICE</th>
+        <th style="text-align: left;">STATUS</th>
+        <!--<tr>
+            <td>NODEJS SERVER</td>
+            <td class="status_<?php //echo strtolower($nodejs_status);?>"><?php //echo $nodejs_status; ?></td>
+        </tr>-->
+        <tr>
+            <td>CRAWLER</td>
+            <td class="status_<?php echo strtolower($cron_status);?>"><?php echo $cron_status; ?></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><?php if($cron_status === "OFFLINE") echo "last"; else echo "current";?> job: "<?php echo $current_job;?>"</td>
+        </tr>
+    </table>
+    <!-- end_status -->
+</div>
+<!-- end crawler settings; -->
+<?php endif;?>
+<!-- site map -->
+
+<?php
+if($user_editing): ?>
+<div id="tab1a" class="active_tab_content">
+    <div id="tab1f-loading" style="display: none;" class="loading"></div>
+    <form id="tab1f" action="<?= $this->app_link . '/' . $page; ?>/upload" method="post" enctype="multipart/form-data" onsubmit="AJAXSubmit(this); return false;">
+        <div class="importlingwhitewrap" style="width:444px;padding-bottom: 10px;">
+            <div class="boxtitle">Upload XML file:
+                <input type="file" name="xml_file" onchange="toggleWordsAction(this, 'xml_action');">
+            </div>
+            <div class="boxtitle">
+                OR import from DOMAIN:
+                <?php if(count($status_domains) > 0) {?>
+                <select name="domain_id" onchange="toggleWordsAction(this, 'xml_action');">
+                    <option value="0">---</option>
+                    <?php
+                    foreach ($status_domains as $null => $entry) {
+                        //show only completed domains:
+                        echo "<option value='" . $entry["idx"] . "'>" . $entry["domain"] . "</option>\n";
+                    }
+                    ?>
+                </select>
+                <?php } else echo " <i>No domains to import.</i>"; ?>
+            </div>
+            <div class="boxtitle" style="width: 300px;">
+                <input type="hidden" name="action" id="xml_action" value=""/>
+                <input type="submit" value="SUBMIT">
+            </div>
+        </div>
+    </form>
+    <div class="boxtitle" id="tab1f-result" style="color: green; font-family: 10px sans-serif;font-family: Arial;width:500px;"></div>
+</div>
+<?php endif; ?>
+
+<!-- check words -->
+<div id="tab2a" <?php if($user_editing) echo 'class="hidden_tab_content"'; else echo 'class="active_tab_content"';?>>
+    <?php
+    $completed_domains = array();
+    $has_completed = false;
+
+    //check to see if user has completed domains:
+    if (isset($user_domains)) {
+        foreach ($user_domains as $null => $entry) {
+            $no = $domain_count[$entry["id"]];
+            $parsed1_links = $no["parsed1"];
+            $parsed2_links = $no["parsed2"];
+            $total_links = $no["total_links"];
+
+            if ($parsed1_links > 0) {
+                $completed_domains[] = $entry["id"];
+                $has_completed = true;
+            }
+        }
+    }
+
+    if (!$has_completed) {
+        echo "User doesn't have completed domains.";
+    } else {
+        ?>
+        <div id="tab2f-loading" style="display: none;" class="loading"></div>
+        <form id="tab2f" action="<?= $this->app_link . '/' . $page; ?>/upload" method="post" enctype="multipart/form-data" onsubmit="AJAXSubmit(this); return false;">
+            <div class="importlingwhitewrap" style="width:444px;padding-bottom: 10px;">
+                <div class="boxtitle">STANDARD LIST:</div>
+                <textarea cols="30" rows="10" style="width:250px;line-height:15px;height:160px;padding:10px 0 0 10px;" name="csv_list" class="dropdownbox" onkeyup="toggleWordsAction(this, 'csv_action');"></textarea>
+
+                <div class="boxtitle">OR Upload TEXT:
+                    <input type="file" name="csv_file" onchange="toggleWordsAction(this, 'csv_action')">
+                </div>
+                <div class="boxtitle">
+                    SELECT DOMAIN: <select name="domain_id">
+                        <option value="0">---</option>
+                        <?php
+                        foreach ($user_domains as $null => $entry) {
+                            //show only completed domains:
+                            if (in_array($entry["id"], $completed_domains)) {
+                                echo "<option value='" . $entry["id"] . "'>" . $entry["domain_name"] . "</option>\n";
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="boxtitle">
+                    <input type="hidden" name="action" id="csv_action" value=""/>
+                    <input type="submit" value="SUBMIT">
+                </div>
+            </div>
+        </form>
+    <?php } ?>
+</div>
+
+<!-- start density-result modal -->
+<div id="density-result" class="reveal-modal" style="top: 100px;width: 1000px;">
+    <div class="modal-blueheadline" style="width: 100%;"></div>
+    <div class="modal-midline" style="width: 100%;">
+        <div class="modal-midlinetext" id="density-result-title">loading</div>
+    </div>
+    <!-- start loading pageinfo -->
+    <div id="density-result-load" style="display: none;" class="loading"></div>
+    <!-- end loading pageinfo -->
+    <div class="modal-bodyarea" id="density-result-data" style="width: 100%; padding: 0px;">
+        ...
+    </div>
+    <div class="modal-bottomline" style="width: 100%;text-align: center;height: 51px;">
+        <a href="#" id="density-result-btn">
+            <button class="exportcsvbutton" style="cursor:pointer;float: none;"></button>
+        </a>
+    </div>
+</div>
+<!-- end modal -->
+
+<!-- history -->
+<div id="tab3a" class="hidden_tab_content">
+    <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;max-height: 200px;overflow-y: scroll;">
+        <?php
+        if (count($user_history) < 1) {
+            echo "User has no history<br/>";
+        } else {
+            ?>
+            <table style="width: 600px;padding-top: 5px;">
+                <tr>
+                    <td style="width:50%;"><b>Uploaded site maps:</b><br/></td>
+                    <td><b>Word checks:</b><br/></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">
+                        <ul style="list-style: none;padding-left: 2px;">
+                            <?php
+                            foreach ($user_history as $null => $entry) {
+                                $left_side = $right_side = "";
+                                if ($entry->action_type === "xml_file") {
+                                    sscanf($entry->date, "%d-%d-%d ", $year, $month, $day);
+                                    $date = $day . "/" . $month . "/" . $year;
+                                    echo "<li>" . $date . "-" . $entry->entry_name . "</li>";
+                                }
+                            }
+                            ?>
+                        </ul>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <ul style="list-style: none;padding-left: 2px;">
+                            <?php
+                            foreach ($user_history as $null => $entry) {
+                                $left_side = $right_side = "";
+                                if ($entry->action_type !== "xml_file") {
+                                    sscanf($entry->date, "%d-%d-%d ", $year, $month, $day);
+                                    $date = $day . "/" . $month . "/" . $year;
+                                    echo "<li><a href='javascript:show_density_modal(\"" . $entry->id . "\");' title='View result'>" . $date . " - " . $entry->entry_name . "</a></li>";
+                                }
+                            }
+                            ?>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        <?php } ?>
+    </div>
+</div>
+
+<!-- Page Data -->
+<div id="tab4a" class="hidden_tab_content">
+    <div id="loadmore_div" style="display: none;" class="loading"></div>
+    <?php if (!$has_completed) {
+        echo "User doesn't have completed domains.";
+    } else {
+        ?>
+        <form id="tab4f" action="##" method="post" enctype="multipart/form-data">
+            <div class="choosedomainpagetitle" style="float: left;">Choose Domain:
+                <select name="choosedomainspagelist" id="choosedomainspagelist" class="autocompleteinputform" style="float: left;">
+                    <option value="0"> ---</option>
+                    <?php
+                    foreach ($user_domains as $null => $entry) {
+                        //show only completed domains:
+                        if (in_array($entry["id"], $completed_domains)) {
+                            echo "<option value='" . $entry["id"] . "'>" . $entry["domain_name"] . "</option>\n";
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="choosedomainpagetitle" style="float: left;">Search Page:
+                <input type="text" id="auto_complete_text" class="autocompleteinputform ui-autocomplete-input" autocomplete="off"/>
+                <input type="hidden" id="page_urls_with_id"/>
+            </div>
+            <div class="choosedomainpagetitle" style="float: left;margin-left: 27px;">
+                <a href="#" class="dropdownbox" style="display: none;" id="show_btn">SHOW LINKS</a>
+            </div>
+            <div class="choosedomainpagetitle" style="float: left;margin-left: 132px;">
+                <a href="#" class="dropdownbox" style="display: none;" id="show_btn_2">SHOW PAGE INFO</a>
+            </div>
+        </form>
+
+        <!-- start modal -->
+        <div id="chosed-page" class="reveal-modal" style="top: 100px;width: 1000px;">
+            <div class="modal-blueheadline" style="width: 100%;"></div>
+            <div class="modal-midline" style="width: 100%;">
+                <div class="modal-midlinetext" id="selected-link-href">somelink.com</div>
+            </div>
+            <!-- start loading pageinfo -->
+            <div id="chosed-page-load" style="display: none;" class="loading"></div>
+            <!-- end loading pageinfo -->
+            <div class="modal-bodyarea" id="selected-page-data" style="width: 100%; padding: 0px;">
+                some content..
+            </div>
+            <div class="modal-bottomline" style="width: 100%;text-align: center;height: 51px;">
+                <a href="#" id="selected-page-export-btn">
+                    <button class="exportcsvbutton" style="cursor:pointer;float: none;"></button>
+                </a>
+            </div>
+        </div>
+        <!-- start background modal -->
+        <!-- end background modal -->
+        <!-- end modal -->
+    <?php } ?>
+</div>
+<!-- end Page Data -->
+</div>
+</div>
+
+<?php if (isset($user_domains) && isset($action_name)) { ?>
+    <div class="listtitle-wrapper"><!-- start list title-wrapper -->
+        <div id="horiz_container_outer"><!-- start horiz_container_outer -->
+            <div id="horiz_container" style="width: 3150px;"><!-- start horiz_container -->
+                <div class="listtitlebar">
+                    <div class="pagetitlebar">
+                        <div class="pagetitlebar-title">YOUR DOMAINS</div>
+                        <div id="page-info-load" style="display: none;" class="loading"></div>
+                    </div>
+                </div>
+
+                <div class="listtitlesubbar" style="height:45px;width: 3150px;">
+                    <div class="analyticswebaddressbar" style="margin-left:69px;margin-right:2px;">NAME</div>
+                    <div class="analyticswebaddresstime" style="margin-left: 160px;">SERVER IP</div>
+                    <div class="analyticswebaddresstwentyfour" style="margin-left: 50px;">LOCATION</div>
+                    <div class="analyticswebaddressseven" style="margin-left: 30px;">HOSTING COMPANY</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">GOOGLE RANK</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">LINKS</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 40px;">PARSED #1</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">COMPLETED</div>
+
+                    <!-- EXTRA INFORMATION: -->
+                    <div class="analyticswebaddressthirty" style="margin-left: 60px;">DESCRIPTION</div>
+                    <!--<div class="analyticswebaddressthirty" style="margin-left: 70px;">PAGE TYPE</div>-->
+                    <div class="analyticswebaddressthirty" style="margin-left: 65px;">HTTP CODE</div> <!--style="margin-left: 30px;"-->
+                    <div class="analyticswebaddressthirty" style="margin-left: 40px;">CHARSET</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">LANGUAGE</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">SERVER CONFIG</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">CACHED</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 40px;">LOAD TIME</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">PAGE WEIGHT</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">INTERNAL LINKS</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">EXTERNAL LINKS</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">FOLLOW LINKS</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">NO FOLLOW LINKS</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 40px;">H1</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 50px;">H2</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 50px;">H3</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 50px;">H4</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 50px;">H5</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 50px;">H6</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 50px;">INDEXED GOOGLE</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 30px;">INDEXED BING</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 60px;">PAGE TRACKERS</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 40px;">GOOGLE+</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">TWITTER</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">FB SHARES</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">FB LIKES</div>
+                    <div class="analyticswebaddressthirty" style="margin-left: 20px;">FB COMMENTS</div>
+                    <!-- END EXTRA INFORMATION -->
+                </div>
+
+                <?php
+                if (count($user_domains) < 1) {
+                    echo "User has no domains";
+                } else {
+                    foreach ($user_domains as $null => $entry) {
+                        //this one keeps all information for main page - type=array
+                        $a_entry = $domain_extra[$entry["id"]];
+
+                        //adjust information
+                        $description = $a_entry["description"];
+                        if (strlen($description) > 20) {
+                            $description = substr($description, 0, 20) . "..";
+                        }
+
+                        $page_trackers = $a_entry["page_trackers"];
+                        if (strlen($page_trackers) > 20) {
+                            $page_trackers = substr($page_trackers, 0, 20) . "..";
+                        }
+
+                        $hosting_company = $entry['hosting_company'];
+                        if (strlen($hosting_company) > 18) {
+                            $hosting_company = substr($hosting_company, 0, 18) . "..";
+                        }
+
+                        $no = $domain_count[$entry["id"]];
+                        $parsed1_links = $no["parsed1"];
+                        $parsed2_links = $no["parsed2"];
+                        $total_links = $no["total_links"];
+                        ?>
+                        <div class="resultslist" id="domain_row_<?php echo $entry["id"];?>">
+                            <a href="javascript:removeDomain('<?php echo $entry["id"];?>')" title='Delete'><div class="userdelete" style='margin-left:7px;margin-top: 15px;float: left;margin-right:0;padding:0;'></div></a>
+                            <?php if ($parsed2_links < $total_links) { ?>
+                                <div class="rednetwork" style="margin-left:0px;margin-top:12px;" title="In progress.."></div>
+                            <?php } else { ?>
+                                <div class="greennetwork" style="margin-left:0px;margin-top:12px;" title="Completed"></div>
+                            <?php } ?>
+                            <div class="analyticslisturl" style="width: 160px;"><?php echo $entry["domain_name"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 110px;"><?php echo $entry["server_ip"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $entry["server_location"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 140px;cursor: help;" title="<?php echo $entry["hosting_company"]; ?>"><?php echo $hosting_company; ?></div>
+                            <div class="analyticsrankspot" style="width: 70px;"><?php echo $entry["google_rank"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $total_links; ?></div>
+                            <div class="analyticsrankspot" style="width: 70px;"><?php echo $parsed1_links; ?></div>
+                            <div class="analyticsrankspot" style="width: 70px;"><?php echo $parsed2_links; ?></div>
+                            <div class="analyticsrankspot" style="width: 160px;cursor: help;" title="<?php echo $a_entry["description"]; ?>"><?php echo $description; ?></div>
+                            <!--<div class="analyticsrankspot" style="width: 80px;"><?php //echo $a_entry["page_type"]; ?></div>-->
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["http_code"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["charset"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["content_language"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["server_config"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["cached"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["load_time"] . "s"; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["page_weight"] . "kb"; ?></div>
+                            <div class="analyticsrankspot" style="width: 100px;"><?php echo $a_entry["internal_links"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 100px;"><?php echo $a_entry["external_links"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["follow_links"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 110px;"><?php echo $a_entry["no_follow_links"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["h1"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["h2"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["h3"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["h4"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["h5"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["h6"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 110px;"><?php echo $a_entry["indexed_google"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 100px;"><?php echo $a_entry["indexed_bing"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 150px;cursor: help;" title="<?php echo $a_entry["page_trackers"] ?>"><?php echo $page_trackers; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["googlep"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["twitter"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["fb_likes"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 60px;"><?php echo $a_entry["fb_shares"]; ?></div>
+                            <div class="analyticsrankspot" style="width: 80px;"><?php echo $a_entry["fb_comments"]; ?></div>
+                        </div>
+                    <?php
+                    }
+                } //$user_domains > 0
+                ?>
+            </div>
+            <!-- end listtitle-wrapper -->
+        </div>
+        <!-- end horiz_container -->
+
+        <!-- start scrollbar -->
+        <div id="scrollbar">
+            <a id="left_scroll" class="mouseover_left" href="#"></a>
+
+            <div id="track">
+                <div id="dragBar"></div>
+            </div>
+            <a id="right_scroll" class="mouseover_right" href="#"></a>
+        </div>
+        <!-- end scrollbar -->
+    </div><!-- end horiz_container_outer -->
+<?php } ?>
+
+<!-- start words_density_result -->
+<?php if (isset($words_density)) { ?>
+    <div class="listtitlebar">
+        <div class="pagetitlebar">
+            <div class="pagetitlebar-title">Words density:</div>
+        </div>
+    </div>
+    <?php
+    if (count($words_density) < 1) {
+        echo '<div class="listtitlesubbar">None of the words were not found.</div>';
+    } else {
+        echo "<div style='float: left;margin-left: 27px;margin-top: 10px;padding-bottom: 100px;'>";
+        foreach ($words_density as $word => $deeparr) {
+            echo "<b>" . $word . "</b><br/>";
+            if (!empty($deeparr)) {
+                foreach ($deeparr as $link_id => $v) {
+                    echo "----- " . $v["perc"] . "% --- " . $v["link"] . "<br/>";
+                }
+            } else {
+                echo "----- no results.<br/>";
+            }
+        }
+        echo "</div>";
+    }
+}?>
+<!-- end words_density_result -->
+
+<!-- download domain report: -->
+<div class="densitydownloadwrap">
+    <div class="densityxmltitle">Download Domain Report:</div>
+    <?php
+    if (isset($user_domains)) {
+        if (!$has_completed) {
+            echo "<div class='densityxmllist' style='padding-top: 2px;'>User doesn't have completed domains.</div>";
+        } else {
+            ?>
+            <form class="densityxmllist">
+                <?php
+                $options = "";
+                foreach ($user_domains as $null => $entry) {
+                    //show only completed domains:
+                    if (in_array($entry["id"], $completed_domains)) {
+                        if ($entry["report_file"] != "") {
+                            $options .= "<option value='" . $entry["id"] . "'>" . $entry["domain_name"] . "</option>\n";
+                        }
+                    }
+                }
+
+                if (strlen($options) > 0) {
+                    echo '<select name="xmldomains" id="xml_domains" action="#" method="post">';
+                    echo "<option value='0'>---</option>\n";
+                    echo $options;
+                    echo "</select>\n";
+                    echo '<input class="densitydownloadbutton" id="dwn_rep_btn" type="button" value="Submit">';
+                } else {
+                    echo "no reports generated.";
+                }
+                ?>
+                <script>
+                    $('#dwn_rep_btn').click(function (e) {
+                        e.preventDefault();
+
+                        var domain_id = $('#xml_domains').find(":selected").val();
+                        location.href = "density/getdomainreport/" + domain_id;
+                    });
+                </script>
+            </form>
+        <?php
+        }
+    } else {
+        echo "User has no domains";
+    }
+    ?>
+</div>
+<script src="<?= $this->app_link; ?>/js/jquery.horizontal.scroll.js" type="text/javascript"></script>
+<script type="text/javascript">
+    function removeDomain(id) {
+        confirm("Are you sure you want to remove this domain?");
+        var loading = $("#page-info-load");
+
+        //show loading:
+        loading.show();
+
+        //remove domain:
+        $.ajax({
+            url: "<?= $this->app_link;?>/density/removedomain/" + id,
+            dataType: "json",
+            type: "POST",
+            data: {
+            },
+            success: function (data) {
+                if (data.msg == "success") {
+                    //hide loading:
+                    loading.hide();
+
+                    //remove domain row (visually)
+                    $('#domain_row_' + id).remove();
+                }
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+function toggleWordsAction(el, id) {
+    document.getElementById(id).value = el.getAttribute("name");
+}
+
+function toggle_tabs(tab) {
+    //hide "page data"'s buttons:
+    $("#show_btn").hide();
+    $("#show_btn_2").hide();
+
+    var ul_menu = document.getElementById("tabs");
+    var lis = ul_menu.children;
+    var temp_id, temp_id2, temp_id3, form;
+    for (var i = 0; i < lis.length; i++) {
+        temp_id = lis[i].id;
+        temp_id2 = temp_id + "a";
+        temp_id3 = temp_id + "f";
+
+        if (temp_id != tab.id) {
+            document.getElementById(temp_id).setAttribute("class", "");
+            document.getElementById(temp_id2).setAttribute("class", "hidden_tab_content");
+
+            form = document.getElementById(temp_id3);
+            if (form) {
+                form.reset();
+            }
+
+        } else {
+            document.getElementById(temp_id).setAttribute("class", "active");
+            document.getElementById(temp_id2).setAttribute("class", "active_tab_content");
+        }
+    }
+}
+
+$("#auto_complete_text").autocomplete({
+    source: function (request, response) {
+        //resets:
+        $("#page_urls_with_id").val('');
+        $('#loadmore_div').show();
+        $("#show_btn").hide();
+        $("#show_btn_2").hide();
+
+        $.ajax({
+            url: "<?= $this->app_link;?>/density/getjson",
+            dataType: "json",
+            type: "GET",
+            data: {
+                domain: $("#choosedomainspagelist").val(),
+                searched: $('#auto_complete_text').val()
+            },
+            success: function (data) {
+                response(data);
+                $('#loadmore_div').hide();
+            }
+        });
+    },
+    select: function (event, ui) {
+        $("#auto_complete_text").val(ui.item.label)
+        $("#page_urls_with_id").val(ui.item.id);
+
+        if (ui.item.id.trim() !== "") {
+            $("#show_btn").show();
+            $("#show_btn_2").show();
+        }
+    }
+});
+
+//toggle button and value of hidden input that holds the link's id selected
+$("#choosedomainspagelist").keyup(function () {
+    $("#show_btn").hide();
+    $("#show_btn_2").hide();
+    $("#page_urls_with_id").val("");
+});
+
+$("#show_btn").click(function () {
+    //show background and box:
+    $("#chosed-page-bg").css("display", "block");
+    $("#chosed-page").css("visibility", "visible");
+    $("#selected-page-export-btn").hide();
+
+    //reset content:
+    $("#selected-link-href").text("");
+    $("#selected-page-data").text("");
+
+    //show loading:
+    $('#chosed-page-load').show();
+
+    //make ajax request for info / html code
+    var page_id = $("#page_urls_with_id").val();
+
+    //tests only - remove:
+    //page_id = 5;
+
+    $.ajax({
+        url: "<?= $this->app_link;?>/export/pagelinks/",
+        type: "GET",
+        data: {
+            page: page_id,
+            export: "html"
+        },
+        success: function (data) {
+            $("#selected-link-href").text($("#auto_complete_text").val());
+            $("#selected-page-data").html(data);
+
+            $("#selected-page-export-btn")
+                .attr("href", "export/pagelinks/?page=" + page_id + "&export=csv&which=all")
+                .show();
+
+            $("#chosed-page-load").hide(); //hide "loading.."
+        }
+    });
+});
+
+$("#show_btn_2").click(function () {
+    $("#page-info-load").show();
+
+    var page_id = $("#page_urls_with_id").val(),
+        domain_id = $("#choosedomainspagelist").val();
+
+    //tests only - remove:
+    //page_id = 5;
+    //domain_id = 1;
+
+    $.ajax({
+        url: "<?= $this->app_link;?>/export/singlepage/" + domain_id + "/" + page_id + "/html",
+        type: "GET",
+
+        //not needed:
+        data: {
+            page: page_id,
+            export: "html"
+        },
+        success: function (data) {
+            if (data !== "no info") {
+                $("#horiz_container").html(data);
+            } else {
+                alert("No information for this page.");
+            }
+
+            $("#page-info-load").hide(); //hide "loading.."
+        }
+    });
+
+});
+
+$("#cron_save_changes").click(function() {
+    var loading = $("#tab5f-loading"),
+        special = $("#cron_special_id").val(),
+        hours = $("#hours_to_sleep").val(),
+        seconds = $("#seconds_to_sleep").val(),
+        browser = $("#crawler_browser").val();
+
+    loading.show();
+
+    $.ajax({
+        url: "<?= $this->app_link;?>/density/savecronconfig/" + special + "/" + hours + "/" + seconds + "/" + browser,
+        type: "GET",
+        success: function(data) {
+            $("#tab5f-result").html(data);
+            loading.hide();
+        }
+    });
+});
+
+$("#chosed-page-bg").click(function () {
+    $("#chosed-page").css("visibility", "hidden");
+    $("#density-result").css("visibility", "hidden");
+    $("#chosed-page-bg").css("display", "none");
+});
+
+function show_density_modal(history_id) {
+    //show background and box:
+    $("#density-result").css("visibility", "visible");
+    $("#chosed-page-bg").css("display", "block");
+    $("#density-result-load").show();
+
+    $.ajax({
+        url: "<?= $this->app_link;?>/export/words/" + history_id + "/html",
+        type: "GET",
+        success: function (data) {
+            var parsed = JSON.parse(data);
+
+            //
+            $("#density-result-load").hide();
+            $("#density-result-data")
+                .show()
+                .html(parsed["body"]);
+            $("#density-result-btn")
+                .attr("href", "export/words/" + history_id + "/csv")
+                .show();
+            $("#density-result-title")
+                .show()
+                .text(parsed["title"]);
+        }
+    });
+}
+
+function AJAXSubmit(form) {
+    var action = form.getAttribute("action"),
+        formId = form.getAttribute("id"),
+        loading = $("#" + formId + "-loading"),
+        result = $("#" + formId + "-result"),
+        oReq = new XMLHttpRequest();
+
+    //action before load:
+    $("#density-result-btn").hide();
+    $("#density-result-title").hide();
+    $("#density-result-data").hide();
+    loading.show();
+
+    oReq.onload = function () {
+        //hide loading:
+        loading.hide();
+        form.reset();
+
+        if (formId === "tab1f") {
+            result.html(this.responseText);
+        }
+
+        if (formId === "tab2f") {
+            var parsed = JSON.parse(this.responseText),
+                history_id = parsed["history_id"];
+
+            if (parsed) {
+                show_density_modal(history_id);
+            }
+        }
+    };
+
+    oReq.open("post", action, true);
+    oReq.send(new FormData(form));
+}
+
+$('#horiz_container_outer').horizontalScroll();
+</script>

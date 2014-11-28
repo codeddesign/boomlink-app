@@ -1,0 +1,289 @@
+<?php
+$is_admin = false;
+if ($this->session->get("user-role") !== "normal") {
+    $is_admin = true;
+}
+
+$enabled_edit = $enabled_user_export = false;
+$user_domains = $this->session->get("user-domains");
+if(!is_array($user_domains)) {
+    $user_domains = array();
+}
+
+echo $this->getContent();
+?>
+<div>
+    <form id="search_cpn">
+        <input type="search" id="search_name" placeholder="campaign name suchen"/>
+        <!-- <input type="submit" value="Suche"> -->
+    </form>
+</div>
+<form action="<?= $this->app_link; ?>/runningcampaigns/export_csv" method="post">
+    <div class="pagetitlebar">
+        <div class="pagetitlebar-title">LAUFENDE KAMPAGNEN</div>
+    </div>
+
+    <div class="listtitlesubbar">
+        <div class="analyticswebaddressbar">Kampagnenname</div>
+    </div>
+    <?php
+    $i = 0;
+    $popup_count = 0;
+    if (count($get_campaigns) > 0) {
+        //enable export for everybody:
+        $enabled_user_export = true;
+
+        //enable or disable JS function for editing:
+        $enabled_edit = false;
+        if ($is_admin) {
+            $enabled_edit = true;
+        }
+
+        foreach ($get_campaigns as $camp) {
+            $links = PagesToCampaign::find("unique_id = '$camp->unique_id'");
+            $campaign_url = "";
+            $campaign_keyword = "";
+            $campaign_url_idx = "";
+
+            foreach ($links as $link) {
+                $campaign_url = $link->campaign_url;
+                $campaign_url_idx = $link->DomainURLIDX;
+                $campaign_keyword = $link->keywords;
+            }
+
+            //filter domains:
+            if (!in_array($campaign_url_idx, $user_domains) and !$is_admin) {
+                //continue;
+                $edit_this_one = false;
+            } else {
+                $edit_this_one = true;
+                $enabled_edit = true;
+            }
+
+            ?>
+            <div class="resultslist" id="result_set_<?php echo $i; ?>" data-search="<?php echo strtolower($camp->Name); ?>">
+                <div class="analyticslisturl" style="width:340px;border-right:none;">
+                    <?php if ($edit_this_one or $is_admin) { ?>
+                        <a style="float:left;"
+                           href="javascript:delRecord('<?php echo $camp->id; ?>', '<?php echo $i; ?>','Automated')">
+                            <div class="userdelete"></div>
+                        </a>
+                    <?php } ?>
+                    <?php echo $camp->Name; ?>
+                </div>
+                <a href="#site<?php echo $i; ?>" class="droparrow"></a>
+            </div>
+
+            <!-- begin drop list -->
+            <div class="analyticsdroplist-bg" id="site<?php echo $i; ?>" style="display:none;">
+                <div class="analyticsdroplist" style="width:100%;">
+                    <div class="dropdownpr" style="width:698px;margin-top:15px;">
+                        <div class="dropdownsub-titles">ENDE DATUM</div>
+                        <div class="dropdownsub-results"><?php echo date('m/d/Y', strtotime($camp->EndDate)); ?></div>
+                    </div>
+                    <div class="dropdownil" style="width:698px;">
+                        <div class="dropdownsub-titles">KAMPAGNE TYPE</div>
+                        <div class="dropdownsub-results"><?php echo @$camp->CampaignType; ?></div>
+                    </div>
+                    <div class="dropdownil" style="width:698px;">
+                        <div class="dropdownsub-titles">KEYWORD :</div>
+                        <div class="dropdownsub-results"><?php
+                            echo $campaign_keyword;
+                            ?>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="analyticsdroplist" style="width:100%;">
+                    <div class="analyticslisturl" style="width:690px;border-right:none;">KAMPAGNE für:  <a href="<?php echo $campaign_url; ?>" target="_blank"><?php echo $campaign_url; ?></a></div>
+                </div>
+                <?php
+                foreach ($links as $link) {
+                    ?>
+                    <?php $popup_count = $popup_count + 1; ?>
+                    <div class="analyticsdroplist" style="width:100%;">
+                        <div class="analyticslisturl" style="width:690px;border-right:none;">
+                            <a href="<?php echo $link->main_url; ?>" target="_blank"><?php echo $link->main_url; ?></a>
+                        </div>
+                        <?php if ($edit_this_one or $is_admin) { ?>
+                            <a href="#" class="setuplinksbutton" style="margin-right:15px !important;"
+                               data-reveal-id="setuplinksModal-unique" data-counter="<?php echo $popup_count;?>" data-animation="none"></a>
+                            <input type="hidden" value="<?php echo @$link->id ?>"
+                                   id="link_id_<?php echo $popup_count ?>">
+                            <input type="hidden" value="<?php echo utf8_decode(@$link->achor_text) ?>"
+                                   id="anchor_text_<?php echo $popup_count; ?>">
+                            <input type="hidden" value="<?php echo @$link->image_url ?>"
+                                   id="image_url_<?php echo $popup_count; ?>">
+                            <input type="hidden" value="<?php echo @$link->video_url ?>"
+                                   id="video_url_<?php echo $popup_count; ?>">
+                            <textarea id="html_text_<?php echo $popup_count; ?>"
+                                      style="display:none"><?php echo utf8_decode(@$link->html_embed) ?></textarea>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
+            </div><!-- analyticsdroplist-bg -->
+            <!-- end drop list -->
+
+            <?php $i++;
+        }
+    }
+    ?>
+
+    <?php if($enabled_edit) {?>
+        <div id="setuplinksModal-unique" class="reveal-modal">
+            <div class="modal-blueheadline"></div>
+            <div class="modal-midline">
+                <div class="modal-midlinetext">Wählen Sie alle zutreffenden:</div>
+            </div>
+
+            <div class="modal-setuplinksarea">
+                <div class="modallistwrap">
+                    <div class="modal-setupbox" style="margin-bottom:35px;margin-top:15px;">
+                        <div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">anchor text…</div>
+                        <input type="textbox" id="textbox_anchor_text" class="modal-setupboxone" name="textbox_anchor_text" value="">
+                    </div>
+                    <div class="modal-setupbox" style="margin-bottom:35px;">
+                        <div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">image url…</div>
+                        <input type="textbox" id="textbox_image_url" class="modal-setupboxone" name="textbox_image_url" value="">
+                    </div>
+                    <div class="modal-setupbox" style="margin-bottom:10px;">
+                        <div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">youtube video ID</div>
+                        <input type="textbox" id="textbox_video_url" class="modal-setupboxone" name="textbox_video_url" value="">
+                    </div>
+                    <div class="modallisttext">HTML embed</div>
+                    <div class="modal-setupbox" style="height:150px;margin-bottom:0px;">
+                        <textarea name="textbox_html" id="textbox_html" class="modal-setupboxtwo ckeditor"> </textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-bottomline">
+                <div class="close-reveal-modal modal-savecontent" id="" data-id="">
+                    <div class="modalcheckbox"></div>
+                </div>
+            </div>
+        </div>
+    <?php } ?>
+
+    <div class="underlistbar"></div>
+    <?php if ($enabled_user_export) { ?>
+        <button type="submit" class="exportcsvbutton" style="cursor:pointer;"></button>
+    <?php } else echo "No running campaigns."; ?>
+</form>
+<div id="del_dialog" style="display: none;">
+    <p>Sind Sie sicher, will diese Kampagne löschen?</p>
+</div>
+
+
+<script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.reveal2.js"></script>
+
+
+<?php if ($enabled_edit) { ?>
+    <script>
+        $(document).ready(function () {
+            $('a[data-reveal-id]').on('click', function () {
+                var el = $(this),
+                    counter = el.attr('data-counter');
+
+                /* add content to modal for edit: */
+                $('#textbox_anchor_text').val($('#anchor_text_'+counter).val());
+                $('#textbox_image_url').val($('#image_url_'+counter).val());
+                $('#textbox_video_url').val($('#video_url_'+counter).val());
+                $('#textbox_html').val($('#html_text_'+counter).text());
+
+                $('div.modal-savecontent')
+                    .attr('id', $('#link_id_'+counter).val())
+                    .attr('data-id', counter);
+            });
+        });
+
+        function delRecord(id, temp_id, campaign_type) {
+            $('#del_dialog').dialog({
+                autoOpen: true,
+                modal: true,
+                resizable: false,
+                title: 'löschen KAMPAGNE',
+                draggable: false,
+                width: 'auto',
+                buttons: {
+                    "löschen": function () {
+                        $.ajax({
+                            url: "<?= $this->app_link;?>/runningcampaigns/delete_campaign/" + id + "/" + campaign_type,
+                            dataType: "json",
+                            type: "POST",
+                            data: {
+                            },
+                            success: function (data) {
+                                if (data.deleted == "sucss") {
+                                    $('#result_set_' + temp_id).remove();
+                                    $('#site' + temp_id).remove();
+                                    $('#del_dialog').dialog('close');
+                                }
+                            }
+                        });
+                    },
+                    "schließen": function () {
+                        $('#del_dialog').dialog('close');
+                    }
+                }
+            });
+        }
+        $('.modal-savecontent').click(function () {
+            var confrm = confirm("Are you sure you want to save the changes?");
+            if (confrm) {
+                var id = $(this).attr('id');
+                var counter_id = $(this).attr('data-id');
+                var achor_text = document.getElementById('textbox_anchor_text').value;
+                var image_url = document.getElementById('textbox_image_url').value;
+                var video_url = document.getElementById('textbox_video_url').value;
+                var html_embed = CKEDITOR.instances['textbox_html'].getData();
+
+                $.post('<?= $this->app_link?>/runningcampaigns/update_rcampaign_pages', {id: "" + id + "", achor_text: "" + achor_text + "", image_url: "" + image_url + "", video_url: "" + video_url + "", html_embed: "" + html_embed + ""}, function (data) {
+                    alert(data);
+
+                    $('#anchor_text_' + counter_id).val(achor_text);
+                    $('#image_url_' + counter_id).val(image_url);
+                    $('#video_url_' + counter_id).val(video_url);
+                    $('#html_text_' + counter_id).html(html_embed);
+                });
+            }
+        });
+
+        /* handles the search: .. */
+        function doSearch() {
+            var search = $('#search_name').val().toLowerCase(),
+                campaigns_rows = $('div.resultslist'),
+                temp_name, temp_selector;
+
+            if(search.length == 0) {
+                campaigns_rows.show();
+                return false;
+            }
+
+            for(var i = 0; i < campaigns_rows.length; i++) {
+                temp_selector = $(campaigns_rows[i]);
+                temp_name = temp_selector.attr('data-search');
+                if(temp_name.indexOf(search) == -1) {
+                    temp_selector.hide();
+                } else {
+                    temp_selector.show();
+                }
+            }
+
+            return true;
+        }
+
+        /* if the value of search field is being changed */
+        $('#search_name').on('keyup', function() {
+            doSearch();
+        });
+
+        /* or if the form is being submited <- this one can be disabled .. */
+        $('#search_cpn').on('submit', function(e) {
+            e.preventDefault();
+            doSearch();
+        });
+    </script>
+<?php } ?>
+<script type="text/javascript">
+    $('.ckeditor').ckeditor();
+</script>

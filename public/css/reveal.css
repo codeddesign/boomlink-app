@@ -1,0 +1,161 @@
+/*	--------------------------------------------------
+	Reveal Modals
+	-------------------------------------------------- */
+		
+	.reveal-modal-bg { 
+		position: fixed; 
+		height: 100%;
+		width: 100%;
+		background: #000;
+		background: rgba(0,0,0,.8);
+		z-index: 100;
+		display: none;
+		top: 0;
+		left: 0; 
+		}
+	
+	.reveal-modal {
+		visibility: hidden;
+		top: 100px; 
+		left: 50%;
+		margin-left: -200px;
+		width: 547px;
+		position: absolute;
+		z-index: 101;
+		-moz-box-shadow: 0 0 6px #000000;
+		-webkit-box-shadow: 0 0 6px #000000;
+		box-shadow: 0 0 6px #000000;
+		}
+		
+	.reveal-modal.small 		{ width: 200px; margin-left: -140px;}
+	.reveal-modal.medium 		{ width: 400px; margin-left: -240px;}
+	.reveal-modal.large 		{ width: 600px; margin-left: -340px;}
+	.reveal-modal.xlarge 		{ width: 800px; margin-left: -440px;}
+	
+	.reveal-modal .close-reveal-modal {
+		font-size: 22px;
+		line-height: .5;
+		position: absolute;
+		/*top: 8px;
+		right: 11px;*/
+		color: #aaa;
+		text-shadow: 0 -1px 1px rbga(0,0,0,.6);
+		font-weight: bold;
+		cursor: pointer;
+		} 
+	/*
+		
+	NOTES
+	
+	Close button entity is &#215;
+	
+	Example markup
+	
+	<div id="myModal" class="reveal-modal">
+		<h2>Awesome. I have it.</h2>
+		<p class="lead">Your couch.  I it's mine.</p>
+		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ultrices aliquet placerat. Duis pulvinar orci et nisi euismod vitae tempus lorem consectetur. Duis at magna quis turpis mattis venenatis eget id diam. </p>
+		<a class="close-reveal-modal">&#215;</a>
+	</div>
+	
+	*/
+
+.modal-blueheadline {
+	float: left;
+	width: 547px;
+	height: 8px;
+	background: #29A3E3; /* for non-css3 browsers */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#34ADEC', endColorstr='#29A3E3'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#34ADEC), to(#29A3E3)); /* for webkit browsers */
+	background: -moz-linear-gradient(top,  #34ADEC,  #29A3E3); /* for firefox 3.6+ */ 
+}
+
+.modal-midline {
+	width: 547px;
+	height: 41px;
+	border-top: 1px solid #FFFFFF;
+	background: #EDF1F7; /* for non-css3 browsers */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F3F4FA', endColorstr='#EDF1F7'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#F3F4FA), to(#EDF1F7)); /* for webkit browsers */
+	background: -moz-linear-gradient(top,  #F3F4FA,  #EDF1F7); /* for firefox 3.6+ */
+	border-bottom: 1px solid #D5DDEA;
+	float: left;
+}
+
+.modal-bodyarea {
+	float: left;
+	width: 479px;
+	min-height: 100px;
+	border-bottom: 1px solid #D5DDEA;
+	background: #FFFFFF;
+	padding: 34px;
+	max-height: 300px;
+	overflow-y: scroll;
+}
+
+.modal-setuplinksarea {
+	float: left;
+	width: 479px;
+	min-height: 100px;
+	border-bottom: 1px solid #D5DDEA;
+	background: #FFFFFF;
+	padding: 34px 34px 16px 34px;
+	max-height: 600px;
+	overflow-y: scroll;
+}
+
+.modal-bottomline {
+	width: 547px;
+	float: left;
+	height: 41px;
+	background: #EDF1F7; /* for non-css3 browsers */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F3F4FA', endColorstr='#EDF1F7'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#F3F4FA), to(#EDF1F7)); /* for webkit browsers */
+	background: -moz-linear-gradient(top,  #F3F4FA,  #EDF1F7); /* for firefox 3.6+ */
+}
+
+.modal-savecontent {
+	float: left;
+	width: 76px;
+	height: 32px;
+	border: 1px solid #D5DDEA;
+	background: #FFFFFF;
+	margin-left: 236px;
+    margin-top: 3px;
+}
+
+.modal-savecontent-manual {
+	float: left;
+	width: 76px;
+	height: 32px;
+	border: 1px solid #D5DDEA;
+	background: #FFFFFF;
+	margin-left: 236px;
+    margin-top: 3px;
+}
+
+.modal-savecontent:hover {
+	background: #657287;
+	border: 1px solid #404757;
+}
+.modal-savecontent-manual:hover {
+	background: #657287;
+	border: 1px solid #404757;
+}
+
+.modalcheckbox {
+	float: left;
+	background: url('../images/modalcheckbox.png');
+	width: 18px;
+	height: 15px;
+	margin-left: 29px;
+    margin-top: 9px;
+}
+
+.modal-savecontent:hover .modalcheckbox {
+	background: url('../images/modalcheckbox.png') 0 -15px;
+}
+
+.modal-savecontent-manual:hover .modalcheckbox {
+	background: url('../images/modalcheckbox.png') 0 -15px;
+}

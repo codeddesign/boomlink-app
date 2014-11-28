@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
+    <title>LinkShare Web Application</title>
+    <link href="<?= $this->app_link; ?>/css/style.css" rel="stylesheet" type="text/css">
+    <script src="<?= $this->app_link; ?>/js/jquery-1.9.1.js"></script>
+
+
+    <style>
+        .macos_msg_node {
+            position: fixed;
+            right: 2px;
+            width: 320px;
+            z-index: 105;
+        }
+
+        .macos_message, .macos_error, .macos_notice {
+            font-size: 13px;
+            font-weight: bold;
+            margin: 2px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .macos_message {
+            background: none repeat scroll 0 0 #4CA33D;
+            border: 1px solid #428F35;
+            color: #FFFFFF;
+        }
+
+        .macos_notice {
+            background: none repeat scroll 0 0 #FFE04F;
+            border: 1px solid #E4C224;
+            color: #FFFFFF;
+        }
+
+        .macos_error {
+            background: none repeat scroll 0 0 #E33C3C;
+            border: 1px solid #EF0000;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+
+<div style="top: 0px; opacity: 1; display: none;" class="macos_msg_node" id="auth_message">
+</div>
+
+<div class="loginbody">
+    <div class="loginbodywrap">
+        <div class="logologin"></div>
+        <form name="input" action="<?= $this->app_link; ?>" method="POST" class="formstart">
+            <input id="username" value="Benutzername" type="text" name="username" onFocus="if(this.value == 'Benutzername') {this.value = '';}" onBlur="if (this.value == '') {this.value = 'Benutzername';}">
+            <input id="password" type="text" name="password" onblur="if (this.value == '') {this.value = 'Passwort';setAttribute('type', 'text');}" onfocus="if (this.value == 'Passwort') {this.value = ''; setAttribute('type', 'password');}" onclick="this.value='';this.onclick='test'; setAttribute('type', 'password');" value="Passwort"/>
+            <input type="submit" value="Log In" class="loginsubmit">
+
+        </form>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        $("form").submit(function (e) {
+            e.preventDefault(); //prevent default form submit
+
+            if ($('#username').val() == "Benutzername") {
+                $('#username').focus();
+                return false;
+            }
+            else if ($('#password').val() == "Passwort") {
+                $('#username').focus();
+                return false;
+            }
+            else {
+
+                $('#auth_message').text('');
+                $('#auth_message').hide();
+                $('#auth_message').removeClass("macos_message");
+                $('#auth_message').removeClass("macos_error");
+                $('#auth_message').removeClass("macos_notice");
+                $('#auth_message').text("Authentifizierung ! !");
+                $('#auth_message').addClass("macos_notice");
+                $('#auth_message').fadeIn(100);
+                $.ajax({
+                    url: '<?= $this->app_link; ?>/login/auth',
+                    dataType: "json",
+                    type: "POST",
+                    data: {
+                        username: $('#username').val(),
+                        password: $('#password').val()
+                    },
+                    success: function (data) {
+                        $('#auth_message').removeClass("macos_message");
+                        $('#auth_message').removeClass("macos_error");
+                        $('#auth_message').removeClass("macos_notice");
+                        if (data.auth == "sucss") {
+                            $('#auth_message').addClass("macos_message");
+                            $('#auth_message').text(data.msg);
+                            window.location.href = "<?= $this->app_link; ?>";
+                        }
+                        else {
+                            $('#auth_message').addClass("macos_error");
+                            $('#auth_message').text(data.msg);
+                        }
+
+                    }
+                });
+
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

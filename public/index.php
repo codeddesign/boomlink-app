@@ -23,10 +23,16 @@ function custom_array_merge_recursive(array &$config, array &$dev) {
     return $merged;
 }
 
+// get config data:
 $config = require_once('config.php');
+$dev_mode = false;
+
+// overwrite with data from config.dev.php (if file exists):
 if (file_exists('config.dev.php')) {
     $dev = require_once('config.dev.php');
     $config = custom_array_merge_recursive($config, $dev);
+
+    $dev_mode = true;
 }
 
 // run app:
@@ -107,8 +113,8 @@ try {
     });
 
     // setup the rest of the needed information:
-    $di->setShared('navigation_links', function () use ($config) {
-        return $config['navigation_links'];
+    $di->setShared('dev_mode', function() use($dev_mode) {
+        return $dev_mode;
     });
 
     $di->setShared('pages_no_auth', function () use ($config) {

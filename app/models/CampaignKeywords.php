@@ -1,6 +1,4 @@
 <?php
-use \Phalcon\Mvc\Model\Validator\Uniqueness;
-use \Phalcon\Mvc\Model\Validator\PresenceOf;
 use \Phalcon\Mvc\Collection;
 
 /**

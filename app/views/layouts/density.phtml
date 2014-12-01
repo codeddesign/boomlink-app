@@ -1,127 +1,10 @@
 <?php
-$user_role = $this->session->get("user-role");
-if($user_role !== "normal") {
+$is_admin = false;
+if ($this->session->get("user-role") !== "normal") {
     $is_admin = true;
-} else {
-    $is_admin = false;
 }
 ?>
-<style type="text/css">
-    #tabs_container {
-    }
-
-    #tabs {
-        list-style: none;
-        padding: 5px 0 4px 0;
-        margin: 0 0 0 0px;
-    }
-
-    #tabs li {
-        display: inline;
-    }
-
-    #tabs li a {
-        cursor: pointer;
-        color: white;
-        font-weight: bold;
-        border: 1px solid #ccc;
-        padding: 10px 15px 4px;
-        text-decoration: none;
-        background-color: #2288C3;
-        border-bottom: none;
-        outline: none;
-        border-radius: 3px 3px 0 0;
-        -moz-border-radius: 3px 3px 0 0;
-        -webkit-border-top-left-radius: 3px;
-        -webkit-border-top-right-radius: 3px;
-    }
-
-    #tabs li a:hover {
-        color: black;
-        background-color: white;
-        padding: 10px 15px 4px;
-    }
-
-    #tabs li.active a {
-        color: black;
-        background-color: #F1F3F7;
-        padding: 10px 15px 5px;
-        border-bottom: none;
-    }
-
-    #tabs li.active a:hover {
-        padding: 10px 15px 7px;
-        border-bottom: none;
-    }
-
-    #tabs_content_container {
-        border: 1px solid #ccc;
-        border-top: none;
-        padding: 10px;
-        width: 400px;
-    }
-
-    .hidden_tab_content {
-        display: none;
-    }
-
-    .active_tab_content {
-
-    }
-
-    #operations_box {
-        padding-top: 20px;
-    }
-
-    #horiz_container_outer {
-        float: left;
-        height: auto;
-        margin: 5px auto 0;
-        overflow: hidden;
-        position: relative;
-        width: 762px;
-    }
-
-    #horiz_container {
-        margin: 0;
-        padding: 0;
-        width: 1720px;
-    }
-
-    .densitydownloadwrap {
-        float: left;
-        width: 100%;
-        height: 55px;
-        background: #F1F3F7;
-        border-top: 1px solid #C2C2D3;
-        margin-top: 715px;
-    }
-
-    .densityxmltitle {
-        color: #4A9FD0;
-        float: left;
-        font-family: Helvetica, Arial, Sans-serif;
-        font-size: 11px;
-        font-weight: bold;
-        margin-left: 202px;
-        margin-top: 21px;
-        text-decoration: none;
-    }
-
-    .densityxmllist {
-        float: left;
-        margin-left: 15px;
-        margin-top: 18px;
-    }
-
-    .status_online {
-        color: green;
-    }
-
-    .status_offline {
-        color: red;
-    }
-</style>
+<link rel="stylesheet" type="text/css" media="all" href="<?= $this->app_link; ?>/css/tab_pages.css"/>
 <link rel="stylesheet" type="text/css" media="all" href="<?= $this->app_link; ?>/css/jquery.horizontal.scroll.css"/>
 <div class="pagetitlebar">
     <div class="pagetitlebar-title">Keyword Density</div>
@@ -137,138 +20,139 @@ if($user_role !== "normal") {
 <div id="operations_box" style="height: auto;">
     <div id="tabs_container">
         <ul id="tabs">
-            <?php if($user_editing) :?>
-            <li class="active" id="tab1" onclick='toggle_tabs(this);'><a>Upload site map</a></li>
+            <?php if ($user_editing) : ?>
+                <li class="active" id="tab1" onclick='toggle_tabs(this);'><a>Upload site map</a></li>
             <?php
             endif;
             ?>
-            <li id="tab4" <?php if(!$user_editing) echo 'class="active"';?> onclick='toggle_tabs(this);'><a>Page Data</a></li>
+            <li id="tab4" <?php if (!$user_editing) echo 'class="active"'; ?> onclick='toggle_tabs(this);'><a>Page Data</a></li>
             <li id="tab2" onclick='toggle_tabs(this);'><a>Check words</a></li>
             <li id="tab3" onclick='toggle_tabs(this);'><a>History</a></li>
-            <?php if($is_admin): ?>
-            <li id="tab5" onclick='toggle_tabs(this);'><a>Crawler Settings</a></li>
-            <?php endif;?>
+            <?php if ($is_admin): ?>
+                <li id="tab5" onclick='toggle_tabs(this);'><a>Crawler Settings</a></li>
+            <?php endif; ?>
         </ul>
     </div>
 </div>
 
 
 <div class="longwhitepagegraybg" style="height:auto;border-top:0px;border-top:1px solid #C2C2D3;min-height:50px;padding:10px;">
-<?php if($is_admin) : ?>
-<!-- crawler settings: -->
-<div id="tab5a" class="hidden_tab_content">
-    <div id="tab5f-loading" style="display: none;" class="loading"></div>
-    <!-- settings -->
-    <table style="padding-bottom: 15px;">
-        <th colspan="3" style="text-align: left;">SETTINGS:</th>
-        <tr>
-            <td>BREAK TIME CRAWLER</td>
-            <td>
-                <select name="hours_to_sleep" id="hours_to_sleep">
-                    <?php for($i=1;$i<=23;$i++) {?>
-                    <option value="<?php echo $i;?>" <?php if($current_hours == $i) echo "selected";?>> <?php echo $i;?> </option>
-                    <?php  } ?>
-                </select>
-            </td>
-            <td>*number of hours</td>
-        </tr>
-        <tr>
-            <td>BREAK TIME BETWEEN PROXY BLOCKS</td>
-            <td>
+<?php if ($is_admin) : ?>
+    <!-- crawler settings: -->
+    <div id="tab5a" class="hidden_tab_content">
+        <div id="tab5f-loading" style="display: none;" class="loading"></div>
+        <!-- settings -->
+        <table style="padding-bottom: 15px;">
+            <th colspan="3" style="text-align: left;">SETTINGS:</th>
+            <tr>
+                <td>BREAK TIME CRAWLER</td>
+                <td>
+                    <select name="hours_to_sleep" id="hours_to_sleep">
+                        <?php for ($i = 1; $i <= 23; $i++) { ?>
+                            <option value="<?php echo $i; ?>" <?php if ($current_hours == $i) echo "selected"; ?>> <?php echo $i; ?> </option>
+                        <?php } ?>
+                    </select>
+                </td>
+                <td>*number of hours</td>
+            </tr>
+            <tr>
+                <td>BREAK TIME BETWEEN PROXY BLOCKS</td>
+                <td>
 
-                <select name="seconds_to_sleep" id="seconds_to_sleep">
-                <?php for($i=1;$i<=10;$i++) {?>
-                    <option value="<?php echo $i;?>" <?php if($current_seconds == $i) echo "selected";?>> <?php echo $i;?> </option>
-                <?php  } ?>
-                </select>
-            </td>
-            <td>*number of seconds</td>
-        </tr>
-        <tr>
-            <td>Crawler Browser</td>
-            <td colspan="2">
-                <select name="crawler_browser" id="crawler_browser" style="width: 200px;">
-                    <?php foreach($available_browsers as $b_no => $browser){
-                        $name = $browser["name"];
-                        $id = $browser["id"];
-                    ?>
-                        <option value="<?php echo $id;?>" <?php if($current_browser == $name) echo "selected";?>> <?php echo $name;?> </option>
-                    <?php  } ?>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3" style="text-align: left;">
-                <a href="#" class="dropdownbox" id="cron_save_changes" style="float:left;">SAVE CHANGES</a>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <input type="hidden" id="cron_special_id" value="<?php echo $cron_config_id;?>">
-                <div class="boxtitle" id="tab5f-result" style="color: green; font-family: 10px sans-serif;font-family: Arial;width:500px;"></div>
-            </td>
-        </tr>
-    </table>
-    <!-- end settings -->
-    <hr>
-    <!-- status -->
-    <table style="padding-top: 15px;">
-        <th style="text-align: left;width: 150px;">SERVICE</th>
-        <th style="text-align: left;">STATUS</th>
-        <!--<tr>
+                    <select name="seconds_to_sleep" id="seconds_to_sleep">
+                        <?php for ($i = 1; $i <= 10; $i++) { ?>
+                            <option value="<?php echo $i; ?>" <?php if ($current_seconds == $i) echo "selected"; ?>> <?php echo $i; ?> </option>
+                        <?php } ?>
+                    </select>
+                </td>
+                <td>*number of seconds</td>
+            </tr>
+            <tr>
+                <td>Crawler Browser</td>
+                <td colspan="2">
+                    <select name="crawler_browser" id="crawler_browser" style="width: 200px;">
+                        <?php foreach ($available_browsers as $b_no => $browser) {
+                            $name = $browser["name"];
+                            $id = $browser["id"];
+                            ?>
+                            <option value="<?php echo $id; ?>" <?php if ($current_browser == $name) echo "selected"; ?>> <?php echo $name; ?> </option>
+                        <?php } ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: left;">
+                    <a href="#" class="dropdownbox" id="cron_save_changes" style="float:left;">SAVE CHANGES</a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="hidden" id="cron_special_id" value="<?php echo $cron_config_id; ?>">
+
+                    <div class="boxtitle" id="tab5f-result" style="color: green; font-family: 10px Arial sans-serif;width:500px;"></div>
+                </td>
+            </tr>
+        </table>
+        <!-- end settings -->
+        <hr>
+        <!-- status -->
+        <table style="padding-top: 15px;">
+            <th style="text-align: left;width: 150px;">SERVICE</th>
+            <th style="text-align: left;">STATUS</th>
+            <!--<tr>
             <td>NODEJS SERVER</td>
             <td class="status_<?php //echo strtolower($nodejs_status);?>"><?php //echo $nodejs_status; ?></td>
         </tr>-->
-        <tr>
-            <td>CRAWLER</td>
-            <td class="status_<?php echo strtolower($cron_status);?>"><?php echo $cron_status; ?></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><?php if($cron_status === "OFFLINE") echo "last"; else echo "current";?> job: "<?php echo $current_job;?>"</td>
-        </tr>
-    </table>
-    <!-- end_status -->
-</div>
-<!-- end crawler settings; -->
-<?php endif;?>
+            <tr>
+                <td>CRAWLER</td>
+                <td class="status_<?php echo strtolower($cron_status); ?>"><?php echo $cron_status; ?></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><?php if ($cron_status === "OFFLINE") echo "last"; else echo "current"; ?> job: "<?php echo $current_job; ?>"</td>
+            </tr>
+        </table>
+        <!-- end_status -->
+    </div>
+    <!-- end crawler settings; -->
+<?php endif; ?>
 <!-- site map -->
 
 <?php
-if($user_editing): ?>
-<div id="tab1a" class="active_tab_content">
-    <div id="tab1f-loading" style="display: none;" class="loading"></div>
-    <form id="tab1f" action="<?= $this->app_link . '/' . $page; ?>/upload" method="post" enctype="multipart/form-data" onsubmit="AJAXSubmit(this); return false;">
-        <div class="importlingwhitewrap" style="width:444px;padding-bottom: 10px;">
-            <div class="boxtitle">Upload XML file:
-                <input type="file" name="xml_file" onchange="toggleWordsAction(this, 'xml_action');">
+if ($user_editing): ?>
+    <div id="tab1a" class="active_tab_content">
+        <div id="tab1f-loading" style="display: none;" class="loading"></div>
+        <form id="tab1f" action="<?= $this->app_link . '/' . $page; ?>/upload" method="post" enctype="multipart/form-data" onsubmit="AJAXSubmit(this); return false;">
+            <div class="importlingwhitewrap" style="width:444px;padding-bottom: 10px;">
+                <div class="boxtitle">Upload XML file:
+                    <input type="file" name="xml_file" onchange="toggleWordsAction(this, 'xml_action');">
+                </div>
+                <div class="boxtitle">
+                    OR import from DOMAIN:
+                    <?php if (count($status_domains) > 0) { ?>
+                        <select name="domain_id" onchange="toggleWordsAction(this, 'xml_action');">
+                            <option value="0">---</option>
+                            <?php
+                            foreach ($status_domains as $null => $entry) {
+                                //show only completed domains:
+                                echo "<option value='" . $entry["idx"] . "'>" . $entry["domain"] . "</option>\n";
+                            }
+                            ?>
+                        </select>
+                    <?php } else echo " <i>No domains to import.</i>"; ?>
+                </div>
+                <div class="boxtitle" style="width: 300px;">
+                    <input type="hidden" name="action" id="xml_action" value=""/>
+                    <input type="submit" value="SUBMIT">
+                </div>
             </div>
-            <div class="boxtitle">
-                OR import from DOMAIN:
-                <?php if(count($status_domains) > 0) {?>
-                <select name="domain_id" onchange="toggleWordsAction(this, 'xml_action');">
-                    <option value="0">---</option>
-                    <?php
-                    foreach ($status_domains as $null => $entry) {
-                        //show only completed domains:
-                        echo "<option value='" . $entry["idx"] . "'>" . $entry["domain"] . "</option>\n";
-                    }
-                    ?>
-                </select>
-                <?php } else echo " <i>No domains to import.</i>"; ?>
-            </div>
-            <div class="boxtitle" style="width: 300px;">
-                <input type="hidden" name="action" id="xml_action" value=""/>
-                <input type="submit" value="SUBMIT">
-            </div>
-        </div>
-    </form>
-    <div class="boxtitle" id="tab1f-result" style="color: green; font-family: 10px sans-serif;font-family: Arial;width:500px;"></div>
-</div>
+        </form>
+        <div class="boxtitle" id="tab1f-result" style="color: green; font-family: 10px Arial sans-serif;width:500px;"></div>
+    </div>
 <?php endif; ?>
 
 <!-- check words -->
-<div id="tab2a" <?php if($user_editing) echo 'class="hidden_tab_content"'; else echo 'class="active_tab_content"';?>>
+<div id="tab2a" <?php if ($user_editing) echo 'class="hidden_tab_content"'; else echo 'class="active_tab_content"'; ?>>
     <?php
     $completed_domains = array();
     $has_completed = false;
@@ -403,12 +287,15 @@ if($user_editing): ?>
                 <select name="choosedomainspagelist" id="choosedomainspagelist" class="autocompleteinputform" style="float: left;">
                     <option value="0"> ---</option>
                     <?php
+                    $options = array();
                     foreach ($user_domains as $null => $entry) {
                         //show only completed domains:
                         if (in_array($entry["id"], $completed_domains)) {
-                            echo "<option value='" . $entry["id"] . "'>" . $entry["domain_name"] . "</option>\n";
+                            $options[] = "<option value='" . $entry["id"] . "'>" . $entry["domain_name"] . "</option>";
                         }
                     }
+
+                    echo implode("\n", $options);
                     ?>
                 </select>
             </div>
@@ -475,7 +362,8 @@ if($user_editing): ?>
                     <!-- EXTRA INFORMATION: -->
                     <div class="analyticswebaddressthirty" style="margin-left: 60px;">DESCRIPTION</div>
                     <!--<div class="analyticswebaddressthirty" style="margin-left: 70px;">PAGE TYPE</div>-->
-                    <div class="analyticswebaddressthirty" style="margin-left: 65px;">HTTP CODE</div> <!--style="margin-left: 30px;"-->
+                    <div class="analyticswebaddressthirty" style="margin-left: 65px;">HTTP CODE</div>
+                    <!--style="margin-left: 30px;"-->
                     <div class="analyticswebaddressthirty" style="margin-left: 40px;">CHARSET</div>
                     <div class="analyticswebaddressthirty" style="margin-left: 30px;">LANGUAGE</div>
                     <div class="analyticswebaddressthirty" style="margin-left: 20px;">SERVER CONFIG</div>
@@ -532,8 +420,10 @@ if($user_editing): ?>
                         $parsed2_links = $no["parsed2"];
                         $total_links = $no["total_links"];
                         ?>
-                        <div class="resultslist" id="domain_row_<?php echo $entry["id"];?>">
-                            <a href="javascript:removeDomain('<?php echo $entry["id"];?>')" title='Delete'><div class="userdelete" style='margin-left:7px;margin-top: 15px;float: left;margin-right:0;padding:0;'></div></a>
+                        <div class="resultslist" id="domain_row_<?php echo $entry["id"]; ?>">
+                            <a href="javascript:removeDomain('<?php echo $entry["id"]; ?>')" title='Delete'>
+                                <div class="userdelete" style='margin-left:7px;margin-top: 15px;float: left;margin-right:0;padding:0;'></div>
+                            </a>
                             <?php if ($parsed2_links < $total_links) { ?>
                                 <div class="rednetwork" style="margin-left:0px;margin-top:12px;" title="In progress.."></div>
                             <?php } else { ?>
@@ -685,8 +575,7 @@ if($user_editing): ?>
             url: "<?= $this->app_link;?>/density/removedomain/" + id,
             dataType: "json",
             type: "POST",
-            data: {
-            },
+            data: {},
             success: function (data) {
                 if (data.msg == "success") {
                     //hide loading:
@@ -699,38 +588,10 @@ if($user_editing): ?>
         });
     }
 </script>
+<script src="<?= $this->app_link; ?>/js/tab_pages.js"></script>
 <script type="text/javascript">
 function toggleWordsAction(el, id) {
     document.getElementById(id).value = el.getAttribute("name");
-}
-
-function toggle_tabs(tab) {
-    //hide "page data"'s buttons:
-    $("#show_btn").hide();
-    $("#show_btn_2").hide();
-
-    var ul_menu = document.getElementById("tabs");
-    var lis = ul_menu.children;
-    var temp_id, temp_id2, temp_id3, form;
-    for (var i = 0; i < lis.length; i++) {
-        temp_id = lis[i].id;
-        temp_id2 = temp_id + "a";
-        temp_id3 = temp_id + "f";
-
-        if (temp_id != tab.id) {
-            document.getElementById(temp_id).setAttribute("class", "");
-            document.getElementById(temp_id2).setAttribute("class", "hidden_tab_content");
-
-            form = document.getElementById(temp_id3);
-            if (form) {
-                form.reset();
-            }
-
-        } else {
-            document.getElementById(temp_id).setAttribute("class", "active");
-            document.getElementById(temp_id2).setAttribute("class", "active_tab_content");
-        }
-    }
 }
 
 $("#auto_complete_text").autocomplete({
@@ -844,7 +705,7 @@ $("#show_btn_2").click(function () {
 
 });
 
-$("#cron_save_changes").click(function() {
+$("#cron_save_changes").click(function () {
     var loading = $("#tab5f-loading"),
         special = $("#cron_special_id").val(),
         hours = $("#hours_to_sleep").val(),
@@ -856,7 +717,7 @@ $("#cron_save_changes").click(function() {
     $.ajax({
         url: "<?= $this->app_link;?>/density/savecronconfig/" + special + "/" + hours + "/" + seconds + "/" + browser,
         type: "GET",
-        success: function(data) {
+        success: function (data) {
             $("#tab5f-result").html(data);
             loading.hide();
         }

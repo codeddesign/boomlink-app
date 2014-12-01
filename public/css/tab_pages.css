@@ -1,0 +1,166 @@
+#tabs_container {
+}
+
+#tabs {
+    list-style: none;
+    padding: 5px 0 4px 0;
+    margin: 0 0 0 0px;
+}
+
+#tabs li {
+    display: inline;
+}
+
+#tabs li a {
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    padding: 10px 15px 4px;
+    text-decoration: none;
+    background-color: #2288C3;
+    border-bottom: none;
+    outline: none;
+    border-radius: 3px 3px 0 0;
+    -moz-border-radius: 3px 3px 0 0;
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 3px;
+}
+
+#tabs li a:hover {
+    color: black;
+    background-color: white;
+    padding: 10px 15px 4px;
+}
+
+#tabs li.active a {
+    color: black;
+    background-color: #F1F3F7;
+    padding: 10px 15px 5px;
+    border-bottom: none;
+}
+
+#tabs li.active a:hover {
+    padding: 10px 15px 7px;
+    border-bottom: none;
+}
+
+#tabs_content_container {
+    border: 1px solid #ccc;
+    border-top: none;
+    padding: 10px;
+    width: 400px;
+}
+
+.hidden_tab_content {
+    display: none;
+}
+
+.active_tab_content {
+
+}
+
+#operations_box {
+    padding-top: 20px;
+}
+
+#horiz_container_outer {
+    float: left;
+    height: auto;
+    margin: 5px auto 0;
+    overflow: hidden;
+    position: relative;
+    width: 762px;
+}
+
+#horiz_container {
+    margin: 0;
+    padding: 0;
+    width: 1720px;
+}
+
+.densitydownloadwrap {
+    float: left;
+    width: 100%;
+    height: 55px;
+    background: #F1F3F7;
+    border-top: 1px solid #C2C2D3;
+    margin-top: 715px;
+}
+
+.densityxmltitle {
+    color: #4A9FD0;
+    float: left;
+    font-family: Helvetica, Arial, Sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    margin-left: 202px;
+    margin-top: 21px;
+    text-decoration: none;
+}
+
+.densityxmllist {
+    float: left;
+    margin-left: 15px;
+    margin-top: 18px;
+}
+
+.status_online {
+    color: green;
+}
+
+.status_offline {
+    color: red;
+}
+
+/* tabs css: */
+.tabs-form-msg {
+    padding-top: 15px;
+    font-weight: bold;
+}
+
+.tabs-form-msg-err {
+    color: red;
+}
+
+.tabs-form-msg-ok {
+    color: green;
+}
+
+.left-list {
+    float: left;
+    width: 50%;
+}
+
+.right-list {
+    float: left;
+    width: 50%;
+}
+
+.point-sub-list {
+    color: grey;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.point-sub-list input:not(.algo-title) {
+    width: 40px;
+    text-align: right;
+}
+
+.point-sub-list td.left-column {
+    width: 150px;
+}
+
+div.clear {
+    clear: both;
+}
+
+div.button-container {
+    text-align: center;
+}
+
+.right-column input[type=button] {
+    width: 22px;
+    text-align: center;
+}

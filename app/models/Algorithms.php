@@ -1,10 +1,10 @@
 <?php
 use \Phalcon\Mvc\Model;
 
-class DensityTable extends Model
+class Algorithms extends Model
 {
     public function getSource()
     {
-        return "page_main_info_body";
+        return 'algorithms';
     }
 }

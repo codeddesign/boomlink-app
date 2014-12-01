@@ -1,0 +1,108 @@
+<?php
+$is_admin = false;
+if ($this->session->get("user-role") !== 'normal') {
+    $is_admin = true;
+}
+?>
+<link rel="stylesheet" type="text/css" media="all" href="<?= $this->app_link; ?>/css/tab_pages.css"/>
+
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">Crawl Project</div>
+</div>
+
+<div class="whitepagewrap" style="margin-top:17px;">
+    <div><?= $this->getContent(); ?></div>
+
+    <!-- tabs: -->
+    <div id="operations_box" style="height: auto;">
+        <div id="tabs_container">
+            <ul id="tabs">
+                <li id="tab1" onclick='toggle_tabs(this);' class="active"><a>Projects</a></li>
+                <li id="tab2" onclick='toggle_tabs(this);'><a>Create Project</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- tabs content: -->
+    <div class="longwhitepagegraybg" style="height:auto;border-top:0;border-top:1px solid #C2C2D3;min-height:50px;padding:10px;">
+        <!-- projects tab: -->
+        <div id="tab1a" class="active_tab_content">
+            <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;max-height: 200px;overflow-y: scroll;">
+                <?php
+                if (!$is_admin) {
+                    $msg = 'You don\'t have access.';
+                } else {
+                    $msg = 'No projects created.';
+                    if ($projects !== null and count($projects) > 0) {
+                        $list = array();
+                        foreach ($projects as $project) {
+                            $list[] = $project->DomainURLIDX . "# " . $project->project_title . ' [' . $project->domain_name . ']';
+                        }
+
+                        $msg = implode("<br/>", $list);
+                    }
+                }
+
+                echo $msg;
+                ?>
+            </div>
+        </div>
+
+        <!-- create tab: -->
+        <div id="tab2a" class="hidden_tab_content">
+            <div id="tab2f-loading" style="display: none;" class="loading"></div>
+            <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;">
+                <?php if (!$is_admin) { ?> You don't have access. <?php } else { ?>
+                    <form id="tab2f" action="<?= $this->app_link; ?>/crawl_project/create" method="post">
+                        <table>
+                            <tr>
+                                <td style="font-weight: bold;"><label for="project_title">Project title: </label></td>
+                                <td><input type="text" placeholder="some title" id="project_title" name="title"></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold;"><label for="" id="main_link">Main link: </label></td>
+                                <td><input type="url" placeholder="http://projectsite.com/" id="main_link" name="link"></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><input type="submit" value="Create"></td>
+                            </tr>
+                        </table>
+                        <input type="hidden" name="update" value="0">
+                    </form>
+                    <div id="tab2f-message" class='tabs-form-msg' style="display: none;"></div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="<?= $this->app_link; ?>/js/tab_pages.js"></script>
+<script>
+    $('#tab2f').on('submit', function (event) {
+        event.preventDefault();
+        var theForm = $(this), action = theForm.attr('action'), type = theForm.attr('method'), formId = theForm.attr('id'),
+            load = $('#' + formId + '-loading'), msg = $('#' + formId + '-message');
+
+        // show loading, hide message (just in case)
+        load.show();
+        msg.hide().removeClass('tabs-form-msg-ok').removeClass('tabs-form-msg-err');
+
+        $.ajax({
+            type: type,
+            url: action,
+            dataType: 'JSON',
+            data: theForm.serialize(),
+            success: function (response) {
+                var msgClass;
+
+                load.hide();
+                msgClass = (response.error) ? 'tabs-form-msg-err' : 'tabs-form-msg-ok';
+                msg.html(response.msg).show().addClass(msgClass);
+
+                if (!response.error) {
+                    theForm.trigger('reset');
+                }
+            }
+        });
+    });
+</script>

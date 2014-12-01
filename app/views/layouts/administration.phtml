@@ -1,11 +1,22 @@
-<div class="pagetitlebar">
-    <div class="pagetitlebar-title">USERVERWALTUNG</div>
-</div>
-
-<div class="whitepagewrap">
 <?php
-echo $this->getContent();
 
+/* format: 'name' => 'title to show' */
+$navigation_links = array(
+    'dashboard' => 'dashboard',
+    'crawl_project' => 'crawl project',
+    'campaign' => 'campaigns',
+    'manual_campaigns' => 'manual campaigns',
+    'runningcampaigns' => 'ongoing campaigns',
+    'analytics' => 'analytics',
+    'crawllist' => 'crawl list',
+    'import' => 'upload / download',
+);
+
+if ($this->dev_mode) {
+    $navigation_links['density'] = 'keyword density';
+}
+
+// rest of sets:
 $is_ok = $is_admin = $is_master = false;
 switch ($this->session->get("user-role")) {
     case 'master':
@@ -22,6 +33,21 @@ $status_domain = new StatusDomain();
 $current_domains = $status_domain->getDomainsList(); // results object.
 
 /* $user_.. - variables are referring to the current user being edited/saved/.. - depending on this 2 cases it will populate the form*/
+//new user zone - default sets:
+$form_action = "administration/save_users";
+
+//default:
+$user_type = "normal";
+
+//empty values
+$user_id = $user_name = $user_email = "";
+
+//default to false:
+$user_limits = $user_editing = false;
+
+//array:
+$user_pages = $user_domains = array();
+
 if (!empty($user_details)) {
     //edit zone:
     $form_action = "administration/edit_user/" . $user_details->id;
@@ -50,172 +76,162 @@ if (!empty($user_details)) {
     //array:
     $user_pages = json_decode($user_details->pages);
     $user_domains = json_decode($user_details->domains);
-} else {
-    //new user zone - default sets:
-    $form_action = "administration/save_users";
-
-    //default:
-    $user_type = "normal";
-
-    //empty values
-    $user_id = $user_name = $user_email = "";
-
-    //default to false:
-    $user_limits = $user_editing = false;
-
-    //array:
-    $user_pages = $user_domains = array();
 }
 ?>
-<form name="" action="<?= $this->app_link . '/' . $form_action; ?>" method="post">
-    <div style="float:left;width:333px;">
-        <div class="smallwhitepageblueheader"></div>
-        <div class="smallwhitepagegraybg">
-            <div class="boxtitle">BENUTZERNAME</div>
-            <?php if ($is_ok) { ?>
-                <input type="text" name="username" value="<?php echo $user_name ?>" class="dropdownbox">
-            <?php } else { ?>
-                <div class="dropdownbox"><?php echo $user_name; ?></div>
-            <?php } ?>
-        </div>
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">USERVERWALTUNG</div>
+</div>
 
-        <div class="smallwhitepageblueheader"></div>
-        <div class="smallwhitepagegraybg">
-            <div class="boxtitle">PASSWORT</div>
-            <input type="text" name="password" value="" class="dropdownbox">
-        </div>
-
-        <div class="smallwhitepageblueheader"></div>
-        <div class="smallwhitepagegraybg">
-            <div class="boxtitle">EMAIL</div>
-            <input type="text" name="email" value="<?php echo $user_email; ?>" class="dropdownbox">
-        </div>
-
-        <!-- required - we need to show the rest of the form for "normal" users edit: -->
-        <?php if ($is_ok && $user_type == "normal") { ?>
+<div class="whitepagewrap">
+    <?= $this->getContent(); ?>
+    <form name="" action="<?= $this->app_link . '/' . $form_action; ?>" method="post">
+        <div style="float:left;width:333px;">
             <div class="smallwhitepageblueheader"></div>
             <div class="smallwhitepagegraybg">
-                <div class="boxtitle">USER ROLE</div>
-                <select name="type" class="dropdownbox" id="user_type">
-                    <option value="normal" <?php if ($user_type === "normal") echo "selected"; ?>>Simple User</option>
-                    <option value="admin" <?php if ($user_type === "admin") echo "selected"; ?>>Administrator</option>
-                </select>
+                <div class="boxtitle">BENUTZERNAME</div>
+                <?php if ($is_ok) { ?>
+                    <input type="text" name="username" value="<?= $user_name ?>" class="dropdownbox">
+                <?php } else { ?>
+                    <div class="dropdownbox"><?= $user_name; ?></div>
+                <?php } ?>
             </div>
 
-            <div id="normal-user-options">
+            <div class="smallwhitepageblueheader"></div>
+            <div class="smallwhitepagegraybg">
+                <div class="boxtitle">PASSWORT</div>
+                <input type="text" name="password" value="" class="dropdownbox">
+            </div>
+
+            <div class="smallwhitepageblueheader"></div>
+            <div class="smallwhitepagegraybg">
+                <div class="boxtitle">EMAIL</div>
+                <input type="text" name="email" value="<?= $user_email; ?>" class="dropdownbox">
+            </div>
+
+            <!-- required - we need to show the rest of the form for "normal" users edit: -->
+            <?php if ($is_ok && $user_type == "normal") { ?>
                 <div class="smallwhitepageblueheader"></div>
                 <div class="smallwhitepagegraybg">
-                    <div class="boxtitle">Page limits</div>
-                    <select name="limits" class="dropdownbox" id="user_limits">
-                        <option value="false" <?php if (!$user_limits) echo "selected"; ?>>No</option>
-                        <option value="true" <?php if ($user_limits) echo "selected"; ?>>Yes</option>
+                    <div class="boxtitle">USER ROLE</div>
+                    <select name="type" class="dropdownbox" id="user_type">
+                        <option value="normal" <?php if ($user_type === "normal") echo "selected"; ?>>Simple User</option>
+                        <option value="admin" <?php if ($user_type === "admin") echo "selected"; ?>>Administrator</option>
                     </select>
                 </div>
 
-                <div id="normal-user-pages" <?php echo (!$user_limits) ? 'style="display: none;"' : ""; ?>>
-                    <div class="smallwhitepageblueheader"></div>
-                    <div class="smallwhitepagegraybg" style="height:auto;">
-                        <div class="boxtitle">DENIED Pages</div>
-                        <div style="float:right; margin:0 auto; width:50%;">
-                            <input type="checbox" name="pages[]" value="" style="display:none;" checked>
-                            <?php
-                            foreach ($this->navigation_links as $p_name => $p_title) {
-                                ?>
-                                <div><input type="checkbox" name="pages[]"
-                                            value="<?php echo $p_name; ?>"<?php echo (in_array($p_name, $user_pages)) ? " checked> " : "> ";
-                                    echo $p_title; ?></div>
-                            <?php } ?>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="smallwhitepageblueheader"></div>
-                <div class="smallwhitepagegraybg">
-                    <div class="boxtitle">Editing</div>
-                    <select name="editing" class="dropdownbox" id="user_editing">
-                        <option value="false" <?php if (!$user_editing) echo "selected"; ?>>No</option>
-                        <option value="true" <?php if ($user_editing) echo "selected"; ?>>Yes</option>
-                    </select>
-                </div>
-
-                <div id="normal-user-editing" <?php echo (!$user_editing) ? 'style="display: none;"' : ""; ?>>
+                <div id="normal-user-options">
                     <div class="smallwhitepageblueheader"></div>
                     <div class="smallwhitepagegraybg">
-                        <div class="boxtitle">Type of editing</div>
-                        <select name="type_of_editing" class="dropdownbox">
-                            <option value="domain" selected>domain</option>
+                        <div class="boxtitle">Page limits</div>
+                        <select name="limits" class="dropdownbox" id="user_limits">
+                            <option value="false" <?php if (!$user_limits) echo "selected"; ?>>No</option>
+                            <option value="true" <?php if ($user_limits) echo "selected"; ?>>Yes</option>
                         </select>
                     </div>
 
+                    <div id="normal-user-pages" <?= (!$user_limits) ? 'style="display: none;"' : ""; ?>>
+                        <div class="smallwhitepageblueheader"></div>
+                        <div class="smallwhitepagegraybg" style="height:auto;">
+                            <div class="boxtitle">DENIED Pages</div>
+                            <div style="float:right; margin:0 auto; width:50%;">
+                                <input type="checbox" name="pages[]" value="" style="display:none;" checked>
+                                <?php
+                                foreach ($navigation_links as $p_name => $p_title) {
+                                    ?>
+                                    <div>
+                                        <input type="checkbox" name="pages[]" value="<?= $p_name; ?>"<?= (in_array($p_name, $user_pages)) ? " checked> " : "> ", $p_title; ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="smallwhitepageblueheader"></div>
-                    <div class="smallwhitepagegraybg" style="height:auto;">
-                        <div class="boxtitle">ALLOWED Domains</div>
-                        <div style="float:right;margin-right: 10px;">
-                            <input type="checbox" name="domains[]" value="" style="display:none;" checked>
-                            <?php foreach ($current_domains as $key => $domain) { ?>
-                                <div><input type="checkbox" name="domains[]"
-                                            value="<?php echo $domain->idx; ?>"<?php echo (in_array($domain->idx, $user_domains)) ? " checked" : "" ?>> <?php echo $domain->url; ?>
-                                </div>
-                            <?php } ?>
+                    <div class="smallwhitepagegraybg">
+                        <div class="boxtitle">Editing</div>
+                        <select name="editing" class="dropdownbox" id="user_editing">
+                            <option value="false" <?php if (!$user_editing) echo "selected"; ?>>No</option>
+                            <option value="true" <?php if ($user_editing) echo "selected"; ?>>Yes</option>
+                        </select>
+                    </div>
+
+                    <div id="normal-user-editing" <?= (!$user_editing) ? 'style="display: none;"' : ""; ?>>
+                        <div class="smallwhitepageblueheader"></div>
+                        <div class="smallwhitepagegraybg">
+                            <div class="boxtitle">Type of editing</div>
+                            <select name="type_of_editing" class="dropdownbox">
+                                <option value="domain" selected>domain</option>
+                            </select>
+                        </div>
+
+                        <div class="smallwhitepageblueheader"></div>
+                        <div class="smallwhitepagegraybg" style="height:auto;">
+                            <div class="boxtitle">ALLOWED Domains</div>
+                            <div style="float:right;margin-right: 10px;">
+                                <input type="checbox" name="domains[]" value="" style="display:none;" checked>
+                                <?php foreach ($current_domains as $key => $domain) { ?>
+                                    <div><input type="checkbox" name="domains[]"
+                                                value="<?php echo $domain->idx; ?>"<?php echo (in_array($domain->idx, $user_domains)) ? " checked" : "" ?>> <?php echo $domain->url; ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        <?php } ?>
-        <button type="submit" name="save_user" class="saveuserbutton" style="cursor:pointer; border:none;"></button>
-    </div>
-</form>
-
-<?php
-//making list of users available only to admin:
-if ($is_ok) {
-    ?>
-    <div class="adminuserbluetop"></div>
-    <div class="adminuserbg">
-        <div class="adminusertitletext">USER LIST</div>
-        <div class="adminuserwhitebg">
-            <?php if (!empty($get_users)) {
-                foreach ($get_users as $user) {
-                    $remove = true;
-                    if ($user->type === "master") {
-                        $remove = false;
-                    }
-                    ?>
-                    <div class="adminuserlist" id="user_<?php echo $user->id; ?>">
-                        <div class="adminusername-text"><?php echo $user->username; ?></div>
-
-                        <div style="float:right;">
-
-                            <?php if ($user->type !== "master") { ?>
-                                <a href="javascript:delRecord('<?php echo $user->id; ?>')">
-                                    <div class="userdelete"></div>
-                                </a>
-                            <?php } ?>
-
-                        </div>
-
-                        <div style="float:right;">
-                            <?php if (($user->type == "master" and $is_master) or ($user->type !== "master")) { ?>
-                                <a href="<?= $this->app_link;?>/administration/edit_user/<?php echo $user->id; ?>">
-                                    <div class="userlock"></div>
-                                </a>
-                            <?php } ?>
-                        </div>
-                    </div>
-                <?php
-                }
-            } ?>
+            <?php } ?>
+            <button type="submit" name="save_user" class="saveuserbutton" style="cursor:pointer; border:none;"></button>
         </div>
-    </div>
-<?php
-}
-?>
+    </form>
+
+    <?php
+    //making list of users available only to admin:
+    if ($is_ok) {
+        ?>
+        <div class="adminuserbluetop"></div>
+        <div class="adminuserbg">
+            <div class="adminusertitletext">USER LIST</div>
+            <div class="adminuserwhitebg">
+                <?php if (!empty($get_users)) {
+                    foreach ($get_users as $user) {
+                        $remove = true;
+                        if ($user->type === "master") {
+                            $remove = false;
+                        }
+                        ?>
+                        <div class="adminuserlist" id="user_<?= $user->id; ?>">
+                            <div class="adminusername-text"><?= $user->username; ?></div>
+
+                            <div style="float:right;">
+
+                                <?php if ($user->type !== "master") { ?>
+                                    <a href="javascript:delRecord('<?= $user->id; ?>')">
+                                        <div class="userdelete"></div>
+                                    </a>
+                                <?php } ?>
+
+                            </div>
+
+                            <div style="float:right;">
+                                <?php if (($user->type == "master" and $is_master) or ($user->type !== "master")) { ?>
+                                    <a href="<?= $this->app_link; ?>/administration/edit_user/<?= $user->id; ?>">
+                                        <div class="userlock"></div>
+                                    </a>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    <?php
+                    }
+                } ?>
+            </div>
+        </div>
+    <?php
+    }
+    ?>
 </div>
 <div id="del_dialog" style="display: none;">
     <p>Are you Sure Want to Delete this user?</p>
 </div>
 <script>
-
     function delRecord(id) {
         $('#del_dialog').dialog({
             modal: true,

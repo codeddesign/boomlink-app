@@ -1,5 +1,6 @@
 <?php
 use \Phalcon\Mvc\Controller;
+use \Phalcon\Http\Response;
 
 class BaseController extends Controller
 {
@@ -42,5 +43,28 @@ class BaseController extends Controller
     public function indexAction()
     {
         $this->response->redirect($this->app_link);
+    }
+
+    /**
+     * Info:
+     * - This function is available in all controllers that are extending this class
+     * - Returns a JSON response from a view
+     *
+     * @param $output
+     */
+    protected function jsonResponse($output)
+    {
+        $response = new Response();
+        $response->setHeader('Content-Type', 'application/json');
+
+        if (!is_array($output)) {
+            $output = array($output);
+        }
+
+        $response->setJsonContent($output, JSON_NUMERIC_CHECK);
+        $response->send();
+
+        // needed:
+        exit();
     }
 }

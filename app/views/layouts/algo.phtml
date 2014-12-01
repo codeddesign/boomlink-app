@@ -1,0 +1,251 @@
+<?php
+$is_admin = false;
+if ($this->session->get("user-role") !== 'normal') {
+    $is_admin = true;
+}
+?>
+<link rel="stylesheet" type="text/css" media="all" href="<?= $this->app_link; ?>/css/tab_pages.css"/>
+<div class="pagetitlebar">
+    <div class="pagetitlebar-title">Algorithms</div>
+</div>
+
+<div class="whitepagewrap" style="margin-top:17px;">
+    <div><?= $this->getContent(); ?></div>
+
+    <!-- tabs: -->
+    <div id="operations_box" style="height: auto;">
+        <div id="tabs_container">
+            <ul id="tabs">
+                <li id="tab1" onclick='toggle_tabs(this);' class="active"><a>Algorithms</a></li>
+                <li id="tab2" onclick='toggle_tabs(this);'><a>Create Algorithm</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- tabs content: -->
+    <div class="longwhitepagegraybg" style="height:auto;border-top:0;border-top:1px solid #C2C2D3;min-height:50px;padding:10px;">
+        <!-- algorithms tab: -->
+        <div id="tab1a" class="active_tab_content">
+            <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;max-height: 200px;overflow-y: scroll;">
+                <?php
+                if (!$is_admin) {
+                    $msg = 'You don\'t have access.';
+                } else {
+                    $msg = 'There are no algorithms created.';
+                    if ($algorithms !== null AND count($algorithms) > 0) {
+                        foreach ($algorithms as $algo) {
+                            $type = ($algo->is_public) ? 'visible' : 'private';
+                            $list[] = $algo->id . '# ' . $algo->title . ' - ' . $type;
+                        }
+
+                        $msg = implode('<br/>', $list);
+                    }
+                }
+
+                echo $msg;
+                ?>
+            </div>
+        </div>
+
+        <!-- create algorithm tab: -->
+        <div id="tab2a" class="hidden_tab_content">
+            <div id="tab2f-loading" style="display: none;" class="loading"></div>
+            <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;max-height: 200px;overflow-y: scroll;">
+                <?php if (!$is_admin) { ?> You don't have access. <?php } else { ?>
+                    <div id="tab2f-message" class='tabs-form-msg' style="display: none;"></div>
+                    <form id="tab2f" action="<?= $this->app_link ?>/algo/create" method="post">
+                        <!-- main sets -->
+                        <div class="algo-sets-list">
+                            <h3>Main sets:</h3>
+                            <table class="point-sub-list">
+                                <tr>
+                                    <td class="left-column">Algorithm title:</td>
+                                    <td class="right-column"><input type="text" class="algo-title" placeholder="some title" name="title"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left-column">Public:</td>
+                                    <td class="right-column"><input type="checkbox" name="public"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="clear"></div>
+
+                        <!-- left list of settings -->
+                        <div class="left-list">
+                            <div class="algo-sets-list">
+                                <h3>Linking Points:</h3>
+                                <table class="point-sub-list">
+                                    <tr>
+                                        <td class="left-column">For every incoming:</td>
+                                        <td class="right-column">
+                                            <input type="text" value="0.10" name="incoming" id="incoming">
+                                            <input data-for="incoming" data-step="0.10" type="button" value="+"> <input data-for="incoming" data-step="0.10" type="button" value="-">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">For every outgoing:</td>
+                                        <td class="right-column">
+                                            <input type="text" value="0.10" name="outgoing" id="outgoing">
+                                            <input data-for="outgoing" data-step="0.10" type="button" value="+"> <input data-for="outgoing" data-step="0.10" type="button" value="-">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="algo-sets-list">
+                                <h3>Domain Age Points:</h3>
+                                <table class="point-sub-list">
+                                    <tr>
+                                        <td class="left-column">Younger than 1 year:</td>
+                                        <td class="right-column">
+                                            <input type="text" value="10" name="age_1" id="age_1">
+                                            <input data-for="age_1" data-step="10" type="button" value="+"> <input data-for="age_1" data-step="10" type="button" value="-">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">Older than 3 years:</td>
+                                        <td class="right-column">
+                                            <input type="text" value="10" name="age_3" id="age_3">
+                                            <input data-for="age_3" data-step="10" type="button" value="+"> <input data-for="age_3" data-step="10" type="button" value="-">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="algo-sets-list">
+                                <h3>Share Count Points:</h3>
+                                <table class="point-sub-list">
+                                    <tr>
+                                        <td class="left-column">For every share:</td>
+                                        <td class="right-column">
+                                            <input type="text" value="0.10" name="share" id="share">
+                                            <input data-for="share" data-step="0.10" type="button" value="+"> <input data-for="share" data-step="0.10" type="button" value="-">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="algo-sets-list">
+                                <h3>Sentiment Value:</h3>
+                                <table class="point-sub-list">
+                                    <tr>
+                                        <td class="left-column">Positive sentiment:</td>
+                                        <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_positive"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">Neutral sentiment:</td>
+                                        <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_neutral"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">Negative sentiment:</td>
+                                        <td class="right-column"><input type="checkbox" name="sentiment_negative"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- right list of settings -->
+                        <div class="right-list">
+                            <div class="algo-sets-list">
+                                <h3>Pagerank Points:</h3>
+                                <table class="point-sub-list">
+                                    <tr>
+                                        <td class="left-column">If Pagerank n/a or 0</td>
+                                        <td class="right-column"> = <input type="text" value="0" name="pagerank_0"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">If Pagerank 1 - 3</td>
+                                        <td class="right-column"> = <input type="text" value="10" name="pagerank_13"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">If Pagerank 4 - 6</td>
+                                        <td class="right-column"> = <input type="text" value="100" name="pagerank_46"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">If Pagerank 7 - 10</td>
+                                        <td class="right-column"> = <input type="text" value="1000" name="pagerank_710"></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="algo-sets-list">
+                                <h3>Keyword Relevance Points:</h3>
+                                <table class="point-sub-list">
+                                    <tr>
+                                        <td class="left-column">Keyword in Title</td>
+                                        <td class="right-column"> = <input type="text" value="100" name="keyword_title"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">Keyword in Meta Data</td>
+                                        <td class="right-column"> = <input type="text" value="10" name="keyword_meta"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">Keyword in Title H-Titles</td>
+                                        <td class="right-column"> = <input type="text" value="1" name="keyword_h"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left-column">Keyword in Content</td>
+                                        <td class="right-column"> = <input type="text" value="0.50" name="keyword_content"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- clear both divs + save button -->
+                        <div class="clear"></div>
+                        <div class="button-container">
+                            <input type="submit" name='action' value="Save">
+                        </div>
+                    </form>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="<?= $this->app_link; ?>/js/tab_pages.js"></script>
+<script>
+    $('#tab2f').on('submit', function (event) {
+        event.preventDefault();
+        var theForm = $(this), action = theForm.attr('action'), type = theForm.attr('method'), formId = theForm.attr('id'),
+            load = $('#' + formId + '-loading'), msg = $('#' + formId + '-message');
+
+        // show loading, hide message (just in case)
+        load.show();
+        msg.hide().removeClass('tabs-form-msg-ok').removeClass('tabs-form-msg-err');
+
+        $.ajax({
+            type: type,
+            url: action,
+            dataType: 'JSON',
+            data: theForm.serialize(),
+            success: function (response) {
+                var msgClass;
+
+                load.hide();
+                msgClass = (response.error) ? 'tabs-form-msg-err' : 'tabs-form-msg-ok';
+                msg.html(response.msg).show().addClass(msgClass);
+
+                if (!response.error) {
+                    theForm.trigger('reset');
+                }
+            }
+        });
+    });
+
+    $('input[value="+"], input[value="-"]').on('click', function () {
+        var btn = $(this), op = btn.attr('value'), step = btn.attr('data-step'), targetId = btn.attr('data-for'),
+            target = $('#' + targetId), nextValue;
+
+        if (step == '10') {
+            nextValue = parseInt(target.val()) + parseInt(op + step);
+        } else {
+            nextValue = (parseFloat(target.val()) + parseFloat(op + step)).toPrecision(2);
+        }
+
+        if (nextValue < step) {
+            return false;
+        }
+
+        target.val(nextValue);
+    });
+</script>

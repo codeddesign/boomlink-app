@@ -35,22 +35,6 @@ return array(
         'new_mail_body' => '../public/PHPMailer/new_mail.html', // disabled
     ),
 
-    /*
-     * Links refer to navigation around around the website.
-     * Right now this list is being used in 'administration' only
-    */
-    'navigation_links' => array(
-        // name => title
-        'dashboard' => 'dashboard',
-        'campaign' => 'campaigns',
-        'manual_campaigns' => 'manual campaigns',
-        'runningcampaigns' => 'ongoing campaigns',
-        'analytics' => 'analytics',
-        'crawllist' => 'crawl list',
-        'import' => 'upload / download',
-        'density' => 'keyword density',
-    ),
-
     /* links that do not require authentication */
     'pages_no_auth' => array(
         'appserver',

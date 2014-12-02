@@ -32,11 +32,15 @@ if ($this->session->get("user-role") === 'master') {
                     <table>
                         <tr>
                             <td>Status:</td>
-                            <td id="current_status" style="font-weight: bold;"> --- </td>
+                            <td id="current_status" style="font-weight: bold;"> ---</td>
                         </tr>
                         <tr>
                             <td>Operations:</td>
-                            <td><input type="button" class="operation" value="CheckStatus"> | <input type="button" class="operation" value="Start"> | <input type="button" class="operation" value="Stop"></td>
+                            <td>
+                                <input type="button" class="operation" value="CheckStatus" data-op="status"> |
+                                <input type="button" class="operation" value="Start" data-op="start"> |
+                                <input type="button" class="operation" value="Stop" data-op="stop">
+                            </td>
                         </tr>
                     </table>
                 <?php } ?>
@@ -50,6 +54,10 @@ if ($this->session->get("user-role") === 'master') {
                 <?php if (!$is_master) { ?> You don't have access. <?php } else { ?>
                     <form id="tab2f" action="<?= $this->app_link; ?>/crawler_control/settings" method="POST">
                         <table>
+                            <tr>
+                                <td><label for="crawlerPath">Crawler path: </label></td>
+                                <td><input type="url" name="crawlerPath" id="crawlerPath" style="width: 160px;text-align: right;" value="<?= isset($crawler_path) ? $crawler_path : ''; ?>"></td>
+                            </tr>
                             <tr>
                                 <td><label for="atOnce">Links at once: </label></td>
                                 <td><input type="text" name="atOnce" id="atOnce" style="width: 40px;text-align: right;" value="<?= isset($crawler_config['atOnce']) ? $crawler_config['atOnce'] : ''; ?>"> / per project</td>
@@ -119,6 +127,23 @@ if ($this->session->get("user-role") === 'master') {
                 if (!response.error && response.cid !== undefined) {
                     $('#cid').val(response.cid);
                 }
+            }
+        });
+    });
+
+    $('.operation').on('click', function () {
+        var clicked = $(this), op = clicked.attr('data-op'), targetMsg = $('#current_status');
+
+        $.ajax({
+            type: 'GET',
+            url: '<?= $this->app_link;?>/crawler_control/status/' + op,
+            dataType: 'JSON',
+            success: function (response) {
+                if (op != 'status' && response == 'already') {
+                    response = op + ': is ' + response;
+                }
+
+                targetMsg.html(response).toUpperCase();
             }
         });
     });

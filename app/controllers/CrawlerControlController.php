@@ -73,8 +73,14 @@ class CrawlerControlController extends BaseController
 
         $curl_obj = new CurlController();
         $response = $curl_obj->getResponse($link . '?op=' . $op);
+
+        // this method is being used in settingsAction() so:
         if ($returns) {
             return $response;
+        }
+
+        if ($response == null) {
+            $response = 'Failed to connect.';
         }
 
         $this->jsonResponse($response);

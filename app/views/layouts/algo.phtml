@@ -34,8 +34,8 @@ if ($this->session->get("user-role") !== 'normal') {
                     $msg = 'There are no algorithms created.';
                     if ($algorithms !== null AND count($algorithms) > 0) {
                         foreach ($algorithms as $algo) {
-                            $type = ($algo->is_public) ? 'visible' : 'private';
-                            $list[] = $algo->id . '# ' . $algo->title . ' - ' . $type;
+                            $type = ($algo->is_public) ? 'public' : 'private';
+                            $list[] = $algo->id . '# ' . $algo->title . ' - <b>' . $type.'</b>';
                         }
 
                         $msg = implode('<br/>', $list);

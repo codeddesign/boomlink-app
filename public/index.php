@@ -10,7 +10,8 @@ use \Phalcon\Mvc\Application;
 use \Phalcon\Exception;
 
 /* configuration handle: */
-function custom_array_merge_recursive(array &$config, array &$dev) {
+function custom_array_merge_recursive(array &$config, array &$dev)
+{
     $merged = $config;
     foreach ($dev as $key => &$value) {
         if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
@@ -109,11 +110,13 @@ try {
 
     // returns something like: http(s)://localhost
     $di->setShared('app_link', function () use ($config) {
-        return sprintf('%s://%s/%s', $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_NAME'], $config['app_extra_path']);
+        $scheme = (!isset($_SERVER['REQUEST_SCHEME'])) ? 'http' : $_SERVER['REQUEST_SCHEME'];
+        
+        return sprintf('%s://%s/%s', $scheme, $_SERVER['SERVER_NAME'], $config['app_extra_path']);
     });
 
     // setup the rest of the needed information:
-    $di->setShared('dev_mode', function() use($dev_mode) {
+    $di->setShared('dev_mode', function () use ($dev_mode) {
         return $dev_mode;
     });
 

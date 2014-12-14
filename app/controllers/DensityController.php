@@ -799,8 +799,10 @@ class DensityController extends BaseController
 
         //safety check:
         if (strlen($file_name) > 0 and stripos($file_name, ".php") === false and stripos($file_name, ".csv") !== true) {
-            header("Location: http://107.170.94.168/extract_body/" . $file_name);
+            return $this->response->redirect($this->app_link . '/extract_body/' . $file_name);
         }
+
+        return true;
     }
 
     public function removeDomainAction($id)

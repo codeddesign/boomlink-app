@@ -20,9 +20,10 @@ class AdministrationController extends BaseController
      */
     public function indexAction()
     {
-        $get_users = Administration::find();
-        $this->view->setVar('get_users', $get_users);
-
+        $status_domain = new StatusDomain();
+        $this->view->setVar('current_domains', $status_domain->getDomainsList());
+        $this->view->setVar('get_users', Administration::find());
+        
         /*
          * checking for user type. If not master then get it's id
          * and set `user_details` in order to enable the form for editing user information

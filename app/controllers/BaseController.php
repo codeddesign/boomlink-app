@@ -67,4 +67,26 @@ class BaseController extends Controller
         // needed:
         exit();
     }
+
+    /**
+     * @param array $string
+     * @return array|mixed|string
+     */
+    protected function json_encode_special(array $string)
+    {
+        $string = json_encode($string, true);
+        $string = preg_replace_callback('/\\\\u([0-9a-f]{4})/i', function ($matches) {
+                $sym = mb_convert_encoding(
+                    pack('H*', $matches[1]),
+                    'UTF-8',
+                    'UTF-16'
+                );
+
+                return $sym;
+            },
+            $string
+        );
+
+        return $string;
+    }
 }

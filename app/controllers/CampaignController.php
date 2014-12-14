@@ -1,5 +1,6 @@
 <?php
 use \Phalcon\Mvc\View;
+use \Phalcon\Db;
 
 class CampaignController extends BaseController
 {
@@ -26,6 +27,8 @@ class CampaignController extends BaseController
         $get_lists = Lists::find("ListType = 'STANDARD'");
         $this->view->setVar('get_domains', $get_domains);
         $this->view->setVar('get_lists', $get_lists);
+        $this->view->setVar('algorithms', Algorithms::find());
+
         if (isset($_GET['name']) && trim($_GET['name']) != '') {
             $this->flash->success('The Standard Campaign "' . $_GET['name'] . '" is built successfully');
         }
@@ -36,13 +39,10 @@ class CampaignController extends BaseController
      */
     public function build_campaignAction()
     {
-        $get_domains = StatusDomain::find();
-        $get_lists = Lists::find("ListType='STANDARD'");
-        $this->view->setVar('get_domains', $get_domains);
-        $this->view->setVar('get_lists', $get_lists);
-        $request = $this->request;
-        if ($request->isPost()) {
+        $this->view->setVar('get_domains', StatusDomain::find());
+        $this->view->setVar('get_lists', Lists::find("ListType='STANDARD'"));
 
+        if ($this->request->isPost()) {
             $unique_id = md5(date('Y-m-d H:i:s'));
             $master_campaign = new MasterCampaign();
             $master_campaign->Name = $_POST['campaign_name'];
@@ -56,367 +56,270 @@ class CampaignController extends BaseController
                 }
             }
 
-            if (isset($_POST['page_urls']) && $_POST['page_urls']) {
-                foreach ($_POST['page_urls'] as $value) {
-                    $campaing_url = split("@#", $value);
-                    foreach ($_POST['page_url_checkbox'] as $urls) {
-                        $page_to_campaign = new PagesToCampaign();
-                        $url_split = explode("$%", $urls);
-                        $page_to_campaign->unique_id = $unique_id;
-                        $page_to_campaign->campaign_url = $campaing_url[0];
-                        //$page_to_campaign->campaign_url_DomainURLIDX = $campaing_url[1];
-                        $page_to_campaign->main_url = (substr($url_split[0], -1) == '/') ? substr($url_split[0], 0, -1) : $url_split[0];
-                        $page_to_campaign->url_ref = $url_split[0];
-                        $page_to_campaign->DomainURLIDX = $campaing_url[1];
-                        $page_to_campaign->StartDate = date("Y-m-d H:i:s", strtotime($_POST['start_date']));
-                        $page_to_campaign->EndDate = date("Y-m-d H:i:s", strtotime($_POST['end_date']));
-                        if (isset($_POST['keywords']) && $_POST['keywords']) {
-                            $page_to_campaign->keywords = $_POST['keywords'];
-                        }
+            // ..
+            $auto_complete_url = trim($_POST['auto_complete_url']);
+            $selected_domain_id = trim($_POST['selected_domain_id']);
 
-                        if (isset($_POST['textbox_anchor_text' . $url_split[2]]) && $_POST['textbox_anchor_text' . $url_split[2]]) {
-                            $page_to_campaign->achor_text = $_POST['textbox_anchor_text' . $url_split[2]];
-                        }
+            if (isset($_POST['page_url_checkbox']) and count($_POST['page_url_checkbox'])) {
+                foreach ($_POST['page_url_checkbox'] as $urls) {
+                    $page_to_campaign = new PagesToCampaign();
+                    $url_split = explode("$%", $urls);
+                    $page_to_campaign->unique_id = $unique_id;
+                    $page_to_campaign->campaign_url = $auto_complete_url;
+                    $page_to_campaign->DomainURLIDX = $selected_domain_id;
+                    $page_to_campaign->main_url = (substr($url_split[0], -1) == '/') ? substr($url_split[0], 0, -1) : $url_split[0];
+                    $page_to_campaign->url_ref = $url_split[0];
+                    $page_to_campaign->StartDate = date("Y-m-d H:i:s", strtotime($_POST['start_date']));
+                    $page_to_campaign->EndDate = date("Y-m-d H:i:s", strtotime($_POST['end_date']));
 
-                        if (isset($_POST['textbox_image_url' . $url_split[2]]) && $_POST['textbox_image_url' . $url_split[2]]) {
-                            $page_to_campaign->image_url = $_POST['textbox_image_url' . $url_split[2]];
-                        }
-                        if (isset($_POST['textbox_video_url' . $url_split[2]]) && $_POST['textbox_video_url' . $url_split[2]]) {
-                            $page_to_campaign->video_url = $_POST['textbox_video_url' . $url_split[2]];
-                        }
-                        if (isset($_POST['textbox_html' . $url_split[2]]) && $_POST['textbox_html' . $url_split[2]]) {
-                            $page_to_campaign->html_embed = $_POST['textbox_html' . $url_split[2]];
-                        }
-                        if (isset($_POST['textbox_keywords_analytics' . $url_split[2]]) && $_POST['textbox_keywords_analytics' . $url_split[2]]) {
-                            $page_to_campaign->keywords_for_analytics = $_POST['textbox_keywords_analytics' . $url_split[2]];
-                        }
-                        $page_to_campaign->save();
+                    if (isset($_POST['keywords']) && $_POST['keywords']) {
+                        $page_to_campaign->keywords = $_POST['keywords'];
                     }
-                }
-            } else {
-                foreach ($_POST['main_domain_url'] as $value) {
-                    foreach ($_POST['page_url_checkbox'] as $urls) {
-                        $page_to_campaign = new PagesToCampaign();
-                        $url_split = explode("$%", $urls);
-                        $page_to_campaign->unique_id = $unique_id;
-                        $page_to_campaign->campaign_url = $value;
-                        $page_to_campaign->main_url = (substr($url_split[0], -1) == '/') ? substr($url_split[0], 0, -1) : $url_split[0];
-                        $page_to_campaign->url_ref = $url_split[0];
-                        $page_to_campaign->DomainURLIDX = $url_split[1];
-                        $page_to_campaign->StartDate = date("Y-m-d H:i:s", strtotime($_POST['start_date']));
-                        $page_to_campaign->EndDate = date("Y-m-d H:i:s", strtotime($_POST['end_date']));
-                        if (isset($_POST['keywords']) && $_POST['keywords']) {
-                            $page_to_campaign->keywords = $_POST['keywords'];
-                        }
-                        if (isset($_POST['textbox_anchor_text' . $url_split[2]]) && $_POST['textbox_anchor_text' . $url_split[2]]) {
-                            $page_to_campaign->achor_text = $_POST['textbox_anchor_text' . $url_split[2]];
-                        }
 
-                        if (isset($_POST['textbox_image_url' . $url_split[2]]) && $_POST['textbox_image_url' . $url_split[2]]) {
-                            $page_to_campaign->image_url = $_POST['textbox_image_url' . $url_split[2]];
-                        }
-                        if (isset($_POST['textbox_video_url' . $url_split[2]]) && $_POST['textbox_video_url' . $url_split[2]]) {
-                            $page_to_campaign->video_url = $_POST['textbox_video_url' . $url_split[2]];
-                        }
-                        if (isset($_POST['textbox_html' . $url_split[2]]) && $_POST['textbox_html' . $url_split[2]]) {
-                            $page_to_campaign->html_embed = $_POST['textbox_html' . $url_split[2]];
-                        }
-                        if (isset($_POST['textbox_keywords_analytics' . $url_split[2]]) && $_POST['textbox_keywords_analytics' . $url_split[2]]) {
-                            $page_to_campaign->keywords_for_analytics = $_POST['textbox_keywords_analytics' . $url_split[2]];
-                        }
-                        $page_to_campaign->save();
+                    if (isset($_POST['textbox_anchor_text' . $url_split[2]]) && $_POST['textbox_anchor_text' . $url_split[2]]) {
+                        $page_to_campaign->achor_text = $_POST['textbox_anchor_text' . $url_split[2]];
                     }
+
+                    if (isset($_POST['textbox_image_url' . $url_split[2]]) && $_POST['textbox_image_url' . $url_split[2]]) {
+                        $page_to_campaign->image_url = $_POST['textbox_image_url' . $url_split[2]];
+                    }
+
+                    if (isset($_POST['textbox_video_url' . $url_split[2]]) && $_POST['textbox_video_url' . $url_split[2]]) {
+                        $page_to_campaign->video_url = $_POST['textbox_video_url' . $url_split[2]];
+                    }
+
+                    if (isset($_POST['textbox_html' . $url_split[2]]) && $_POST['textbox_html' . $url_split[2]]) {
+                        $page_to_campaign->html_embed = $_POST['textbox_html' . $url_split[2]];
+                    }
+
+                    if (isset($_POST['textbox_keywords_analytics' . $url_split[2]]) && $_POST['textbox_keywords_analytics' . $url_split[2]]) {
+                        $page_to_campaign->keywords_for_analytics = $_POST['textbox_keywords_analytics' . $url_split[2]];
+                    }
+
+                    $page_to_campaign->save();
                 }
+
+                return $this->response->redirect($this->app_link . '/campaign?name=' . addslashes($_POST['campaign_name']));
             }
-
-            header('Location: '.$this->app_link.'/campaign?name=' . $_POST['campaign_name']);
         }
+
+        return $this->response->redirect($this->app_link . '/campaign');
     }
 
-    /**
-     *This function is used to get categories of Pages.
-     */
-    function get_categoriesAction()
+    /*
+     * Handles the keyword/s search via ajax:
+     * */
+    public function searchAction()
     {
-        $request = $this->request;
-        if ($request->isPost()) {
+        // post data:
+        $backup_lod = $list_of_domains = json_decode(trim($_POST['list_of_domains']), 1);
+        $campaign_name = trim($_POST['campaign_name']);
+        $keywords = trim($_POST['keywords']);
+        $selected_domain_id = trim($_POST['selected_domain']);
+        $start_date = trim($_POST['start_date']);
+        $end_date = trim($_POST['start_date']);
+        $auto_complete_url = trim($_POST['auto_complete_url']);
 
-            $domainss = $_POST['domains'];
-            $domains = json_decode($domainss);
-            $domains = array_map('intval', $domains);
-
-            $pages = $_POST['pages'];
-            $pages = json_decode($pages);
-            $domains = implode(",", $domains);
-            $pages = implode(",", $pages);
-            $arr = array();
-
-            //$rangeQuery = array('conditions' => array('DomainURLIDX' => array( '$in' => $domains ),'PageURL'=>array( '$in' => $pages )),'limit'=>1);
-            $cursor = PageMainInfo::find("DomainURLIDX IN($domains) AND PageURL IN('$pages') LIMIT 1");
-
-            $i = 0;
-            foreach ($cursor as $dom) {
-                $arr[$i] = $dom->SiteCate1;
-                $i++;
-                $arr[$i] = $dom->SiteCate2;
-                $i++;
-                $arr[$i] = $dom->SiteCate3;
-                $i++;
-            }
-            $this->view->disable();
-            echo json_encode(array_unique($arr));
+        $output = array('error' => 1);
+        if (!isset($_POST['algorithm_id'])) {
+            $output['msg'] = 'You must select and algorithm!';
+            $this->jsonResponse($output);
         }
-    }
+        $algorithm_id = trim($_POST['algorithm_id']);
 
-    /**
-     *This function is used to get searched results of the search form.
-     */
-    public function generateAction()
-    {
-        $campaign_name = $_POST['campaign_name'];
-        $domain_ids = $_POST['domain_ids'];
-        $domain_ids = json_decode($domain_ids);
-        $domain_ids = array_map('intval', $domain_ids);
-
-        $page_urls_with_id = $_POST['page_urls_with_id'];
-        $page_urls_with_id = json_decode($page_urls_with_id);
-        $main_domain_url = $_POST['main_domain_url'];
-        $main_domain_url = json_decode($main_domain_url);
-        $pages_per_domain = (is_numeric($_POST['pages_per_domain'])) ? $_POST['pages_per_domain'] : 3;
-        $categories = $_POST['categories'];
-        $categories = json_decode($categories);
-        $this->output = '';
-        $this->output .= '
-                <div class="listtitlebar">
-                        <div class="pagetitlebar-title">PASSENDEN WEBSITE\'S</div>
-                </div>
-                <div class="listtitlesubbar">
-                        <div class="webaddressbar">INTERNET ADRESSE</div>
-                        <div class="bestmatchbar">BEST MATCH</div>
-                </div>
-                
-                <form name="build-campaign" action="'.$this->app_link.'/campaign/build_campaign" method="post" onsubmit="return check_domain_selected();">
-                    <input type="hidden" name="campaign_name" value="' . $campaign_name . '" />
-                    <input type="hidden" name="keywords" value="' . @$_POST['keywords'] . '" />
-                    <input type="hidden" name="start_date" value="' . $_POST['start_date'] . '" />
-                    <input type="hidden" name="end_date" value="' . $_POST['end_date'] . '" />';
-
-        foreach ($page_urls_with_id as $p) {
-            $this->output .= '<input type="hidden" name="page_urls[]" value="' . $p . '"/>';
-        }
-        foreach ($main_domain_url as $main_url) {
-            $this->output .= '<input type="hidden" value="' . $main_url . '" name="main_domain_url[]"/>';
-        }
-
-
-        $this->makeOutput($domain_ids, $categories, $pages_per_domain);
-        $this->output .= '<input type="hidden" name="total_page_urls" id="total_page_urls" value="' . $this->counter . '" />
-                                <div class="underlistbar"></div>';
-        if ($this->session->has("user-role") && $this->session->get("user-role") == 'master')
-            $this->output .= '<button type="" class="buildcampbutton" name="buildcampbutton" style="border:none; cursor:pointer"></button>';
-        $this->output .= '</form>';
-
-        echo $this->output;
-        exit;
-
-    }
-
-    /**
-     *This function is used to get KWSentiment values of Pages.
-     */
-    public function SentimentValueAction()
-    {
-        $page_url = $_POST['page_url'];
-        $get_page_sentiments = PageKwInfo::find(array('PageURL' => $page_url, "limit" => 1));
-        $result = 0;
-        foreach ($get_page_sentiments as $value) {
-            $result = ucfirst($value->KWSentiment);
-        }
-        echo json_encode(array("KWSentiment" => $result));
-        exit;
-    }
-
-    /**
-     *This function is used to check whether any campaign already exists with the same name.
-     */
-    public function isCampaignExistsAction()
-    {
-        $total = MasterCampaign::count("Name = '" . $_POST['campaign_name'] . "'");
+        // determine if campaign exists:
+        $total = MasterCampaign::count("Name = '" . $campaign_name . "'");
         if ($total) {
-            echo json_encode(array("status" => "error"));
-        } else {
-            echo json_encode(array("status" => "sucss"));
+            $output['msg'] = 'Campaign already exists!';
+            $this->jsonResponse($output);
         }
-        exit;
+
+        // manage list of domains and their ids:
+        if (!is_array($list_of_domains) AND count($list_of_domains) < 2) {
+            $output['msg'] = 'Not enough domains to create a campaign!';
+            $this->jsonResponse($output);
+        }
+
+        unset($list_of_domains[$selected_domain_id]);
+        $list_of_domains = array_values(array_flip($list_of_domains));
+        $list_of_domains = (count($list_of_domains) == 1) ? $list_of_domains[0] : $list_of_domains;
+
+        // manage searched keywords:
+        if (!strlen($keywords)) {
+            $output['msg'] = 'No keyword to search!';
+            $this->jsonResponse($output);
+        }
+
+        // get algorithm config:
+        $algorithm = $this->db->fetchOne(sprintf('SELECT * FROM algorithms WHERE id=%d', $algorithm_id), Db::FETCH_ASSOC);
+        $algorithm_config = json_decode($algorithm['config'], 1);
+        $sentimental_types = array();
+        foreach ($algorithm_config as $key => $value) {
+            switch ($key) {
+                case 'sentiment_positive':
+                    $generic_value = 0;
+                    break;
+                case 'sentiment_negative':
+                    $generic_value = 1;
+                    break;
+                case 'sentiment_neutral':
+                    $generic_value = 2;
+                    break;
+                default:
+                    $generic_value = -1;
+                    break;
+            }
+
+            if ($generic_value > -1 AND $value) {
+                $sentimental_types[] = $generic_value;
+            }
+        }
+
+        /* build up query to search for keyword: */
+        $query['select'] = 'SELECT * FROM  `page_main_info_body` pmib';
+
+        $query['join_0'] = 'INNER JOIN page_main_info pmi ON pmi.id = pmib.page_id';
+        $query['join_1'] = 'INNER JOIN page_main_info_points pmip ON pmi.id = pmip.page_id';
+        $query['join_2'] = 'LEFT JOIN page_main_info_headings pmih ON pmi.id = pmih.page_id';
+
+        $query['condition_0'] = 'WHERE pmib.body REGEXP "[[:<:]]' . addslashes($keywords) . '[[:>:]]"';
+        $query['condition_1'] = 'AND pmi.parsed_status = 1 AND pmi.api_data_status = 1 AND pmi.proxy_data_status = 1';
+        $query['condition_2'] = 'AND pmip.algo_id = ' . $algorithm['id'];
+
+        $query['conditions_x'] = (is_array($list_of_domains)) ? 'AND pmi.DomainURLIDX IN (' . implode(',', $list_of_domains) . ')' : 'AND pmi.DomainURLIDX = ' . $list_of_domains;
+        if (count($sentimental_types)) {
+            $query['condition_y'] = 'AND pmi.sentimental_type IN (' . implode(', ', $sentimental_types) . ')';
+        }
+
+        // for tests:
+        #$query['temp_limit'] = 'LIMIT 2';
+
+        // run query
+        $result = $this->db->fetchAll(implode(' ', $query), Db::FETCH_ASSOC);
+        unset($query);
+
+        if (!count($result)) {
+            $output['msg'] = 'No results returned!';
+            $this->jsonResponse($output);
+        }
+
+        // array -> uniqueness:
+        $save = array();
+        foreach ($result as $r_no => $r) {
+            if (isset($save[$r['page_id']])) {
+                unset($result[$r_no]);
+            } else {
+                // save as reference:
+                $save[$r['page_id']] = '';
+
+                // remove content:
+                $result[$r_no]['body'] = false;
+
+                // add more points:
+                $check_by_keys = array(
+                    'keyword_title' => 'page_title',
+                    'keyword_meta' => 'description',
+                    'keyword_h' => 'heading_text',
+                );
+
+                foreach ($check_by_keys as $algo_key => $result_key) {
+                    if ($this->keywordExists($keywords, $result[$r_no][$result_key])) {
+                        // for tests:
+                        #echo 'added ' . $algorithm_config[$algo_key] . ' to ' . $result_key.' page-id '. $r['page_id']. '' . "\n";
+                        #echo $result[$r_no][$result_key]."\n\n\n";
+                        $result[$r_no]['points'] += $algorithm_config[$algo_key];
+                    }
+
+                    // remove content:
+                    if ($result_key == 'heading_text') {
+                        //$result[$r_no][$result_key] = false;
+                    }
+                }
+
+                // no need to check content:
+                $result[$r_no]['points'] += $algorithm_config['keyword_content'];
+            }
+        }
+
+        // array -> group based on user's selected limit:
+        $save = array();
+        $pages_per_domain = trim($_POST['pages_per_domain']);
+        foreach ($result as $r_no => $r) {
+            if (!isset($save[$r['DomainURLIDX']])) {
+                $save[$r['DomainURLIDX']] = array();
+            }
+
+            if (count($save[$r['DomainURLIDX']]) < $pages_per_domain) {
+                $save[$r['DomainURLIDX']][] = $r;
+            }
+        }
+        unset($result);
+
+        // array -> re-group globally:
+        foreach ($save as $domain_id => $links) {
+            foreach ($links as $l_no => $link) {
+                $save2[] = $link;
+            }
+        }
+        unset($save);
+
+        // array -> sort descending by points:
+        uasort($save2, array($this, 'descendingSortByPoints'));
+
+        // ..
+        $this->view->disableLevel(View::LEVEL_MAIN_LAYOUT);
+        $this->view->disableLevel(View::LEVEL_LAYOUT);
+
+        echo $this->view->getRender('layouts', 'campaign_ajax', array(
+            'results' => $save2,
+            'campaign_name' => $campaign_name,
+            'keywords' => $keywords,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'list_of_domains' => $backup_lod,
+            'auto_complete_url' => $auto_complete_url,
+            'selected_domain_id' => $selected_domain_id,
+        ));
     }
 
     /**
-     *This function is used to get keywords of Automated Campaign.
+     * @param $needle
+     * @param $haystack
+     * @return int
+     */
+    private function keywordExists($needle, $haystack)
+    {
+        return (preg_match('#(' . $needle . ')#is', $haystack));
+    }
+
+    /**
+     * @param $a
+     * @param $b
+     * @return int
+     */
+    private function descendingSortByPoints($a, $b)
+    {
+        if ($a['points'] == $b['points']) {
+            return 0;
+        }
+
+        return ($a['points'] > $b['points']) ? -1 : 1;
+    }
+
+    /**
+     * This function is used to get keywords of Automated Campaign.
      */
     public function getPreviousKeywordsAction()
     {
-        $keywords = PagesToCampaign::find("url_ref = '" . $_POST['page_url'] . "'");
+        $keywords = PagesToCampaign::find("url_ref = '" . trim($_POST['page_url']) . "'");
         $result = "";
         $i = 0;
+        $pattern = '<li><a href="javascript:setKeywords(%d)">%s</a><input type="hidden" value="%s" id="achor_text_%d"/><input type="hidden" value="%s" id="html_text_%d"/></li>';
         foreach ($keywords as $value) {
             $i++;
-            $result .= ' <li><a href="javascript:setKeywords(' . $i . ')">' . $value->keywords . '</a>
-                <input type="hidden" value="' . $value->achor_text . '" id="achor_text_' . $i . '"/>
-                <input type="hidden" value="' . $value->html_embed . '" id="html_text_' . $i . '"/>
-            </li>';
-        }
-        echo json_encode(array("record" => $result));
-        exit;
-    }
-
-    /**
-     *This function is used to generate search results with its values like Pageranks, back links, social share count etc..
-     */
-    public function makeOutput($domain_ids, $categories, $pages_per_domain)
-    {
-        $domain_ids_temp = $domain_ids;
-        $domain_ids = implode(",", $domain_ids);
-        //$query = array('conditions' => array('DomainURLIDX' => array( '$nin' => $domain_ids )),"sort" => array('Points'=>-1),'limit'=> $this->records_per_search);
-        $query = "DomainURLIDX NOT IN($domain_ids) ORDER BY Points ASC LIMIT $this->records_per_search";
-        if (!empty($categories)) {
-            //$query = array('conditions' => array('DomainURLIDX' => array( '$nin' => $domain_ids ),'$or'=>array(array('SiteCate1' =>$categories[0]),array('SiteCate2' => $categories[1]),array('SiteCate3' =>$categories[2]))),"sort" => array('Points'=>-1),'limit'=>$this->records_per_search);
-            $query = "DomainURLIDX NOT IN($domain_ids) AND SiteCate1 = '$categories[0]' OR SiteCate2 = '$categories[1]' OR SiteCate3 = '$categories[2]' ORDER BY Points ASC LIMIT $this->records_per_search";
+            $result .= sprintf($pattern, $i, $value->keywords, $value->achor_text, $i, $value->html_embed, $i);
         }
 
-        $cursor = PageMainInfo::find($query);
-        foreach ($cursor as $page_url) {
-            $DomainURLIDX = $page_url->DomainURLIDX;
-            if (array_key_exists($DomainURLIDX, $this->temp_domain_ids)) {
-                $this->temp_domain_ids[$DomainURLIDX] = $this->temp_domain_ids[$DomainURLIDX] + 1;
-            } else {
-                $this->temp_domain_ids[$DomainURLIDX] = 1;
-            }
-            if ($this->temp_domain_ids[$DomainURLIDX] > $pages_per_domain) {
-                $this->greater_ids[] = $DomainURLIDX;
-                continue;
-            }
-            $percentage = 0;
-            if ($page_url->Points > 0) {
-                $percentage = ($page_url->Points * 100) / 100;
-                if ($percentage <= 0) {
-                    $percentage = 0;
-                }
-            }
-            //Domain age
-            $timestamp_start = strtotime(date('m/d/Y h:i:s'));
-            //$temp_date = date('Y-m-d H:i:s', );
-            $timestamp_end = strtotime(date('m/d/Y h:i:s', strtotime($page_url->date)));
-
-            $difference = abs($timestamp_end - $timestamp_start);
-            $domain_age = floor($difference / (60 * 60 * 24 * 365));
-            //Sentiments
-
-            $this->output .= '
-                    <div class="resultslist">
-                        <input type="checkbox" name="page_url_checkbox[]" id="page_url_checkbox_' . $this->counter . '" class="css-checkbox page_url_checkbox" value="' . $page_url->PageURL . '$%' . $page_url->DomainURLIDX . '$%' . $this->counter . '"/>
-                        <label for="page_url_checkbox_' . $this->counter . '" class="css-label"></label>
-
-                        <div class="sitelisttitle">' . substr($page_url->PageURL, 0, 50) . '</div>
-                        <a href="#site' . $this->counter . '" class="droparrow" onClick=javascript:getSentiment(' . $this->counter . ')></a>
-                        <div class="matchrating">
-                            <div class="matchrating-progress" style="width:' . $percentage . '%"></div>
-                        </div>
-                        <a href="#" onClick=javascript:getPreviousKeywords(' . $this->counter . ') class="setuplinksbutton" data-reveal-id="setuplinksModal' . $this->counter . '" data-animation="none"></a>
-                    </div>
-                    <div id="setuplinksModal' . $this->counter . '" class="reveal-modal">
-                        <div class="modal-blueheadline"></div>
-                        <div class="modal-midline">
-                                    <div class="modal-midlinetext">Wählen Sie alle zutreffenden:</div>
-                        </div>
-
-                        <div class="modal-setuplinksarea">
-                            <div class="modallistwrap">
-                            	<div class="modal-setupbox" style="margin-bottom:10px;">
-                					<div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">Stichworte For Analytik…</div>
-                    				<input type="textbox" id="textbox_keywords_analytics' . $this->counter . '" class="modal-setupboxone" name="textbox_keywords_analytics' . $this->counter . '">
-            					</div>
-                                <div class="modal-setupbox" style="margin-bottom:35px;margin-top:15px;">
-                                    <div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">anchor text…
-                                    </div>
-                                    <input type="text box" id="textbox_anchor_text' . $this->counter . '" class="modal-setupboxone" name="textbox_anchor_text' . $this->counter . '">
-
-                                </div>';
-            $this->output .= ' <div class="anchorsuggestion">
-                <div class="anchorsuggestion-title">Letzte Keywörter</div>
-                <ul id="keyword_lists_' . $this->counter . '">';
-            $this->output .= '</ul>
-            </div>
-
-            <div class="modal-setupbox" style="margin-bottom:35px;">
-                <div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">image url…</div>
-                <input type="text box" id="textbox_image_url' . $this->counter . '" class="modal-setupboxone" name="textbox_image_url' . $this->counter . '">
-            </div>
-
-            <div class="modal-setupbox" style="margin-bottom:35px;">
-                <div class="modallisttext" style="margin-top:-14px;line-height:0px;margin-left:0px;">myvideo video ID</div>
-                    <input type="textbox" id="textbox_video_url' . $this->counter . '" class="modal-setupboxone" name="textbox_video_url' . $this->counter . '">
-            </div>
-                <div class="modallisttext">HTML embed</div>							
-                <div class="modal-setupbox" style="height:150px;margin-bottom:0px;">
-                <textarea  id="textbox_html' . $this->counter . ' area1" name="textbox_html' . $this->counter . '" class="modal-setupboxtwo ckeditor"></textarea>
-            </div>
-            </div>
-            </div>
-
-
-            <div class="modal-bottomline">
-                <div class="close-reveal-modal modal-savecontent"><div class="modalcheckbox"></div></div>
-            </div>
-            </div>
-                <div id="site' . $this->counter . '" class="dropdownseo" style="display:none;">
-                    <div class="dropdownbluebg">
-                        <div class="fulldomainurl">full domain url:</div>
-                        <div class="sitesactualurl" id="actual_url_' . $this->counter . '">' . $page_url->PageURL . '</div>
-                    </div>
-                                        <div class="dropdownpr">
-                        <div class="dropdownsub-titles">PAGERANK</div>
-                        <div class="dropdownsub-results">' . ($page_url->GooglePageRank) . '</div>
-                    </div>
-                    <div class="dropdowncat">
-                        <div class="dropdownsub-titles">CATEGORY</div>
-                        <div class="dropdownsub-results">' . $page_url->SiteCate1 . '</div>
-                    </div>
-                    <div class="dropdownil">
-                        <div class="dropdownsub-titles">TOTAL BACKLINKS</div>
-                        <div class="dropdownsub-results">' . $page_url->TotalBacklinks . '</div>
-                    </div>
-                    <div class="dropdowwt" style="width:448px;margin-left:34px;">
-                        <div class="dropdownsub-titles">SENTIMENT VALUE</div>
-                        <div class="dropdownsub-results" id="sentimental_value_' . $this->counter . '"></div>
-
-                    </div>
-                    <div class="dropdowol">
-                        <div class="dropdownsub-titles">OUTGOING LINKS</div>
-                        <div class="dropdownsub-results">' . $page_url->TotalOutgoingLinksCnt . '</div>
-                    </div>
-                    <div class="dropdowss" style="margin-left:34px;">
-                        <div class="dropdownsub-titles">SOCIAL SHARES</div>
-                        <div class="dropdownsub-results">' . ($page_url->TwitterShareCnt + $page_url->FacebookShareCnt) . '</div>
-                    </div>';
-            $this->output .= '</div>';
-            $this->counter++;
-        }
-        if (!empty($this->greater_ids)) {
-            $this->greater_ids = array_unique($this->greater_ids);
-            $domain_ids = array_merge($domain_ids_temp, $this->greater_ids);
-            $domain_ids_temp = $domain_ids;
-            $domain_ids = implode(",", $domain_ids);
-            $query = "DomainURLIDX NOT IN($domain_ids) ORDER BY Points ASC LIMIT $this->records_per_search";
-            if (!empty($categories)) {
-                //$query = array('conditions' => array('DomainURLIDX' => array( '$nin' => $domain_ids ),'$or'=>array(array('SiteCate1' =>$categories[0]),array('SiteCate2' => $categories[1]),array('SiteCate3' =>$categories[2]))));
-                $query = "DomainURLIDX NOT IN($domain_ids) AND SiteCate1 = '$categories[0]' OR SiteCate2 = '$categories[1]' OR SiteCate3 = '$categories[2]' ORDER BY Points ASC LIMIT $this->records_per_search";
-            }
-            $cursor_count = PageMainInfo::count($query);
-            if ($cursor_count > 1 && $this->counter < $this->records_per_search) {
-                $this->makeOutput($domain_ids_temp, $categories, $pages_per_domain);
-            } else {
-                return TRUE;
-            }
-        }
+        $this->jsonResponse(array('record' => $result));
     }
 }

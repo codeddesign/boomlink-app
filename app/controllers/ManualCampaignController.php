@@ -240,24 +240,18 @@ class ManualCampaignController extends BaseController
         $return_arr = array();
         $request = $this->request;
         if ($request->isPost()) {
+            $domain_ids = json_decode($_POST['domains'],1);
+            $page_url = trim($_POST['cat_text']);
 
-            $domainss = $_POST['domains'];
-            $domains = json_decode($domainss);
-            $domains = array_map('intval', $domains);
-            $domains = implode(",", $domains);
-
-            $category = $_POST['cat_text'];
-            //$regex = new MongoRegex("/$category/i");
-            //$rangeQuery = array('conditions' => array('DomainURLIDX' => array( '$in' => $domains ), 'PageURL' =>$regex), 'limit'=>$limit);
-            $cursor = PageMainInfo::find("DomainURLIDX IN ($domains) AND PageURL LIKE '%$category%' LIMIT 5 ");
+            $cursor = PageMainInfo::find("DomainURLIDX IN(".implode(',', $domain_ids).") AND PageURL LIKE '%$page_url%' LIMIT 5 ");
             foreach ($cursor as $dom) {
                 $return_arr[] = array(
                     'label' => $dom->PageURL,
                     'id' => $dom->PageURL . '@#' . $dom->DomainURLIDX
                 );
             }
-            $this->view->disable();
-            echo json_encode($return_arr);
+
+            $this->jsonResponse($return_arr);
         }
 
     }

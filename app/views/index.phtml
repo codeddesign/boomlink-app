@@ -267,19 +267,7 @@
                 <?php
                 }
 
-                if ($show_full_nav OR !in_array("density", $blocked_pages)) {
-                    ?>
-                    <a href="<?= $this->app_link; ?>/crawl_project" style="color:#545454;">
-                        <li class="navlink" <?php echo ($page == "crawl_project") ? "id='active'" : ""; ?>>
-                                <span class="navicon">
-                                    <img src="<?= $this->app_link; ?>/images/importicon.png" width="15px" height="14px">
-                                </span> Crawl Project
-                        </li>
-                    </a>
-                <?php
-                }
-
-                if ($show_full_nav OR !in_array("density", $blocked_pages)) {
+                if ($show_full_nav OR !in_array("algo", $blocked_pages)) {
                     ?>
                     <a href="<?= $this->app_link; ?>/algo" style="color:#545454;">
                         <li class="navlink" <?php echo ($page == "algo") ? "id='active'" : ""; ?>>
@@ -527,10 +515,10 @@
 <?php if ($page == "campaign"): ?>
 
     <!-- page javascript -->
-    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.min.js"></script>
-    <script type="text/javascript" src="<?= $this->app_link; ?>/js/jquery.reveal.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery.min.js" type="text/javascript"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery.reveal.js" type="text/javascript"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
-    <script src="<?= $this->app_link; ?>/js/jquery-ui-1.10.3.custom.js"></script>
+    <script src="<?= $this->app_link; ?>/js/jquery-ui-1.10.3.custom.js" type="text/javascript"></script>
 
     <script type="text/javascript">
         $.noConflict(); // avoid jquery conflict

@@ -1,9 +1,7 @@
 <?php
-
 /* format: 'name' => 'title to show' */
 $navigation_links = array(
     'dashboard' => 'dashboard',
-    'crawl_project' => 'crawl project',
     'campaign' => 'campaigns',
     'manual_campaigns' => 'manual campaigns',
     'runningcampaigns' => 'ongoing campaigns',
@@ -28,9 +26,6 @@ switch ($this->session->get("user-role")) {
         $is_admin = true;
         break;
 }
-//get current user's domains:
-$status_domain = new StatusDomain();
-$current_domains = $status_domain->getDomainsList(); // results object.
 
 /* $user_.. - variables are referring to the current user being edited/saved/.. - depending on this 2 cases it will populate the form*/
 //new user zone - default sets:

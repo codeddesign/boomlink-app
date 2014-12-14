@@ -2,10 +2,10 @@
 -- version 4.0.10deb1
 -- http://www.phpmyadmin.net
 --
--- Gazda: localhost
--- Timp de generare: 11 Dec 2014 la 15:06
--- Versiune server: 5.5.40-0ubuntu0.14.04.1
--- Versiune PHP: 5.5.9-1ubuntu4.5
+-- Host: localhost
+-- Generation Time: Dec 14, 2014 at 08:35 PM
+-- Server version: 5.5.40-0ubuntu0.14.04.1
+-- PHP Version: 5.5.9-1ubuntu4.5
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,13 +17,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Bază de date: `site_analysis`
+-- Database: `site_analysis`
 --
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `algorithms`
+-- Table structure for table `algorithms`
 --
 
 CREATE TABLE IF NOT EXISTS `algorithms` (
@@ -33,24 +33,24 @@ CREATE TABLE IF NOT EXISTS `algorithms` (
   `is_public` int(1) NOT NULL DEFAULT '0',
   `config` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `crawler_agents`
+-- Table structure for table `crawler_agents`
 --
 
 CREATE TABLE IF NOT EXISTS `crawler_agents` (
   `id` int(3) NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=75 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `crawler_config`
+-- Table structure for table `crawler_config`
 --
 
 CREATE TABLE IF NOT EXISTS `crawler_config` (
@@ -58,12 +58,12 @@ CREATE TABLE IF NOT EXISTS `crawler_config` (
   `crawler_path` text NOT NULL,
   `config` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `domains_to_crawl`
+-- Table structure for table `domains_to_crawl`
 --
 
 CREATE TABLE IF NOT EXISTS `domains_to_crawl` (
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `domains_to_crawl` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `domain_rankings`
+-- Table structure for table `domain_rankings`
 --
 
 CREATE TABLE IF NOT EXISTS `domain_rankings` (
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `domain_rankings` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `google_pages`
+-- Table structure for table `google_pages`
 --
 
 CREATE TABLE IF NOT EXISTS `google_pages` (
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `google_pages` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `keyword_rankings`
+-- Table structure for table `keyword_rankings`
 --
 
 CREATE TABLE IF NOT EXISTS `keyword_rankings` (
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `keyword_rankings` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `lists`
+-- Table structure for table `lists`
 --
 
 CREATE TABLE IF NOT EXISTS `lists` (
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `lists` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `log_action`
+-- Table structure for table `log_action`
 --
 
 CREATE TABLE IF NOT EXISTS `log_action` (
@@ -152,12 +152,12 @@ CREATE TABLE IF NOT EXISTS `log_action` (
   `action_params` text COLLATE utf8_unicode_ci,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2344 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2671 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `master_campaign`
+-- Table structure for table `master_campaign`
 --
 
 CREATE TABLE IF NOT EXISTS `master_campaign` (
@@ -168,12 +168,12 @@ CREATE TABLE IF NOT EXISTS `master_campaign` (
   `CampaignType` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `unique_id` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=379 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=392 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `pages_to_campaign`
+-- Table structure for table `pages_to_campaign`
 --
 
 CREATE TABLE IF NOT EXISTS `pages_to_campaign` (
@@ -192,12 +192,12 @@ CREATE TABLE IF NOT EXISTS `pages_to_campaign` (
   `video_url` varchar(300) COLLATE utf8_unicode_ci DEFAULT NULL,
   `image_url` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `page_kw_info`
+-- Table structure for table `page_kw_info`
 --
 
 CREATE TABLE IF NOT EXISTS `page_kw_info` (
@@ -219,7 +219,7 @@ CREATE TABLE IF NOT EXISTS `page_kw_info` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `page_link_info`
+-- Table structure for table `page_link_info`
 --
 
 CREATE TABLE IF NOT EXISTS `page_link_info` (
@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS `page_link_info` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `page_main_info`
+-- Table structure for table `page_main_info`
 --
 
 CREATE TABLE IF NOT EXISTS `page_main_info` (
@@ -283,14 +283,14 @@ CREATE TABLE IF NOT EXISTS `page_main_info` (
   `tweeter` int(12) DEFAULT NULL,
   `google_plus` int(12) DEFAULT NULL,
   `google_rank` int(2) DEFAULT NULL,
-  `completed_algos` text COLLATE utf8_unicode_ci,
+  `completed_algos` varchar(1024) COLLATE utf8_unicode_ci DEFAULT '[]',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2839 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `page_main_info_body`
+-- Table structure for table `page_main_info_body`
 --
 
 CREATE TABLE IF NOT EXISTS `page_main_info_body` (
@@ -298,12 +298,12 @@ CREATE TABLE IF NOT EXISTS `page_main_info_body` (
   `page_id` int(11) NOT NULL,
   `body` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=941 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `page_main_info_headings`
+-- Table structure for table `page_main_info_headings`
 --
 
 CREATE TABLE IF NOT EXISTS `page_main_info_headings` (
@@ -311,12 +311,12 @@ CREATE TABLE IF NOT EXISTS `page_main_info_headings` (
   `page_id` int(9) NOT NULL,
   `heading_text` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2457 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `page_main_info_points`
+-- Table structure for table `page_main_info_points`
 --
 
 CREATE TABLE IF NOT EXISTS `page_main_info_points` (
@@ -325,12 +325,12 @@ CREATE TABLE IF NOT EXISTS `page_main_info_points` (
   `algo_id` int(9) NOT NULL,
   `points` varchar(15) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=286 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `proxies_list`
+-- Table structure for table `proxies_list`
 --
 
 CREATE TABLE IF NOT EXISTS `proxies_list` (
@@ -341,12 +341,12 @@ CREATE TABLE IF NOT EXISTS `proxies_list` (
   `password` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`idx`),
   UNIQUE KEY `ProxyIP` (`ProxyIP`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=51 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `site_xmlmap`
+-- Table structure for table `site_xmlmap`
 --
 
 CREATE TABLE IF NOT EXISTS `site_xmlmap` (
@@ -359,7 +359,7 @@ CREATE TABLE IF NOT EXISTS `site_xmlmap` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `status_domain`
+-- Table structure for table `status_domain`
 --
 
 CREATE TABLE IF NOT EXISTS `status_domain` (
@@ -377,12 +377,12 @@ CREATE TABLE IF NOT EXISTS `status_domain` (
   `robots_file` text COLLATE utf8_unicode_ci,
   PRIMARY KEY (`DomainURLIDX`),
   KEY `index1` (`DomainURL`(255),`Status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `status_page_links`
+-- Table structure for table `status_page_links`
 --
 
 CREATE TABLE IF NOT EXISTS `status_page_links` (
@@ -399,7 +399,7 @@ CREATE TABLE IF NOT EXISTS `status_page_links` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `track_visitors`
+-- Table structure for table `track_visitors`
 --
 
 CREATE TABLE IF NOT EXISTS `track_visitors` (
@@ -415,7 +415,7 @@ CREATE TABLE IF NOT EXISTS `track_visitors` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE IF NOT EXISTS `users` (
@@ -434,7 +434,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_browsers`
+-- Table structure for table `_sitemap_browsers`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_browsers` (
@@ -446,7 +446,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_browsers` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_cron_config`
+-- Table structure for table `_sitemap_cron_config`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_cron_config` (
@@ -465,7 +465,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_cron_config` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_domain_info`
+-- Table structure for table `_sitemap_domain_info`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_domain_info` (
@@ -491,7 +491,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_domain_info` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_links`
+-- Table structure for table `_sitemap_links`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_links` (
@@ -510,7 +510,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_links` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_links_external`
+-- Table structure for table `_sitemap_links_external`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_links_external` (
@@ -524,7 +524,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_links_external` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_links_headers`
+-- Table structure for table `_sitemap_links_headers`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_links_headers` (
@@ -572,7 +572,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_links_headers` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_links_info`
+-- Table structure for table `_sitemap_links_info`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_links_info` (
@@ -618,7 +618,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_links_info` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_links_internal`
+-- Table structure for table `_sitemap_links_internal`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_links_internal` (
@@ -632,7 +632,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_links_internal` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_links_social`
+-- Table structure for table `_sitemap_links_social`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_links_social` (
@@ -651,7 +651,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_links_social` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_user_history`
+-- Table structure for table `_sitemap_user_history`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_user_history` (
@@ -669,7 +669,7 @@ CREATE TABLE IF NOT EXISTS `_sitemap_user_history` (
 -- --------------------------------------------------------
 
 --
--- Structura de tabel pentru tabelul `_sitemap_user_words`
+-- Table structure for table `_sitemap_user_words`
 --
 
 CREATE TABLE IF NOT EXISTS `_sitemap_user_words` (

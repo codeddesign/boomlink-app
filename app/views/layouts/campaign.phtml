@@ -87,7 +87,7 @@ if (!is_array($user_domains)) {
         $('#generate_list_form').on('submit', function (ev) {
             ev.preventDefault();
 
-            var formSData = $(this).serialize();
+            var formSData = $(this).serialize(), loading = $('#search_loading_div');
 
             if ($('#campaign_name').val() == '') {
                 alert("Enter campaign name");
@@ -119,6 +119,7 @@ if (!is_array($user_domains)) {
                 return false
             }
 
+            loading.show();
             $.ajax({
                 url: "<?= $this->app_link;?>/campaign/search",
                 type: "POST",
@@ -137,7 +138,7 @@ if (!is_array($user_domains)) {
 
                     $('#searched_pages_result').html(data);
 
-                    $('.droparrow').click(function () {
+                    $('.droparrow').on('click', function () {
                         var show_id = $(this).attr('data-show-id'),
                             content = $('#' + show_id);
 
@@ -149,6 +150,8 @@ if (!is_array($user_domains)) {
                         content.css('display', 'none');
                         return true;
                     });
+
+                    loading.hide();
                 }
             });
         });
@@ -188,8 +191,7 @@ if (!is_array($user_domains)) {
         <!--<a href="#" class="dropdownbox" data-reveal-id="choosepageModal" data-animation="none">Wählen Sie Seite <span class="dropdownbox-arrow"></span></a> !-->
         <input type="text" name="auto_complete_url" id="auto_complete_url" class="autocompleteinputform"/>
 
-        <div id="loadmore_div" style="display: none;" class="loading">
-        </div>
+        <div id="loadmore_div" style="display: none;" class="loading"></div>
     </div>
 </div>
 
@@ -233,6 +235,7 @@ if (!is_array($user_domains)) {
 
 <div class="whitepageblueheader"></div>
 <div class="longwhitepagegraybg">
+    <div id="search_loading_div" style="display: none;" class="loading"></div>
     <input type="text" name="keywords" id="keywords" value="" placeholder="Kampagne erstellen" class="mediumwhiteformfield">
     <button type="submit" class="campaigngeneratelist" name="submit" style="border:none; cursor:pointer;"></button>
 </div>

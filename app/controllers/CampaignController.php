@@ -156,10 +156,10 @@ class CampaignController extends BaseController
         $sentimental_types = array();
         foreach ($algorithm_config as $key => $value) {
             switch ($key) {
-                case 'sentiment_positive':
+                case 'sentiment_negative':
                     $generic_value = 0;
                     break;
-                case 'sentiment_negative':
+                case 'sentiment_positive':
                     $generic_value = 1;
                     break;
                 case 'sentiment_neutral':
@@ -170,7 +170,7 @@ class CampaignController extends BaseController
                     break;
             }
 
-            if ($generic_value > -1 AND $value) {
+            if ($generic_value > -1 AND $value == 1) {
                 $sentimental_types[] = $generic_value;
             }
         }
@@ -178,9 +178,9 @@ class CampaignController extends BaseController
         /* build up query to search for keyword: */
         $query['select'] = 'SELECT * FROM  `page_main_info_body` pmib';
 
-        $query['join_0'] = 'INNER JOIN page_main_info pmi ON pmi.id = pmib.page_id';
-        $query['join_1'] = 'INNER JOIN page_main_info_points pmip ON pmi.id = pmip.page_id';
-        $query['join_2'] = 'LEFT JOIN page_main_info_headings pmih ON pmi.id = pmih.page_id';
+        $query['join_0'] = 'LEFT JOIN page_main_info_headings pmih ON pmib.page_id = pmih.page_id';
+        $query['join_1'] = 'INNER JOIN page_main_info pmi ON pmib.page_id = pmi.id';
+        $query['join_2'] = 'INNER JOIN page_main_info_points pmip ON pmib.page_id = pmip.page_id';
 
         $query['condition_0'] = 'WHERE pmib.body REGEXP "[[:<:]]' . addslashes($keywords) . '[[:>:]]"';
         $query['condition_1'] = 'AND pmi.parsed_status = 1 AND pmi.api_data_status = 1 AND pmi.proxy_data_status = 1';
@@ -213,7 +213,7 @@ class CampaignController extends BaseController
                 $save[$r['page_id']] = '';
 
                 // remove content:
-                $result[$r_no]['body'] = false;
+                $result[$r_no]['body'] = null;
 
                 // add more points:
                 $check_by_keys = array(
@@ -224,15 +224,10 @@ class CampaignController extends BaseController
 
                 foreach ($check_by_keys as $algo_key => $result_key) {
                     if ($this->keywordExists($keywords, $result[$r_no][$result_key])) {
-                        // for tests:
-                        #echo 'added ' . $algorithm_config[$algo_key] . ' to ' . $result_key.' page-id '. $r['page_id']. '' . "\n";
-                        #echo $result[$r_no][$result_key]."\n\n\n";
                         $result[$r_no]['points'] += $algorithm_config[$algo_key];
-                    }
-
-                    // remove content:
-                    if ($result_key == 'heading_text') {
-                        //$result[$r_no][$result_key] = false;
+                        $result[$r_no][$result_key] = 1;
+                    } else {
+                        $result[$r_no][$result_key] = 0;
                     }
                 }
 
@@ -266,12 +261,64 @@ class CampaignController extends BaseController
         // array -> sort descending by points:
         uasort($save2, array($this, 'descendingSortByPoints'));
 
+        // handle percentage and data for filtering:
+        $first = false;
+        $min_max = $results_filtered = array();
+        $avoid_keys = array_flip(array('page_id', 'PageURL'));
+
+        foreach ($save2 as $s_no => $link) {
+            if (!$first) {
+                $first = $link['points'];
+            }
+
+            // save percentage to main array:
+            $save2[$s_no]['percentage'] = $percentage = floor($link['points'] * 100 / $first);
+
+            // build up array for JS:
+            $incoming_links = $save2[$s_no]['total_back_links'];
+            $outgoing_links = $save2[$s_no]['follow_links'] + $save2[$s_no]['no_follow_links'];
+            $google_rank = ($save2[$s_no]['google_rank'] == null) ? 0 : $save2[$s_no]['google_rank'];
+            $share_count = $link['fb_shares'] + $link['fb_likes'] + $link['fb_comments'] + $link['tweeter'] + $link['google_plus'];
+
+            $temp = array(
+                'page_id' => (int)$save2[$s_no]['page_id'],
+                'PageURL' => $save2[$s_no]['PageURL'],
+                'percentage' => (int)$percentage,
+                'incoming_links' => (int)$incoming_links,
+                'outgoing_links' => (int)$outgoing_links,
+                'google_rank' => (int)$google_rank,
+                'domain_age' => (int)0,
+                'share_count' => (int)$share_count,
+                'sentiment' => (int)$save2[$s_no]['sentimental_type'],
+                'keyword_title' => (int)$save2[$s_no]['heading_text'],
+                'keyword_description' => (int)$save2[$s_no]['description'],
+                'keyword_headings' => (int)$save2[$s_no]['heading_text'],
+            );
+            $results_filtered[] = $temp;
+
+            // handle minimum-maximum available in filtering:
+            foreach ($temp as $key => $value) {
+                if (!isset($avoid_keys[$key])) {
+                    if (!isset($min_max[$key]['min']) OR $value <= $min_max[$key]['min']) {
+                        $min_max[$key]['min'] = $value;
+                    }
+
+                    if (!isset($min_max[$key]['max']) or $value >= $min_max[$key]['max']) {
+                        $min_max[$key]['max'] = $value;
+                    }
+                }
+            }
+        }
+
         // ..
         $this->view->disableLevel(View::LEVEL_MAIN_LAYOUT);
         $this->view->disableLevel(View::LEVEL_LAYOUT);
 
         echo $this->view->getRender('layouts', 'campaign_ajax', array(
             'results' => $save2,
+            'results_filtered' => $results_filtered,
+            'min_max' => $min_max,
+            'sentimental_types' => $sentimental_types,
             'campaign_name' => $campaign_name,
             'keywords' => $keywords,
             'start_date' => $start_date,

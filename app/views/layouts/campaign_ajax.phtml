@@ -1,6 +1,102 @@
+<style>
+    .search-filtering-table-titles {
+        color: #2280B8;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .search-filtering-table-fields {
+        text-align: center;
+    }
+
+    .search-filtering-table {
+        font-size: 10px;
+    }
+
+    .td-right-input {
+        width: 28px;
+        margin-left: 2px;
+    }
+
+    .td-left-input {
+        width: 28px;
+    }
+</style>
 <div class="listtitlebar">
-    <div class="pagetitlebar-title">PASSENDEN WEBSITE\'S</div>
+    <div class="pagetitlebar-title">PASSENDEN WEBSITE'S</div>
 </div>
+<!-- start: filtering results -->
+<div>
+    <script>
+        var search_results_filtered = <?= json_encode($results_filtered); ?>;
+    </script>
+    <form id="filtering-form">
+        <table class="search-filtering-table">
+            <tr class="search-filtering-table-titles">
+                <td><label for="url_text">URL/Seite</label></td>
+                <td><label for="seo_score">Minimum<br/>SEO Score</label></td>
+                <td><label for="google_rank">Pagerank</label></td>
+                <td><label for="incoming_links">Incoming<br/>Links</label></td>
+                <td><label for="outgoing_links">Outgoing<br/>Links</label></td>
+                <td><label for="domain_age">Domain<br/>age</label></td>
+                <td><label for="share_count">Share<br/>Count</label></td>
+                <td><label for="sentiment">Sentiment</label></td>
+                <td><label for="keyword_title">Keyword<br/>in title</label></td>
+                <td><label for="keyword_description">Keyword<br/>in descr.</label></td>
+                <td><label for="keyword_headings">Keyword<br/>in headings</label></td>
+            </tr>
+            <tr class="search-filtering-table-fields">
+                <td><input type="search" id="url_text" name="url_text" style="width: 90px;" placeholder="search.." class="filter-field"></td>
+                <td><input type="text" id="seo_score" name="seo_score_min" class="td-left-input filter-field" style="width: 50px" value="<?= isset($min_max['percentage']['min']) ? $min_max['percentage']['min'] : ''; ?>"></td>
+                <td>
+                    <input type="text" id="google_rank" name="google_rank_min" class="td-left-input filter-field" value="<?= isset($min_max['google_rank']['min']) ? $min_max['google_rank']['min'] : ''; ?>">
+                    <input type="text" id="google_rank" name="google_rank_max" class="td-right-input filter-field" value="<?= isset($min_max['google_rank']['max']) ? $min_max['google_rank']['max'] : ''; ?>">
+                </td>
+                <td>
+                    <input type="text" id="incoming_links" name="incoming_links_min" class="td-left-input filter-field" value="<?= isset($min_max['incoming_links']['min']) ? $min_max['incoming_links']['min'] : ''; ?>">
+                    <input type="text" id="incoming_links" name="incoming_links_max" class="td-right-input filter-field" value="<?= isset($min_max['incoming_links']['max']) ? $min_max['incoming_links']['max'] : ''; ?>">
+                </td>
+                <td>
+                    <input type="text" id="outgoing_links" name="outgoing_links_min" class="td-left-input filter-field" value="<?= isset($min_max['outgoing_links']['min']) ? $min_max['outgoing_links']['min'] : ''; ?>">
+                    <input type="text" id="outgoing_links" name="outgoing_links_max" class="td-right-input filter-field" value="<?= isset($min_max['outgoing_links']['max']) ? $min_max['outgoing_links']['max'] : ''; ?>">
+                </td>
+                <td>
+                    <input type="text" id="domain_age" name="domain_age_min" class="td-left-input filter-field" value="<?= isset($min_max['domain_age']['min']) ? $min_max['domain_age']['min'] : ''; ?>">
+                    <input type="text" id="domain_age" name="domain_age_max" class="td-right-input filter-field" value="<?= isset($min_max['domain_age']['max']) ? $min_max['domain_age']['max'] : ''; ?>">
+                </td>
+                <td>
+                    <input type="text" id="share_count" name="share_count_min" class="td-left-input filter-field" value="<?= isset($min_max['share_count']['min']) ? $min_max['share_count']['min'] : ''; ?>">
+                    <input type="text" id="share_count" name="share_count_max" class="td-right-input filter-field" value="<?= isset($min_max['share_count']['max']) ? $min_max['share_count']['max'] : ''; ?>">
+                </td>
+                <td>
+                    <select id="sentiment" name="sentiment" class="filter-field">
+                        <option value="">--</option>
+                        <?php
+                        if (!count($sentimental_types)) : ?>
+                            <option value="0">negative</option>
+                            <option value="1">positive</option>
+                            <option value="2">neutral</option>
+                        <?php
+                        else:
+                            $selected = (count($sentimental_types) == 1) ? 'selected' : '';
+                            $option_pattern = '<option value="%d" %s>%s</option>';
+                            foreach ($sentimental_types as $s_null => $s_val) {
+                                $senti_str = ($s_val == 2) ? 'neutral' : ($s_val == 1) ? 'positive' : 'negative';
+                                echo sprintf($option_pattern, $s_val, $selected, $senti_str);
+                            }
+                        endif;
+                        ?>
+                    </select>
+                </td>
+                <td><input type="checkbox" id="keyword_title" name="keyword_title" class="filter-field"></td>
+                <td><input type="checkbox" id="keyword_description" name="keyword_description" class="filter-field"></td>
+                <td><input type="checkbox" id="keyword_headings" name="keyword_headings" class="filter-field"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!-- end: filtering results -->
+
 <div class="listtitlesubbar">
     <div class="webaddressbar">INTERNET ADRESSE</div>
     <div class="bestmatchbar">BEST MATCH</div>
@@ -13,7 +109,6 @@
     <input type="hidden" name="end_date" value="<?= $end_date; ?>"/>
     <?php
     $counter = 0;
-    $first = false;
     foreach ($results as $l_no => $link) :
         $counter++;
 
@@ -23,25 +118,18 @@
         $sentimental_type = ($link['sentimental_type'] == 2) ? 'neutral' : ($link['sentimental_type'] == 1) ? 'positive' : 'negative';
         $google_rank = ($link['google_rank'] == '') ? 'n/a' : $link['google_rank'];
 
-        // handle percentage:
-        if (!$first) {
-            $first = $link['points'];
-        }
-        $percentage = floor($link['points'] * 100 / $first);
-
         // big link:
         $big_link_value = $link['PageURL'] . '$%' . $link['DomainURLIDX'] . '$%' . $link['page_id'];
         ?>
-        <div class="resultslist">
+        <div class="resultslist" id="result-for-<?= $link['page_id']; ?>">
             <input type="checkbox" name="page_url_checkbox[]" id="page_url_checkbox_<?= $link['page_id']; ?>" class="css-checkbox page_url_checkbox" value="<?= $big_link_value ?>"/>
             <label for="page_url_checkbox_<?= $link['page_id']; ?>" class="css-label"></label>
 
-            <div class="sitelisttitle" title="<?= $link['PageURL']; ?>" style="cursor: help;"><?= $page_url; ?>
-            </div>
+            <div class="sitelisttitle" title="<?= $link['PageURL']; ?>" style="cursor: help;"><?= $page_url; ?></div>
             <a class="droparrow" data-show-id="site-<?= $link['page_id']; ?>" style="cursor: pointer;"></a>
 
             <div class="matchrating">
-                <div class="matchrating-progress" style="width: <?= $percentage; ?>%"></div>
+                <div class="matchrating-progress" style="width: <?= $link['percentage']; ?>%"></div>
             </div>
 
             <a href="#" onclick="getPreviousKeywords(<?= $link['page_id']; ?>)" class="setuplinksbutton" data-reveal-id="setuplinksModal<?= $link['page_id']; ?>" data-animation="none"></a>
@@ -134,3 +222,72 @@
         <button class="buildcampbutton" name="buildcampbutton" style="border:none; cursor:pointer"></button>
     <?php endif; ?>
 </form>
+<script>
+    function doSearch(field) {
+        var name = field.attr('name'),
+            formObj = $('#filtering-form').serializeArray(),
+            min_max = ['share_count', 'domain_age', 'incoming_links', 'outgoing_links', 'google_rank'],
+            formArr = {}, i, k, show, srf, theKey, row;
+
+        for (i = 0; i < formObj.length; i++) {
+            formArr[formObj[i].name] = formObj[i].value;
+        }
+
+        for (i = 0; i < search_results_filtered.length; i++) {
+            srf = search_results_filtered[i];
+            show = 1;
+
+            if (formArr.url_text.trim() !== '' && srf.PageURL.toLowerCase().indexOf(formArr.url_text.toLowerCase()) == -1) {
+                show = 0;
+            }
+
+            if (formArr.seo_score_min.trim() !== '' && srf.percentage < formArr.seo_score_min) {
+                show = 0;
+            }
+
+            for (k = 0; k < min_max.length; k++) {
+                theKey = min_max[k];
+
+                if (formArr[theKey + '_max'] !== '' && formArr[theKey + '_min'] !== '') {
+                    if (srf[theKey] > formArr[theKey + '_max']) {
+                        show = 0;
+                    }
+
+                    if (srf[theKey] < formArr[theKey + '_min']) {
+                        show = 0;
+                    }
+                }
+            }
+
+            if (formArr.sentiment !== '' && formArr.sentiment !== srf.sentiment) {
+                show = 0;
+            }
+
+            if (formArr.keyword_title !== undefined && srf.keyword_title == 0) {
+                show = 0;
+            }
+
+            if (formArr.keyword_description !== undefined && srf.keyword_description == 0) {
+                show = 0;
+            }
+
+            if (formArr.keyword_headings !== undefined && srf.keyword_headings == 0) {
+                show = 0;
+            }
+
+            row = $('#result-for-' + srf.page_id);
+            row.hide();
+            if (show) {
+                row.show();
+            }
+        }
+    }
+
+    $('input[type=text].filter-field, input[type=search].filter-field').on('keyup', function () {
+        doSearch($(this));
+    });
+
+    $('input[type=checkbox].filter-field, select.filter-field').change(function () {
+        doSearch($(this))
+    });
+</script>

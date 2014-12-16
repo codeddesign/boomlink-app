@@ -81,7 +81,7 @@ class ManualCampaignController extends BaseController
 				<div class="listsetuplinks">Setup-Links</div>
 				<div class="connectionlevel">Verbindung aufgebaut</div>
 			</div>
-            <form name="build-manual-campaign" action="'.$this->app_link.'/manual_campaign/build" method="post" onsubmit="return check_domain_selected();">
+            <form name="build-manual-campaign" action="' . $this->app_link . '/manual_campaign/build" method="post" onsubmit="return check_domain_selected();">
 			<input type="hidden" name="campaign_name" value="' . $campaign_name . '" />
                         <input type="hidden" name="keywords" value="' . $request->getPost('keywords') . '" />
 			<input type="hidden" name="start_date" value="' . $request->getPost('start_date') . '" />
@@ -240,10 +240,16 @@ class ManualCampaignController extends BaseController
         $return_arr = array();
         $request = $this->request;
         if ($request->isPost()) {
-            $domain_ids = json_decode($_POST['domains'],1);
             $page_url = trim($_POST['cat_text']);
 
-            $cursor = PageMainInfo::find("DomainURLIDX IN(".implode(',', $domain_ids).") AND PageURL LIKE '%$page_url%' LIMIT 5 ");
+            if (isset($_POST['domains'])) {
+                $domain_ids = json_decode($_POST['domains'], 1);
+                $cursor = PageMainInfo::find("DomainURLIDX IN(" . implode(',', $domain_ids) . ") AND PageURL LIKE '%$page_url%' LIMIT 5 ");
+            } else {
+                $domain_id = trim($_POST['domain_id']);
+                $cursor = PageMainInfo::find("DomainURLIDX=" . $domain_id . " AND PageURL LIKE '%$page_url%' LIMIT 5 ");
+            }
+
             foreach ($cursor as $dom) {
                 $return_arr[] = array(
                     'label' => $dom->PageURL,

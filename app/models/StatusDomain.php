@@ -13,7 +13,12 @@ class StatusDomain extends Model
     public function getDomainsList()
     {
         $query = new Phalcon\Mvc\Model\Query("SELECT DomainURLIDX as idx, DomainURL as url FROM StatusDomain", $this->getDI());
-        return $query->execute();
+        $domains = $query->execute();
+        if (is_array($domains)) {
+            $domains = array();
+        }
+
+        return $domains;
     }
 
     function getCrawledLists()

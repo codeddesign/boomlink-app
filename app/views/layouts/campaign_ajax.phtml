@@ -71,21 +71,9 @@
                 <td>
                     <select id="sentiment" name="sentiment" class="filter-field">
                         <option value="">--</option>
-                        <?php
-                        if (!count($sentimental_types)) : ?>
                             <option value="0">negative</option>
                             <option value="1">positive</option>
                             <option value="2">neutral</option>
-                        <?php
-                        else:
-                            $selected = (count($sentimental_types) == 1) ? 'selected' : '';
-                            $option_pattern = '<option value="%d" %s>%s</option>';
-                            foreach ($sentimental_types as $s_null => $s_val) {
-                                $senti_str = ($s_val == 2) ? 'neutral' : ($s_val == 1) ? 'positive' : 'negative';
-                                echo sprintf($option_pattern, $s_val, $selected, $senti_str);
-                            }
-                        endif;
-                        ?>
                     </select>
                 </td>
                 <td><input type="checkbox" id="keyword_title" name="keyword_title" class="filter-field"></td>

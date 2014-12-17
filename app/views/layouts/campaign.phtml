@@ -251,14 +251,14 @@ if (!is_array($user_domains)) {
             <div class="modallistwrap">
                 <?php
                 $i = 0;
-                $listOfDomains = array();
+                $list_of_domains = array();
                 if (!empty($get_domains)) {
                     foreach ($get_domains as $domain) {
                         if (!in_array($domain->DomainURLIDX, $user_domains) and !$is_admin) {
                             continue;
                         }
 
-                        $listOfDomains[$domain->DomainURLIDX] = $domain->DomainURL;
+                        $list_of_domains[$domain->DomainURLIDX] = $domain->DomainURL;
                         ?>
                         <div class="modal-listbox">
                             <input type="checkbox" name="selected_domain" value="<?= $domain->DomainURLIDX; ?>" id="domain_checkbox_<?= $i; ?>" class="css-checkbox"/>
@@ -269,7 +269,7 @@ if (!is_array($user_domains)) {
                         <?php $i++;
                     }
                 } ?>
-                <input type="hidden" name="list_of_domains" id="list_of_domains" value='<?= json_encode($listOfDomains, true); ?>'>
+                <input type="hidden" name="list_of_domains" id="list_of_domains" value='<?= json_encode($list_of_domains, true); ?>'>
             </div>
         </div>
         <div class="modal-bottomline">

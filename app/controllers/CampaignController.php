@@ -35,6 +35,34 @@ class CampaignController extends BaseController
     }
 
     /**
+     * @param $reg_date
+     * @return int
+     */
+    private function getDomainAgeByDate($reg_date)
+    {
+        $date = new DateTime($reg_date);
+        $now = new DateTime();
+        return $now->diff($date)->y;
+    }
+
+    /**
+     * @param $domains
+     * @return array
+     */
+    private function getDomainsAge($domains)
+    {
+        $temp = array();
+        foreach ($domains as $domain) {
+            $reg_date = strtolower(trim($domain->registration_date));
+            $reg_date = ($reg_date == 0) ? '' : $reg_date;
+
+            $temp[$domain->DomainURLIDX] = ($reg_date == '') ? 0 : $this->getDomainAgeByDate($reg_date);
+        }
+
+        return $temp;
+    }
+
+    /**
      *This function is used to save build campaigns in the database.
      */
     public function build_campaignAction()
@@ -203,6 +231,9 @@ class CampaignController extends BaseController
             $this->jsonResponse($output);
         }
 
+        // get domains_age:
+        $domains_age = $this->getDomainsAge(StatusDomain::find());
+
         // array -> uniqueness:
         $save = array();
         foreach ($result as $r_no => $r) {
@@ -264,7 +295,7 @@ class CampaignController extends BaseController
         // handle percentage and data for filtering:
         $first = false;
         $min_max = $results_filtered = array();
-        $avoid_keys = array_flip(array('page_id', 'PageURL'));
+        $avoid_keys = array_flip(array('page_id', 'PageURL', 'keyword_title', 'keyword_description', 'keyword_headings'));
 
         foreach ($save2 as $s_no => $link) {
             if (!$first) {
@@ -283,16 +314,16 @@ class CampaignController extends BaseController
             $temp = array(
                 'page_id' => (int)$save2[$s_no]['page_id'],
                 'PageURL' => $save2[$s_no]['PageURL'],
+                'keyword_title' => (int)$save2[$s_no]['heading_text'],
+                'keyword_description' => (int)$save2[$s_no]['description'],
+                'keyword_headings' => (int)$save2[$s_no]['heading_text'],
                 'percentage' => (int)$percentage,
                 'incoming_links' => (int)$incoming_links,
                 'outgoing_links' => (int)$outgoing_links,
                 'google_rank' => (int)$google_rank,
-                'domain_age' => (int)0,
                 'share_count' => (int)$share_count,
                 'sentiment' => (int)$save2[$s_no]['sentimental_type'],
-                'keyword_title' => (int)$save2[$s_no]['heading_text'],
-                'keyword_description' => (int)$save2[$s_no]['description'],
-                'keyword_headings' => (int)$save2[$s_no]['heading_text'],
+                'domain_age' => (int)$domains_age[$save2[$s_no]['DomainURLIDX']],
             );
             $results_filtered[] = $temp;
 

@@ -22,14 +22,14 @@
         width: 28px;
     }
 </style>
+<script>
+    var search_results_filtered = <?= json_encode($results_filtered); ?>;
+</script>
 <div class="listtitlebar">
     <div class="pagetitlebar-title">PASSENDEN WEBSITE'S</div>
 </div>
 <!-- start: filtering results -->
 <div>
-    <script>
-        var search_results_filtered = <?= json_encode($results_filtered); ?>;
-    </script>
     <form id="filtering-form">
         <table class="search-filtering-table">
             <tr class="search-filtering-table-titles">
@@ -226,7 +226,7 @@
     function doSearch(field) {
         var name = field.attr('name'),
             formObj = $('#filtering-form').serializeArray(),
-            min_max = ['share_count', 'domain_age', 'incoming_links', 'outgoing_links', 'google_rank'],
+            min_max = ['share_count', 'domain_age', 'incoming_links', 'outgoing_links', 'google_rank', 'domains_age'],
             formArr = {}, i, k, show, srf, theKey, row;
 
         for (i = 0; i < formObj.length; i++) {
@@ -259,7 +259,7 @@
                 }
             }
 
-            if (formArr.sentiment !== '' && formArr.sentiment !== srf.sentiment) {
+            if (formArr.sentiment !== '' && formArr.sentiment != srf.sentiment) {
                 show = 0;
             }
 

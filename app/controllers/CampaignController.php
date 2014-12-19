@@ -147,6 +147,7 @@ class CampaignController extends BaseController
         $start_date = trim($_POST['start_date']);
         $end_date = trim($_POST['start_date']);
         $auto_complete_url = trim($_POST['auto_complete_url']);
+        $pages_per_domain = trim($_POST['pages_per_domain']);
 
         $output = array('error' => 1);
         if (!isset($_POST['algorithm_id'])) {
@@ -170,7 +171,6 @@ class CampaignController extends BaseController
 
         unset($list_of_domains[$selected_domain_id]);
         $list_of_domains = array_values(array_flip($list_of_domains));
-        $list_of_domains = (count($list_of_domains) == 1) ? $list_of_domains[0] : $list_of_domains;
 
         // manage searched keywords:
         if (!strlen($keywords)) {
@@ -204,27 +204,35 @@ class CampaignController extends BaseController
         }
 
         /* build up query to search for keyword: */
-        $query['select'] = 'SELECT * FROM  `page_main_info_body` pmib';
+        $result = array();
+        foreach ($list_of_domains as $d_no => $domain_id) {
+            $query['select'] = 'SELECT * FROM  `page_main_info_body` pmib';
 
-        $query['join_0'] = 'LEFT JOIN page_main_info_headings pmih ON pmib.page_id = pmih.page_id';
-        $query['join_1'] = 'INNER JOIN page_main_info pmi ON pmib.page_id = pmi.id';
-        $query['join_2'] = 'INNER JOIN page_main_info_points pmip ON pmib.page_id = pmip.page_id';
+            $query['join_0'] = 'LEFT JOIN page_main_info_headings pmih ON pmib.page_id = pmih.page_id';
+            $query['join_1'] = 'INNER JOIN page_main_info pmi ON pmib.page_id = pmi.id';
+            $query['join_2'] = 'INNER JOIN page_main_info_points pmip ON pmib.page_id = pmip.page_id';
 
-        $query['condition_0'] = 'WHERE pmib.body REGEXP "[[:<:]]' . addslashes($keywords) . '[[:>:]]"';
-        $query['condition_1'] = 'AND pmi.parsed_status = 1 AND pmi.api_data_status = 1 AND pmi.proxy_data_status = 1';
-        $query['condition_2'] = 'AND pmip.algo_id = ' . $algorithm['id'];
+            $query['condition_0'] = 'WHERE pmib.body REGEXP "[[:<:]]' . addslashes($keywords) . '[[:>:]]"';
+            $query['condition_1'] = 'AND pmi.parsed_status = 1 AND pmi.api_data_status = 1 AND pmi.proxy_data_status = 1';
+            $query['condition_2'] = 'AND pmip.algo_id = ' . $algorithm['id'];
 
-        $query['conditions_x'] = (is_array($list_of_domains)) ? 'AND pmi.DomainURLIDX IN (' . implode(',', $list_of_domains) . ')' : 'AND pmi.DomainURLIDX = ' . $list_of_domains;
-        if (count($sentimental_types)) {
-            $query['condition_y'] = 'AND pmi.sentimental_type IN (' . implode(', ', $sentimental_types) . ')';
+            $query['conditions_x'] = 'AND pmi.DomainURLIDX = ' . $domain_id;
+            if (count($sentimental_types)) {
+                $query['condition_y'] = 'AND pmi.sentimental_type IN (' . implode(', ', $sentimental_types) . ')';
+            }
+
+            $query['order'] = 'ORDER BY pmip.points DESC';
+            $query['temp_limit'] = 'LIMIT ' . $pages_per_domain;
+
+            // run query
+            $temp = $this->db->fetchAll(implode(' ', $query), Db::FETCH_ASSOC);
+            if (count($temp)) {
+                $result = array_merge($result, $temp);
+            }
+
+            unset($temp);
+            unset($query);
         }
-
-        // for tests:
-        #$query['temp_limit'] = 'LIMIT 2';
-
-        // run query
-        $result = $this->db->fetchAll(implode(' ', $query), Db::FETCH_ASSOC);
-        unset($query);
 
         if (!count($result)) {
             $output['msg'] = 'No results returned!';
@@ -235,13 +243,13 @@ class CampaignController extends BaseController
         $domains_age = $this->getDomainsAge(StatusDomain::find());
 
         // array -> uniqueness:
-        $save = array();
+        $save_page_id = array();
         foreach ($result as $r_no => $r) {
-            if (isset($save[$r['page_id']])) {
+            if (isset($save_page_id[$r['page_id']])) {
                 unset($result[$r_no]);
             } else {
                 // save as reference:
-                $save[$r['page_id']] = '';
+                $save_page_id[$r['page_id']] = '';
 
                 // remove content:
                 $result[$r_no]['body'] = null;
@@ -267,63 +275,41 @@ class CampaignController extends BaseController
             }
         }
 
-        // array -> group based on user's selected limit:
-        $save = array();
-        $pages_per_domain = trim($_POST['pages_per_domain']);
-        foreach ($result as $r_no => $r) {
-            if (!isset($save[$r['DomainURLIDX']])) {
-                $save[$r['DomainURLIDX']] = array();
-            }
-
-            if (count($save[$r['DomainURLIDX']]) < $pages_per_domain) {
-                $save[$r['DomainURLIDX']][] = $r;
-            }
-        }
-        unset($result);
-
-        // array -> re-group globally:
-        foreach ($save as $domain_id => $links) {
-            foreach ($links as $l_no => $link) {
-                $save2[] = $link;
-            }
-        }
-        unset($save);
-
         // array -> sort descending by points:
-        uasort($save2, array($this, 'descendingSortByPoints'));
+        uasort($result, array($this, 'descendingSortByPoints'));
 
         // handle percentage and data for filtering:
         $first = false;
         $min_max = $results_filtered = array();
         $avoid_keys = array_flip(array('page_id', 'PageURL', 'keyword_title', 'keyword_description', 'keyword_headings'));
 
-        foreach ($save2 as $s_no => $link) {
+        foreach ($result as $s_no => $link) {
             if (!$first) {
                 $first = $link['points'];
             }
 
             // save percentage to main array:
-            $save2[$s_no]['percentage'] = $percentage = floor($link['points'] * 100 / $first);
+            $result[$s_no]['percentage'] = $percentage = floor($link['points'] * 100 / $first);
 
             // build up array for JS:
-            $incoming_links = $save2[$s_no]['total_back_links'];
-            $outgoing_links = $save2[$s_no]['follow_links'] + $save2[$s_no]['no_follow_links'];
-            $google_rank = ($save2[$s_no]['google_rank'] == null) ? 0 : $save2[$s_no]['google_rank'];
+            $incoming_links = $result[$s_no]['total_back_links'];
+            $outgoing_links = $result[$s_no]['follow_links'] + $result[$s_no]['no_follow_links'];
+            $google_rank = ($result[$s_no]['google_rank'] == null) ? 0 : $result[$s_no]['google_rank'];
             $share_count = $link['fb_shares'] + $link['fb_likes'] + $link['fb_comments'] + $link['tweeter'] + $link['google_plus'];
 
             $temp = array(
-                'page_id' => (int)$save2[$s_no]['page_id'],
-                'PageURL' => $save2[$s_no]['PageURL'],
-                'keyword_title' => (int)$save2[$s_no]['heading_text'],
-                'keyword_description' => (int)$save2[$s_no]['description'],
-                'keyword_headings' => (int)$save2[$s_no]['heading_text'],
+                'page_id' => (int)$result[$s_no]['page_id'],
+                'PageURL' => $result[$s_no]['PageURL'],
+                'keyword_title' => (int)$result[$s_no]['heading_text'],
+                'keyword_description' => (int)$result[$s_no]['description'],
+                'keyword_headings' => (int)$result[$s_no]['heading_text'],
                 'percentage' => (int)$percentage,
                 'incoming_links' => (int)$incoming_links,
                 'outgoing_links' => (int)$outgoing_links,
                 'google_rank' => (int)$google_rank,
                 'share_count' => (int)$share_count,
-                'sentiment' => (int)$save2[$s_no]['sentimental_type'],
-                'domain_age' => (int)$domains_age[$save2[$s_no]['DomainURLIDX']],
+                'sentiment' => (int)$result[$s_no]['sentimental_type'],
+                'domain_age' => (int)$domains_age[$result[$s_no]['DomainURLIDX']],
             );
             $results_filtered[] = $temp;
 
@@ -346,7 +332,7 @@ class CampaignController extends BaseController
         $this->view->disableLevel(View::LEVEL_LAYOUT);
 
         echo $this->view->getRender('layouts', 'campaign_ajax', array(
-            'results' => $save2,
+            'results' => $result,
             'results_filtered' => $results_filtered,
             'min_max' => $min_max,
             'sentimental_types' => $sentimental_types,

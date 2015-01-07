@@ -207,9 +207,9 @@ class AnalyticsController extends BaseController
         }
         $this->view->setVar("domain_drop_down1", $drop1_html);
         $this->view->setVar("domains", $domains);
-        $this->view->setVar("time_array", $time_array);
+        $this->view->setVar("time_array", !isset($time_array) ? array() : $time_array );
         //$this->view->setVar("date_array" ,  $this->ConverDateJson($date_array));
-        $this->view->setVar("date_array", $date_array);
+        $this->view->setVar("date_array", !isset($date_array) ? array() : $date_array);
         $this->view->setVar("record_type", $record_type);
         $this->view->setVar("domain_drop_down2", $drop1_htm2);
     }

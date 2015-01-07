@@ -52,7 +52,7 @@ class IndexController extends BaseController
             $this->response->redirect($this->app_link.'/login');
         }
 
-        $domains_crawled = DomainsToCrawl::count(); // Query for fetching whole values from the collection ""DomainsToCrawl"
+        $domains_crawled = StatusDomain::count(); // Query for fetching whole values from the collection ""DomainsToCrawl"
         //$domains_crawled = count($domains_to_crawl);// Count the mongo collection "DomainsToCrawl"
         $this->view->setVar('domains_crawled', $domains_crawled); // Get total domains crawled
         $this->view->setTemplateAfter("dashboard"); // call the view dashboard after the main layout initialized

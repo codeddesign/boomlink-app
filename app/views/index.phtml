@@ -211,7 +211,7 @@
         </div>
         <div class="networkactive">
             <div class="networkline"></div>
-            <div class="greennetwork"></div>
+            <div class="greennetwork" id="crawler-lamp"></div>
             Crawler Aktive
         </div>
         <div class="networkactive">
@@ -649,6 +649,24 @@
                 toggle_switch.html('');
             }
         });
+    });
+
+    $(document).ready(function () {
+        (function () {
+            var crawler_lamp = $('#crawler-lamp'), lampCss;
+            setInterval(function () {
+                $.ajax({
+                    type: 'GET',
+                    url: '<?= $this->app_link;?>/crawler_control/status/status',
+                    dataType: 'JSON',
+                    success: function (response) {
+                        lampCss = (response == 'off') ? 'rednetwork' : 'greennetwork';
+                        crawler_lamp.addClass(lampCss);
+                    }
+                });
+
+            }, 3000);
+        }());
     });
 </script>
 </body>

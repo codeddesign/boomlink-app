@@ -101,7 +101,7 @@
         $counter++;
 
         // pre-sets:
-        $page_url = (strlen($link['PageURL']) > 40) ? $page_url = substr($link['PageURL'], 0, 30) . '...' . substr($link['PageURL'], strlen($link['PageURL']) - 30) : $link['PageURL'];
+        $page_url = (strlen($link['PageURL']) > 40) ? $page_url = substr($link['PageURL'], 0, 20) . '...' . substr($link['PageURL'], strlen($link['PageURL']) - 20) : $link['PageURL'];
         $social_shares = $link['fb_shares'] + $link['fb_likes'] + $link['fb_comments'] + $link['tweeter'] + $link['google_plus'];
         $sentimental_type = ($link['sentimental_type'] == 2) ? 'neutral' : ($link['sentimental_type'] == 1) ? 'positive' : 'negative';
         $google_rank = ($link['google_rank'] == '') ? 'n/a' : $link['google_rank'];

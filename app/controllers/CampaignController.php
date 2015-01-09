@@ -206,9 +206,8 @@ class CampaignController extends BaseController
         /* build up query to search for keyword: */
         $result = array();
         foreach ($list_of_domains as $d_no => $domain_id) {
-            $query['select'] = 'SELECT * FROM  `page_main_info_body` pmib';
+            $query['select'] = 'SELECT pmi.*, pmip.*, pmib.body, pmib.page_id, (SELECT GROUP_CONCAT(pmih.heading_text) FROM page_main_info_headings pmih WHERE pmib.page_id = pmih.page_id) as heading_text FROM  `page_main_info_body` pmib';
 
-            $query['join_0'] = 'LEFT JOIN page_main_info_headings pmih ON pmib.page_id = pmih.page_id';
             $query['join_1'] = 'INNER JOIN page_main_info pmi ON pmib.page_id = pmi.id';
             $query['join_2'] = 'INNER JOIN page_main_info_points pmip ON pmib.page_id = pmip.page_id';
 

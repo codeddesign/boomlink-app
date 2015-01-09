@@ -87,7 +87,7 @@ if (!is_array($user_domains)) {
         $('#generate_list_form').on('submit', function (ev) {
             ev.preventDefault();
 
-            var formSData = $(this).serialize(), loading = $('#search_loading_div');
+            var formSData = $(this).serialize(), loading = $('#search_loading_div'), resultContent = $('#searched_pages_result');
 
             if ($('#campaign_name').val() == '') {
                 alert("Enter campaign name");
@@ -119,7 +119,9 @@ if (!is_array($user_domains)) {
                 return false
             }
 
+            resultContent.html('');
             loading.show();
+
             $.ajax({
                 url: "<?= $this->app_link;?>/campaign/search",
                 type: "POST",
@@ -132,11 +134,12 @@ if (!is_array($user_domains)) {
                     }
 
                     if (data.error !== undefined && data.error) {
+                        loading.hide();
                         alert(data.msg);
                         return false;
                     }
 
-                    $('#searched_pages_result').html(data);
+                    resultContent.html(data);
 
                     $('.droparrow').on('click', function () {
                         var show_id = $(this).attr('data-show-id'),

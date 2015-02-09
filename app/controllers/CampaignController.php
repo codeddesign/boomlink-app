@@ -182,6 +182,8 @@ class CampaignController extends BaseController
         $algorithm = $this->db->fetchOne(sprintf('SELECT * FROM algorithms WHERE id=%d', $algorithm_id), Db::FETCH_ASSOC);
         $algorithm_config = json_decode($algorithm['config'], 1);
         $sentimental_types = array();
+
+        $enable_proxy_data = $enable_api_data = false;
         foreach ($algorithm_config as $key => $value) {
             switch ($key) {
                 case 'sentiment_negative':
@@ -198,6 +200,14 @@ class CampaignController extends BaseController
                     break;
             }
 
+            if( (stripos($key, 'sentiment') !== false OR $key == 'incoming') and (int)$value !== 0) {
+                $enable_api_data = true;
+            }
+
+            if( (stripos($key, 'page_rank') !== false OR $key=='share') AND (int)$value !== 0) {
+                $enable_proxy_data = true;
+            }
+
             if ($generic_value > -1 AND $value == 1) {
                 $sentimental_types[] = $generic_value;
             }
@@ -212,7 +222,19 @@ class CampaignController extends BaseController
             $query['join_2'] = 'INNER JOIN page_main_info_points pmip ON pmib.page_id = pmip.page_id';
 
             $query['condition_0'] = 'WHERE pmib.body REGEXP "[[:<:]]' . addslashes($keywords) . '[[:>:]]"';
-            $query['condition_1'] = 'AND pmi.parsed_status = 1 AND pmi.api_data_status = 1 AND pmi.proxy_data_status = 1';
+            //$query['condition_0'] = 'WHERE pmib.body LIKE "%' . addslashes($keywords) . '%"';
+            //$query['condition_0'] = 'WHERE match(pmib.body) against (\''.addslashes($keywords).'\')';
+            $query['condition_1a'] = 'AND pmi.parsed_status = 1';
+
+            if($enable_api_data) {
+                $query['condition_1b'] = 'AND pmi.api_data_status = 1';
+            }
+
+            if($enable_proxy_data)
+            {
+                $query['condition_1c'] = 'AND pmi.proxy_data_status = 1';
+            }
+
             $query['condition_2'] = 'AND pmip.algo_id = ' . $algorithm['id'];
 
             $query['conditions_x'] = 'AND pmi.DomainURLIDX = ' . $domain_id;
@@ -288,7 +310,13 @@ class CampaignController extends BaseController
             }
 
             // save percentage to main array:
-            $result[$s_no]['percentage'] = $percentage = floor($link['points'] * 100 / $first);
+            if((int)$first !== 0) {
+                $temp_perc = floor( $link['points'] * 100 / $first );
+            } else {
+                $temp_perc = 0;
+            }
+
+            $result[$s_no]['percentage'] = $percentage = $temp_perc;
 
             // build up array for JS:
             $incoming_links = $result[$s_no]['total_back_links'];

@@ -18,6 +18,8 @@ if (!is_array($user_domains)) {
         <div class="listtitlesubbar">
             <div class="analyticswebaddressbar">INTERNET ADRESSE</div>
             <div class="bestmatchbar" style="margin-right:10px;">LINK LIMIT</div>
+            <div class="bestmatchbar" style="margin-right:40px;">Total</div>
+            <div class="bestmatchbar" style="margin-right:40px;">Crawled</div>
         </div>
         <?php
         //export for everyone:
@@ -54,7 +56,9 @@ if (!is_array($user_domains)) {
                             </a>
                         <?php } ?>
                         <?php echo $value['main_url'] ?>
-                        <span style="float:right;"><?php echo $value['total_suburls']; ?></span>
+
+                        <span style="float:right;width: 70px;text-align: right;margin-right:40px;"><?= $value['total_suburls'] . ' |'; ?></span>
+                        <span style="float:right;width: 70px;text-align: right;"><?= $value['total_suburls_crawled'] . ' |'; ?></span>
                     </div>
 
                     <a class="droparrow" href="#site<?php echo $i ?>"></a>

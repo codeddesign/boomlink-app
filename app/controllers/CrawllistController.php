@@ -34,7 +34,8 @@ class CrawllistController extends BaseController
                 'Status' => $value->Status,
                 'DomainURLIDX' => $value->DomainURLIDX,
                 'page_limit' => (@$value->page_limit) ? $value->page_limit : 3,
-                'total_suburls' => $this->getTotalSubUrls($value->DomainURLIDX)
+                'total_suburls' => PageMainInfo::count("DomainURLIDX = '".$value->DomainURLIDX."'"),
+                'total_suburls_crawled' => PageMainInfo::count("DomainURLIDX = '".$value->DomainURLIDX."' and parsed_status='1'"),
             );
         }
 
@@ -56,15 +57,6 @@ class CrawllistController extends BaseController
             );
         }
         return $domain_details;
-    }
-
-    /**
-     *This function is used to get count of total pages crawled of a domain.
-     */
-    function getTotalSubUrls($DomainURLIDX)
-    {
-        $domains = PageMainInfo::count("DomainURLIDX = '$DomainURLIDX'");
-        return $domains;
     }
 
     /**

@@ -812,7 +812,7 @@ function generateData() {
     var data_array = [];
 
 
-    var data = '<?php echo $date_array; ?>';
+    var data = '<?= json_encode($date_array); ?>';
     var json = JSON.parse(data);
     console.log(json);
 

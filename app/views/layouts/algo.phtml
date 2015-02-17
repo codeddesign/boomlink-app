@@ -1,209 +1,253 @@
 <?php
 $is_admin = false;
-if ($this->session->get("user-role") !== 'normal') {
+if ($this->session->get( "user-role" ) !== 'normal') {
     $is_admin = true;
 }
 ?>
 <link rel="stylesheet" type="text/css" media="all" href="<?= $this->app_link; ?>/css/tab_pages.css"/>
+
+<div class="whitepagewrap">
+    <div class="homepagetitle">Algorithms</div>
+    <div class="homepagetitleline"></div>
+    <button type="button" class="homepagebuttons toggle-btn" data-toggle="algo-list" style="cursor:pointer;">List</button>
+    <button type="button" class="homepagebuttons toggle-btn" data-toggle="algo-create" style="cursor:pointer;">Create</button>
+</div>
+<div style="clear:both;"></div>
+
+<div style="margin-top: 0;">
 <div class="pagetitlebar">
-    <div class="pagetitlebar-title">Algorithms</div>
+    <div class="pagetitlebar-title"></div>
 </div>
 
-<div class="whitepagewrap" style="margin-top:17px;">
-    <div><?= $this->getContent(); ?></div>
-
-    <!-- tabs: -->
-    <div id="operations_box" style="height: auto;">
-        <div id="tabs_container">
-            <ul id="tabs">
-                <li id="tab1" onclick='toggle_tabs(this);' class="active"><a>Algorithms</a></li>
-                <li id="tab2" onclick='toggle_tabs(this);'><a>Create Algorithm</a></li>
-            </ul>
+<div id="algo-list" class="tabs tab-algo-list">
+    <?php
+    if ( ! $is_admin) {
+        echo "You don't have access.";
+    } elseif ( ! count( $algorithms )) {
+        echo "There are no algorithms created.";
+    } else {
+        ?>
+        <div class="listtitlesubbar">
+            <div class="analyticswebaddressbar">Algorithm</div>
+            <div class="bestmatchbar" style="margin-right:10px;">View</div>
         </div>
-    </div>
 
-    <!-- tabs content: -->
-    <div class="longwhitepagegraybg" style="height:auto;border-top:0;border-top:1px solid #C2C2D3;min-height:50px;padding:10px;">
-        <!-- algorithms tab: -->
-        <div id="tab1a" class="active_tab_content">
-            <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;max-height: 200px;overflow-y: scroll;">
-                <?php
-                if (!$is_admin) {
-                    $msg = 'You don\'t have access.';
-                } else {
-                    $msg = 'There are no algorithms created.';
-                    if ($algorithms !== null AND count($algorithms) > 0) {
-                        foreach ($algorithms as $algo) {
-                            $type = ($algo->is_public) ? 'public' : 'private';
-                            $list[] = $algo->id . '# ' . $algo->title . ' - <b>' . $type . '</b>';
-                        }
+        <?php
+        $options_translated = array(
+            'keyword_h'    => 'keyword in headings',
+            'pagerank_13'  => 'pagerank 1-3',
+            'pagerank_46'  => 'pagerank 4-6',
+            'pagerank_710' => 'pagerank 7-10',
 
-                        $msg = implode('<br/>', $list);
-                    }
-                }
+        );
+        foreach ($algorithms as $algo) {
+            $type    = ( $algo->is_public ) ? 'public' : 'private';
+            $options = json_decode( $algo->config, 1 );
+            ksort( $options );
 
-                echo $msg;
-                ?>
+            ?>
+            <div id="<?= $algo->id; ?>">
+                <div class="resultslist">
+                    <div class="analyticslisturl" style="width:690px;border-right:none;">
+                        <!--<a href="javascript:delRecord(1,'algo1')" style="float: left;">
+                            <div class="userdelete"></div>
+                        </a>-->
+                        <?= $algo->title; ?>
+                        <span style="float:right;"><?= ( $type ); ?></span>
+                    </div>
+
+                    <a class="droparrow" href="#algo<?= $algo->id; ?>"></a>
+                </div>
             </div>
-        </div>
 
-        <!-- create algorithm tab: -->
-        <div id="tab2a" class="hidden_tab_content">
-            <div id="tab2f-loading" style="display: none;" class="loading"></div>
-            <div class="importlingwhitewrap" style="width: 100%;padding-bottom: 10px;max-height: 200px;overflow-y: scroll;">
-                <?php if (!$is_admin) { ?> You don't have access. <?php } else { ?>
-                    <div id="tab2f-message" class='tabs-form-msg' style="display: none;"></div>
-                    <form id="tab2f" action="<?= $this->app_link . '/' . $page ?>/create" method="post">
-                        <!-- main sets -->
-                        <div class="algo-sets-list">
-                            <h3>Main sets:</h3>
-                            <table class="point-sub-list">
-                                <tr>
-                                    <td class="left-column">Algorithm title:</td>
-                                    <td class="right-column"><input type="text" class="algo-title" placeholder="some title" name="title"></td>
-                                </tr>
-                                <tr>
-                                    <td class="left-column">Public:</td>
-                                    <td class="right-column"><input type="checkbox" name="public"></td>
-                                </tr>
-                            </table>
+            <div id="algo<?= $algo->id; ?>" style="display:none;">
+                <?php foreach ($options as $option => $option_value) {
+                    $show   = false;
+                    $option = ( isset( $options_translated[$option] ) ) ? $options_translated[$option] : str_replace( '_', ' ', $option );
+
+                    if (is_numeric( $option_value ) and (int) ( $option_value ) > 0) {
+                        $show = true;
+                    }
+                    if (stripos( $option, 'sentiment' ) !== false) {
+                        $option_value = ( $option_value == 1 ) ? 'checked' : 'unchecked';
+                        $show         = true;
+                    }
+
+                    if ($show) {
+                        ?>
+                        <div class="analyticsdroplist" style="width:100%;">
+                            <div class="analyticslisturl" style="border-right:none;"><?= $option; ?></div>
+                            <span style="float:right;margin-top: 12px;margin-right:20px;width:60px;"><?= $option_value; ?></span>
                         </div>
-                        <div class="clear"></div>
-
-                        <!-- left list of settings -->
-                        <div class="left-list">
-                            <div class="algo-sets-list">
-                                <h3>Linking Points:</h3>
-                                <table class="point-sub-list">
-                                    <tr>
-                                        <td class="left-column">For every incoming:</td>
-                                        <td class="right-column">
-                                            <input type="text" value="0.00" name="incoming" id="incoming">
-                                            <!--<input data-for="incoming" data-step="0.10" type="button" value="+"> <input data-for="incoming" data-step="0.10" type="button" value="-">-->
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">For every outgoing:</td>
-                                        <td class="right-column">
-                                            <input type="text" value="0.00" name="outgoing" id="outgoing">
-                                            <!--<input data-for="outgoing" data-step="0.10" type="button" value="+"> <input data-for="outgoing" data-step="0.10" type="button" value="-">-->
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <div class="algo-sets-list">
-                                <h3>Domain Age Points:</h3>
-                                <table class="point-sub-list">
-                                    <tr>
-                                        <td class="left-column">Younger than 1 year:</td>
-                                        <td class="right-column">
-                                            <input type="text" value="0.00" name="age_1" id="age_1">
-                                            <!--<input data-for="age_1" data-step="10.00" type="button" value="+"> <input data-for="age_1" data-step="10.00" type="button" value="-">-->
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">Older than 3 years:</td>
-                                        <td class="right-column">
-                                            <input type="text" value="0.00" name="age_3" id="age_3">
-                                            <!--<input data-for="age_3" data-step="10.00" type="button" value="+"> <input data-for="age_3" data-step="10.00" type="button" value="-">-->
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <div class="algo-sets-list">
-                                <h3>Share Count Points:</h3>
-                                <table class="point-sub-list">
-                                    <tr>
-                                        <td class="left-column">For every share:</td>
-                                        <td class="right-column">
-                                            <input type="text" value="0.00" name="share" id="share">
-                                            <!--<input data-for="share" data-step="0.10" type="button" value="+"> <input data-for="share" data-step="0.10" type="button" value="-">-->
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <div class="algo-sets-list">
-                                <h3>Sentiment Value:</h3>
-                                <table class="point-sub-list">
-                                    <tr>
-                                        <td class="left-column">Positive sentiment:</td>
-                                        <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_positive"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">Neutral sentiment:</td>
-                                        <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_neutral"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">Negative sentiment:</td>
-                                        <td class="right-column"><input type="checkbox" name="sentiment_negative"></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- right list of settings -->
-                        <div class="right-list">
-                            <div class="algo-sets-list">
-                                <h3>Pagerank Points:</h3>
-                                <table class="point-sub-list">
-                                    <tr>
-                                        <td class="left-column">If Pagerank n/a or 0</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="pagerank_0"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">If Pagerank 1 - 3</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="pagerank_13"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">If Pagerank 4 - 6</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="pagerank_46"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">If Pagerank 7 - 10</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="pagerank_710"></td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <div class="algo-sets-list">
-                                <h3>Keyword Relevance Points:</h3>
-                                <table class="point-sub-list">
-                                    <tr>
-                                        <td class="left-column">Keyword in Title</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="keyword_title"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">Keyword in Meta Data</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="keyword_meta"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">Keyword in Title H-Titles</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="keyword_h"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="left-column">Keyword in Content</td>
-                                        <td class="right-column"> = <input type="text" value="0.00" name="keyword_content"></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- clear both divs + save button -->
-                        <div class="clear"></div>
-                        <div class="button-container">
-                            <input type="submit" name='action' value="Save">
-                        </div>
-                    </form>
+                    <?php } ?>
                 <?php } ?>
             </div>
-        </div>
-    </div>
+        <?php } ?>
+    <?php } ?>
 </div>
-<script src="<?= $this->app_link; ?>/js/tab_pages.js"></script>
+
+<div id="algo-create" class="tabs tab-algo-create" style="display: none;">
+    <div id="tab2f-loading" style="display: none;" class="loading"></div>
+
+    <?php if ( ! $is_admin) { ?> You don't have access. <?php } else { ?>
+        <div id="tab2f-message" class='tabs-form-msg' style="display: none;"></div>
+        <form id="tab2f" action="<?= $this->app_link . '/' . $page ?>/create" style="margin-left:20px;" method="post">
+            <!-- main sets -->
+            <div class="algo-sets-list">
+                <h3>Main sets:</h3>
+                <table class="point-sub-list">
+                    <tr>
+                        <td class="left-column">Algorithm title:</td>
+                        <td class="right-column"><input type="text" class="algo-title" placeholder="some title" name="title"></td>
+                    </tr>
+                    <tr>
+                        <td class="left-column">Public:</td>
+                        <td class="right-column"><input type="checkbox" name="public"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="clear"></div>
+
+            <!-- left list of settings -->
+            <div class="left-list">
+                <div class="algo-sets-list">
+                    <h3>Linking Points:</h3>
+                    <table class="point-sub-list">
+                        <tr>
+                            <td class="left-column">For every incoming:</td>
+                            <td class="right-column">
+                                <input type="text" value="0.00" name="incoming" id="incoming">
+                                <!--<input data-for="incoming" data-step="0.10" type="button" value="+"> <input data-for="incoming" data-step="0.10" type="button" value="-">-->
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">For every outgoing:</td>
+                            <td class="right-column">
+                                <input type="text" value="0.00" name="outgoing" id="outgoing">
+                                <!--<input data-for="outgoing" data-step="0.10" type="button" value="+"> <input data-for="outgoing" data-step="0.10" type="button" value="-">-->
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="algo-sets-list">
+                    <h3>Domain Age Points:</h3>
+                    <table class="point-sub-list">
+                        <tr>
+                            <td class="left-column">Younger than 1 year:</td>
+                            <td class="right-column">
+                                <input type="text" value="0.00" name="age_1" id="age_1">
+                                <!--<input data-for="age_1" data-step="10.00" type="button" value="+"> <input data-for="age_1" data-step="10.00" type="button" value="-">-->
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">Older than 3 years:</td>
+                            <td class="right-column">
+                                <input type="text" value="0.00" name="age_3" id="age_3">
+                                <!--<input data-for="age_3" data-step="10.00" type="button" value="+"> <input data-for="age_3" data-step="10.00" type="button" value="-">-->
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="algo-sets-list">
+                    <h3>Share Count Points:</h3>
+                    <table class="point-sub-list">
+                        <tr>
+                            <td class="left-column">For every share:</td>
+                            <td class="right-column">
+                                <input type="text" value="0.00" name="share" id="share">
+                                <!--<input data-for="share" data-step="0.10" type="button" value="+"> <input data-for="share" data-step="0.10" type="button" value="-">-->
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="algo-sets-list">
+                    <h3>Sentiment Value:</h3>
+                    <table class="point-sub-list">
+                        <tr>
+                            <td class="left-column">Positive sentiment:</td>
+                            <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_positive"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">Neutral sentiment:</td>
+                            <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_neutral"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">Negative sentiment:</td>
+                            <td class="right-column"><input type="checkbox" name="sentiment_negative"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- right list of settings -->
+            <div class="right-list">
+                <div class="algo-sets-list">
+                    <h3>Pagerank Points:</h3>
+                    <table class="point-sub-list">
+                        <tr>
+                            <td class="left-column">If Pagerank n/a or 0</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_0"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">If Pagerank 1 - 3</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_13"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">If Pagerank 4 - 6</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_46"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">If Pagerank 7 - 10</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_710"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="algo-sets-list">
+                    <h3>Keyword Relevance Points:</h3>
+                    <table class="point-sub-list">
+                        <tr>
+                            <td class="left-column">Keyword in Title</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_title"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">Keyword in Meta Data</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_meta"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">Keyword in Title H-Titles</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_h"></td>
+                        </tr>
+                        <tr>
+                            <td class="left-column">Keyword in Content</td>
+                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_content"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- clear both divs + save button -->
+            <div class="clear"></div>
+            <div class="button-container">
+                <input type="submit" name='action' value="Save">
+            </div>
+        </form>
+    <?php } ?>
+</div>
+</div>
+<div class="underlistbar"></div>
+
 <script>
+    $('.toggle-btn').on('click', function () {
+        var toShow = $(this).data('toggle');
+
+        $('.tabs').hide();
+        $('.tab-' + toShow).show();
+    });
+
     $('#tab2f').on('submit', function (event) {
         event.preventDefault();
         var theForm = $(this), action = theForm.attr('action'), type = theForm.attr('method'), formId = theForm.attr('id'),

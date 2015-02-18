@@ -116,14 +116,14 @@ if ($this->session->get( "user-role" ) !== 'normal') {
                         <tr>
                             <td class="left-column">For every incoming:</td>
                             <td class="right-column">
-                                <input type="text" value="0.00" name="incoming" id="incoming">
+                                <input type="number" value="0" min="0" name="incoming" id="incoming">
                                 <!--<input data-for="incoming" data-step="0.10" type="button" value="+"> <input data-for="incoming" data-step="0.10" type="button" value="-">-->
                             </td>
                         </tr>
                         <tr>
                             <td class="left-column">For every outgoing:</td>
                             <td class="right-column">
-                                <input type="text" value="0.00" name="outgoing" id="outgoing">
+                                <input type="number" value="0" min="0" name="outgoing" id="outgoing">
                                 <!--<input data-for="outgoing" data-step="0.10" type="button" value="+"> <input data-for="outgoing" data-step="0.10" type="button" value="-">-->
                             </td>
                         </tr>
@@ -136,14 +136,14 @@ if ($this->session->get( "user-role" ) !== 'normal') {
                         <tr>
                             <td class="left-column">Younger than 1 year:</td>
                             <td class="right-column">
-                                <input type="text" value="0.00" name="age_1" id="age_1">
+                                <input type="number" value="0" min="0" name="age_1" id="age_1">
                                 <!--<input data-for="age_1" data-step="10.00" type="button" value="+"> <input data-for="age_1" data-step="10.00" type="button" value="-">-->
                             </td>
                         </tr>
                         <tr>
                             <td class="left-column">Older than 3 years:</td>
                             <td class="right-column">
-                                <input type="text" value="0.00" name="age_3" id="age_3">
+                                <input type="number" value="0" min="0" name="age_3" id="age_3">
                                 <!--<input data-for="age_3" data-step="10.00" type="button" value="+"> <input data-for="age_3" data-step="10.00" type="button" value="-">-->
                             </td>
                         </tr>
@@ -156,7 +156,7 @@ if ($this->session->get( "user-role" ) !== 'normal') {
                         <tr>
                             <td class="left-column">For every share:</td>
                             <td class="right-column">
-                                <input type="text" value="0.00" name="share" id="share">
+                                <input type="number" value="0" min="0" name="share" id="share">
                                 <!--<input data-for="share" data-step="0.10" type="button" value="+"> <input data-for="share" data-step="0.10" type="button" value="-">-->
                             </td>
                         </tr>
@@ -168,11 +168,11 @@ if ($this->session->get( "user-role" ) !== 'normal') {
                     <table class="point-sub-list">
                         <tr>
                             <td class="left-column">Positive sentiment:</td>
-                            <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_positive"></td>
+                            <td class="right-column"><input type="checkbox" name="sentiment_positive"></td>
                         </tr>
                         <tr>
                             <td class="left-column">Neutral sentiment:</td>
-                            <td class="right-column"><input type="checkbox" checked="checked" name="sentiment_neutral"></td>
+                            <td class="right-column"><input type="checkbox" name="sentiment_neutral"></td>
                         </tr>
                         <tr>
                             <td class="left-column">Negative sentiment:</td>
@@ -189,19 +189,19 @@ if ($this->session->get( "user-role" ) !== 'normal') {
                     <table class="point-sub-list">
                         <tr>
                             <td class="left-column">If Pagerank n/a or 0</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_0"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="pagerank_0"></td>
                         </tr>
                         <tr>
                             <td class="left-column">If Pagerank 1 - 3</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_13"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="pagerank_13"></td>
                         </tr>
                         <tr>
                             <td class="left-column">If Pagerank 4 - 6</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_46"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="pagerank_46"></td>
                         </tr>
                         <tr>
                             <td class="left-column">If Pagerank 7 - 10</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="pagerank_710"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="pagerank_710"></td>
                         </tr>
                     </table>
                 </div>
@@ -211,19 +211,19 @@ if ($this->session->get( "user-role" ) !== 'normal') {
                     <table class="point-sub-list">
                         <tr>
                             <td class="left-column">Keyword in Title</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_title"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="keyword_title"></td>
                         </tr>
                         <tr>
                             <td class="left-column">Keyword in Meta Data</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_meta"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="keyword_meta"></td>
                         </tr>
                         <tr>
                             <td class="left-column">Keyword in Title H-Titles</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_h"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="keyword_h"></td>
                         </tr>
                         <tr>
                             <td class="left-column">Keyword in Content</td>
-                            <td class="right-column"> = <input type="text" value="0.00" name="keyword_content"></td>
+                            <td class="right-column"> = <input type="number" value="0" min="0" name="keyword_content"></td>
                         </tr>
                     </table>
                 </div>

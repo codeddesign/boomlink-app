@@ -216,7 +216,6 @@ class CampaignController extends BaseController
 SELECT
 	*,
 
-	@score0  := ".$aConfig['keyword_content']." *( MATCH (body) AGAINST('" . $keywords . "') )                         AS scoreBody,
 	@score1  := " . $aConfig['keyword_title'] . " *( MATCH (page_title) AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreTitle,
 	@score2  := " . $aConfig['keyword_meta'] . " *( MATCH (description) AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreDescription,
 	@score3  := " . $aConfig['keyword_h'] . " *( MATCH (heading_text)   AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreHeadings,
@@ -231,7 +230,7 @@ SELECT
 	@score9  := " . $aConfig['incoming'] . " *( IFNULL(total_back_links, 0) )                          AS scoreIncom,
 	@score10 := " . $aConfig['outgoing'] . " *( IFNULL(follow_links, 0) + IFNULL(no_follow_links, 0) ) AS scoreOutgo,
 
-	(@score0 + @score1 + @score2 + @score3 + @score4 + @score5 + @score6 + @score7 + @score8 + @score9 + @score10) AS scoreTotal
+	(" . $aConfig['keyword_content'] . " + @score1 + @score2 + @score3 + @score4 + @score5 + @score6 + @score7 + @score8 + @score9 + @score10) AS scoreTotal
 FROM       page_main_info          AS pmi
 INNER JOIN page_main_info_body     AS pmib  ON pmib.page_id = pmi.id
 INNER JOIN page_main_info_headings AS pmih  ON pmih.page_id = pmi.id

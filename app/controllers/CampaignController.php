@@ -211,7 +211,6 @@ class CampaignController extends BaseController
 
         /* build up query to search for keyword: */
         $keywords = $this->getWordsProperly($keywords);
-
         $query = "
 SELECT
 	*,
@@ -237,10 +236,10 @@ INNER JOIN page_main_info_headings AS pmih  ON pmih.page_id = pmi.id
 WHERE
 	pmi.DomainURLIDX IN (" . implode( ', ', $list_of_domains ) . ")
 	AND MATCH (body) AGAINST('" . $keywords . "' IN BOOLEAN MODE)
-	-- AND pmi.sentimental_type IN (1,2)
 ORDER by scoreTotal desc
 LIMIT " . ( count( $list_of_domains ) * $pages_per_domain ) . "
 ";
+        echo $query;die;
         $result = $this->db->fetchAll($query, Db::FETCH_ASSOC);
 
         if (!count($result)) {

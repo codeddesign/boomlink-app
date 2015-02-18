@@ -239,7 +239,7 @@ WHERE
 ORDER by scoreTotal desc
 LIMIT " . ( count( $list_of_domains ) * $pages_per_domain ) . "
 ";
-        echo $query;die;
+
         $result = $this->db->fetchAll($query, Db::FETCH_ASSOC);
 
         if (!count($result)) {

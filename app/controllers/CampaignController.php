@@ -180,11 +180,15 @@ class CampaignController extends BaseController
 
         // get algorithm config:
         $algorithm = $this->db->fetchOne(sprintf('SELECT * FROM algorithms WHERE id=%d', $algorithm_id), Db::FETCH_ASSOC);
-        $algorithm_config = json_decode($algorithm['config'], 1);
-        $sentimental_types = array();
+        $aConfig = json_decode($algorithm['config'], 1);
 
-        $enable_proxy_data = $enable_api_data = false;
-        foreach ($algorithm_config as $key => $value) {
+        $sentimental_types = array();
+        foreach ($aConfig as $key => $value) {
+            if(!is_numeric($value)) {
+                $aConfig[$key] = 0;
+            }
+            $aConfig[$key] = (int)$value;
+
             switch ($key) {
                 case 'sentiment_negative':
                     $generic_value = 0;
@@ -200,60 +204,45 @@ class CampaignController extends BaseController
                     break;
             }
 
-            if( (stripos($key, 'sentiment') !== false OR $key == 'incoming') and (int)$value !== 0) {
-                $enable_api_data = true;
-            }
-
-            if( (stripos($key, 'page_rank') !== false OR $key=='share') AND (int)$value !== 0) {
-                $enable_proxy_data = true;
-            }
-
             if ($generic_value > -1 AND $value == 1) {
                 $sentimental_types[] = $generic_value;
             }
         }
 
         /* build up query to search for keyword: */
-        $result = array();
-        foreach ($list_of_domains as $d_no => $domain_id) {
-            $query['select'] = 'SELECT pmi.*, pmip.*, pmib.body, pmib.page_id, (SELECT IFNULL(GROUP_CONCAT(pmih.heading_text), "") FROM page_main_info_headings pmih WHERE pmib.page_id = pmih.page_id) as heading_text FROM  `page_main_info_body` pmib';
+        $keywords = $this->getWordsProperly($keywords);
 
-            $query['join_1'] = 'INNER JOIN page_main_info pmi ON pmib.page_id = pmi.id';
-            $query['join_2'] = 'INNER JOIN page_main_info_points pmip ON pmib.page_id = pmip.page_id';
+        $query = "
+SELECT
+	*,
 
-            $query['condition_0'] = 'WHERE pmib.body REGEXP "[[:<:]]' . addslashes($keywords) . '[[:>:]]"';
-            //$query['condition_0'] = 'WHERE pmib.body LIKE "%' . addslashes($keywords) . '%"';
-            //$query['condition_0'] = 'WHERE match(pmib.body) against (\''.addslashes($keywords).'\')';
-            $query['condition_1a'] = 'AND pmi.parsed_status = 1';
+	@score0  := ".$aConfig['keyword_content']." *( MATCH (body) AGAINST('" . $keywords . "') )                         AS scoreBody,
+	@score1  := " . $aConfig['keyword_title'] . " *( MATCH (page_title) AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreTitle,
+	@score2  := " . $aConfig['keyword_meta'] . " *( MATCH (description) AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreDescription,
+	@score3  := " . $aConfig['keyword_h'] . " *( MATCH (heading_text)   AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreHeadings,
 
-            if($enable_api_data) {
-                $query['condition_1b'] = 'AND pmi.api_data_status = 1';
-            }
+	@score4  := " . $aConfig['pagerank_0'] . " *(google_rank IS NOT NULL && google_rank = 0)                           AS scoreRank0,
+	@score5  := " . $aConfig['pagerank_13'] . " *(google_rank IS NOT NULL && (google_rank >= 1 && google_rank <=3) )   AS scoreRank13,
+	@score6  := " . $aConfig['pagerank_46'] . " *(google_rank IS NOT NULL && (google_rank >= 4 && google_rank <=6) )   AS scoreRank46,
+	@score7  := " . $aConfig['pagerank_710'] . " *(google_rank IS NOT NULL && (google_rank >= 7 && google_rank <=10) ) AS scoreRank710,
 
-            if($enable_proxy_data)
-            {
-                $query['condition_1c'] = 'AND pmi.proxy_data_status = 1';
-            }
+	@score8  := " . $aConfig['share'] . " *( IFNULL(fb_shares, 0) + IFNULL(fb_comments, 0) + IFNULL(fb_likes, 0) + IFNULL(tweeter, 0) + IFNULL(google_plus, 0) ) AS scoreShare,
 
-            $query['condition_2'] = 'AND pmip.algo_id = ' . $algorithm['id'];
+	@score9  := " . $aConfig['incoming'] . " *( IFNULL(total_back_links, 0) )                          AS scoreIncom,
+	@score10 := " . $aConfig['outgoing'] . " *( IFNULL(follow_links, 0) + IFNULL(no_follow_links, 0) ) AS scoreOutgo,
 
-            $query['conditions_x'] = 'AND pmi.DomainURLIDX = ' . $domain_id;
-            if (count($sentimental_types)) {
-                $query['condition_y'] = 'AND pmi.sentimental_type IN (' . implode(', ', $sentimental_types) . ')';
-            }
-
-            $query['order'] = 'ORDER BY pmip.points DESC';
-            $query['temp_limit'] = 'LIMIT ' . $pages_per_domain;
-
-            // run query
-            $temp = $this->db->fetchAll(implode(' ', $query), Db::FETCH_ASSOC);
-            if (count($temp)) {
-                $result = array_merge($result, $temp);
-            }
-
-            unset($temp);
-            unset($query);
-        }
+	(@score0 + @score1 + @score2 + @score3 + @score4 + @score5 + @score6 + @score7 + @score8 + @score9 + @score10) AS scoreTotal
+FROM       page_main_info          AS pmi
+INNER JOIN page_main_info_body     AS pmib  ON pmib.page_id = pmi.id
+INNER JOIN page_main_info_headings AS pmih  ON pmih.page_id = pmi.id
+WHERE
+	pmi.DomainURLIDX IN (1,2,3)
+	AND MATCH (body) AGAINST('" . $keywords . "' IN BOOLEAN MODE)
+	-- AND pmi.sentimental_type IN (1,2)
+ORDER by scoreTotal desc
+LIMIT " . ( count( $list_of_domains ) * $pages_per_domain ) . "
+";
+        $result = $this->db->fetchAll($query, Db::FETCH_ASSOC);
 
         if (!count($result)) {
             $output['msg'] = 'No results returned!';
@@ -263,42 +252,6 @@ class CampaignController extends BaseController
         // get domains_age:
         $domains_age = $this->getDomainsAge(StatusDomain::find());
 
-        // array -> uniqueness:
-        $save_page_id = array();
-        foreach ($result as $r_no => $r) {
-            if (isset($save_page_id[$r['page_id']])) {
-                unset($result[$r_no]);
-            } else {
-                // save as reference:
-                $save_page_id[$r['page_id']] = '';
-
-                // remove content:
-                $result[$r_no]['body'] = null;
-
-                // add more points:
-                $check_by_keys = array(
-                    'keyword_title' => 'page_title',
-                    'keyword_meta' => 'description',
-                    'keyword_h' => 'heading_text',
-                );
-
-                foreach ($check_by_keys as $algo_key => $result_key) {
-                    if ($this->keywordExists($keywords, $result[$r_no][$result_key])) {
-                        $result[$r_no]['points'] += $algorithm_config[$algo_key];
-                        $result[$r_no][$result_key] = 1;
-                    } else {
-                        $result[$r_no][$result_key] = 0;
-                    }
-                }
-
-                // no need to check content:
-                $result[$r_no]['points'] += $algorithm_config['keyword_content'];
-            }
-        }
-
-        // array -> sort descending by points:
-        uasort($result, array($this, 'descendingSortByPoints'));
-
         // handle percentage and data for filtering:
         $first = false;
         $min_max = $results_filtered = array();
@@ -306,12 +259,12 @@ class CampaignController extends BaseController
 
         foreach ($result as $s_no => $link) {
             if (!$first) {
-                $first = $link['points'];
+                $first = $link['scoreTotal'];
             }
 
             // save percentage to main array:
             if((int)$first !== 0) {
-                $temp_perc = floor( $link['points'] * 100 / $first );
+                $temp_perc = floor( $link['scoreTotal'] * 100 / $first );
             } else {
                 $temp_perc = 0;
             }
@@ -327,9 +280,9 @@ class CampaignController extends BaseController
             $temp = array(
                 'page_id' => (int)$result[$s_no]['page_id'],
                 'PageURL' => $result[$s_no]['PageURL'],
-                'keyword_title' => (int)$result[$s_no]['heading_text'],
-                'keyword_description' => (int)$result[$s_no]['description'],
-                'keyword_headings' => (int)$result[$s_no]['heading_text'],
+                'keyword_title' => $result[$s_no]['scoreTitle'],
+                'keyword_description' => $result[$s_no]['scoreDescription'],
+                'keyword_headings' => $result[$s_no]['scoreHeadings'],
                 'percentage' => (int)$percentage,
                 'incoming_links' => (int)$incoming_links,
                 'outgoing_links' => (int)$outgoing_links,
@@ -374,30 +327,6 @@ class CampaignController extends BaseController
     }
 
     /**
-     * @param $needle
-     * @param $haystack
-     * @return int
-     */
-    private function keywordExists($needle, $haystack)
-    {
-        return (preg_match('#(' . $needle . ')#is', $haystack));
-    }
-
-    /**
-     * @param $a
-     * @param $b
-     * @return int
-     */
-    private function descendingSortByPoints($a, $b)
-    {
-        if ($a['points'] == $b['points']) {
-            return 0;
-        }
-
-        return ($a['points'] > $b['points']) ? -1 : 1;
-    }
-
-    /**
      * This function is used to get keywords of Automated Campaign.
      */
     public function getPreviousKeywordsAction()
@@ -412,5 +341,25 @@ class CampaignController extends BaseController
         }
 
         $this->jsonResponse(array('record' => $result));
+    }
+
+    private function keywordExists($needle, $haystack)
+    {
+        return (preg_match('#(' . $needle . ')#is', $haystack));
+    }
+
+    private function getWordsProperly( $keywords )
+    {
+        $keywords = str_replace( array( '+', '-' ), ' ', $keywords );
+        $keywords = explode( ' ', $keywords );
+
+        $save = array();
+        foreach ($keywords as $k_no => $keyword) {
+            if (( $keyword = trim( $keyword ) )) {
+                $save[] = '+' . $keyword;
+            }
+        }
+
+        return addslashes( implode( ' ', $save ) );
     }
 }

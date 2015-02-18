@@ -87,7 +87,8 @@ if (!is_array($user_domains)) {
         $('#generate_list_form').on('submit', function (ev) {
             ev.preventDefault();
 
-            var formSData = $(this).serialize(), loading = $('#search_loading_div'), resultContent = $('#searched_pages_result');
+            var formSData = $(this).serialize(), loading = $('#search_loading_div'), resultContent = $('#searched_pages_result'),
+                aboveResults = $('#above-results');
 
             if ($('#campaign_name').val() == '') {
                 alert("Enter campaign name");
@@ -119,6 +120,7 @@ if (!is_array($user_domains)) {
                 return false
             }
 
+            aboveResults.show();
             resultContent.html('');
             loading.show();
 
@@ -135,10 +137,13 @@ if (!is_array($user_domains)) {
 
                     if (data.error !== undefined && data.error) {
                         loading.hide();
-                        alert(data.msg);
+                        aboveResults.show();
+                        resultContent.html(data.msg);
                         return false;
                     }
 
+                    loading.hide();
+                    aboveResults.hide();
                     resultContent.html(data);
 
                     $('.droparrow').on('click', function () {
@@ -153,8 +158,6 @@ if (!is_array($user_domains)) {
                         content.css('display', 'none');
                         return true;
                     });
-
-                    loading.hide();
                 }
             });
         });
@@ -401,8 +404,8 @@ if (!is_array($user_domains)) {
 
 </form>
 </div>
-<div id="searched_pages_result">
-    <div class="listtitlebar" style="border:none;"></div>
-</div>
+<div class="listtitlebar" id="above-results" style="border:none;"></div>
+<div style="clear:both;"></div>
+<div id="searched_pages_result"></div>
 <input type="hidden" id="current_id"/>
 <input type="hidden" id="page_urls_with_id"/>

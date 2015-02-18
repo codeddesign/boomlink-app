@@ -193,6 +193,10 @@
                 <div class="dropdownsub-titles">OUTGOING LINKS</div>
                 <div class="dropdownsub-results"><?= $link['follow_links'] + $link['no_follow_links']; ?></div>
             </div>
+            <div class="dropdowwt" style="width:448px;margin-left:34px;">
+                <div class="dropdownsub-titles">Points</div>
+                <div class="dropdownsub-results"><?= $link['scoreTotal']; ?></div>
+            </div>
         </div>
     <?php
     endforeach;

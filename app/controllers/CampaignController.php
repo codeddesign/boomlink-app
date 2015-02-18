@@ -236,7 +236,7 @@ FROM       page_main_info          AS pmi
 INNER JOIN page_main_info_body     AS pmib  ON pmib.page_id = pmi.id
 INNER JOIN page_main_info_headings AS pmih  ON pmih.page_id = pmi.id
 WHERE
-	pmi.DomainURLIDX IN (1,2,3)
+	pmi.DomainURLIDX IN (" . implode( ', ', $list_of_domains ) . ")
 	AND MATCH (body) AGAINST('" . $keywords . "' IN BOOLEAN MODE)
 	-- AND pmi.sentimental_type IN (1,2)
 ORDER by scoreTotal desc

@@ -104,7 +104,9 @@ class IndexController extends BaseController
         foreach ($records as $value) {
             // see the date manual page for format options
             $date = date("m/d", strtotime($value->date));
-            $return_array[$date] = $return_array[$date] + 1;
+            if(isset($return_array[$date])) {
+                $return_array[$date] = $return_array[$date] + 1;
+            }
             // increment the value of the array when its match
 
         }

@@ -1533,12 +1533,13 @@ select#analyticschoosedomain, select#analyticschoosetime {
 	width: 334px;
 	height: 38px;
 	margin-top: 30px;
+	margin-bottom: 50px;
 }
 
 .adminuserbluetop {
 	float: right;
 	width: 333px;
-	height: 6px;
+	/*height: 6px;*/
 	-webkit-border-top-left-radius: 2px;
 	-webkit-border-top-right-radius: 2px;
 	-moz-border-radius-topleft: 2px;
@@ -1557,6 +1558,7 @@ select#analyticschoosedomain, select#analyticschoosetime {
 	width: 331px;
 	height: 378px;
 	background: #F1F3F7;
+	padding-bottom: 12px;
 	border: 1px solid #C2C2D3;
 	border-top: 1px solid #FFFFFF;
 	-webkit-border-bottom-right-radius: 3px;
@@ -1583,7 +1585,7 @@ select#analyticschoosedomain, select#analyticschoosetime {
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	height: 329px;
+	/*height: 329px;*/
     margin-left: 12px;
     margin-top: 7px;
     width: 303px;
@@ -1838,4 +1840,8 @@ select.buildcampaignbutton {
     height: 26px;
     padding: 0 5px;
     width: 241px;
+}
+
+.search-filtering-table {
+	float: left;
 }

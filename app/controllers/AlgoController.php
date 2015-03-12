@@ -1,4 +1,6 @@
 <?php
+use \Phalcon\Mvc\View;
+use \Phalcon\Db;
 
 class AlgoController extends BaseController
 {
@@ -58,9 +60,15 @@ class AlgoController extends BaseController
         $backup = $data;
         unset($data['title']);
         unset($data['public']);
+        unset($data['id']);
 
-        $statement = $this->db->prepare('INSERT INTO algorithms (user_id, title, is_public, config) VALUES (:user_id, :title, :is_public, :config)');
+        $query['insert'] = 'INSERT INTO algorithms (id, user_id, title, is_public, config)';
+        $query['values'] = 'VALUES (:id, :user_id, :title, :is_public, :config)';
+        $query['duplicate'] = 'ON DUPLICATE KEY UPDATE user_id=VALUES(user_id), title=VALUES(title), is_public=VALUES(is_public), config=VALUES(config)';
+
+        $statement = $this->db->prepare(implode(' ', $query));
         $this->db->executePrepared($statement, array(
+            'id' => (trim($backup['id']) === '') ? NULL : $backup['id'],
             'user_id' => $this->session->get('user-id'),
             'title' => $backup['title'],
             'is_public' => $backup['public'],
@@ -68,5 +76,34 @@ class AlgoController extends BaseController
         ), array());
 
         return $this->db->lastInsertId();
+    }
+
+    public function deleteAction( $id )
+    {
+        $userRole = $this->session->get( "user-role" );
+        $userId   = $this->session->get( "user-id" );
+
+        //needed:
+        $this->view->disable();
+
+        $query = "SELECT id FROM algorithms WHERE id='" . $id . "'";
+        if ($userRole !== 'master') {
+            $query .= ' AND user_id="' . $userId . '"';
+        }
+
+        $status = "failed";
+        $msg    = "Failed to remove algorithm.";
+
+        $result = $this->db->fetchAll( $query, Db::FETCH_ASSOC );
+        if (count( $result ) > 0) {
+            $query  = "DELETE FROM algorithms WHERE id='" . $id . "'";
+            $result = $this->db->execute( $query );
+            if ($result) {
+                $status = "sucss";
+                $msg    = "Algorithm was removed successfully.";
+            }
+        }
+
+        echo json_encode( array( "deleted" => $status, "msg" => $msg ) );
     }
 }

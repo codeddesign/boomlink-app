@@ -211,36 +211,36 @@ class CampaignController extends BaseController
 
         /* build up query to search for keyword: */
         $keywords = $this->getWordsProperly($keywords);
+
         $query = "
 SELECT
-	*,
+        *,
+        @score0  := " . $aConfig['keyword_content'] . " *(MATCH (body) AGAINST('" . $keywords . "') ) as relevanceScorePoints,
+        @score1  := " . $aConfig['keyword_title'] . " *( MATCH (page_title) AGAINST('" . $keywords . "') ) AS scoreTitle,
+        @score2  := " . $aConfig['keyword_meta'] . " *( MATCH (description) AGAINST('" . $keywords . "') ) AS scoreDescription,
+        @score3  := " . $aConfig['keyword_h'] . " *( MATCH (heading_text)   AGAINST('" . $keywords . "') ) AS scoreHeadings,
 
-	@score1  := " . $aConfig['keyword_title'] . " *( MATCH (page_title) AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreTitle,
-	@score2  := " . $aConfig['keyword_meta'] . " *( MATCH (description) AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreDescription,
-	@score3  := " . $aConfig['keyword_h'] . " *( MATCH (heading_text)   AGAINST('" . $keywords . "' IN BOOLEAN MODE) ) AS scoreHeadings,
+        @score4  := " . $aConfig['pagerank_0'] . " *(google_rank IS NOT NULL && google_rank = 0)                           AS scoreRank0,
+        @score5  := " . $aConfig['pagerank_13'] . " *(google_rank IS NOT NULL && (google_rank >= 1 && google_rank <=3) )   AS scoreRank13,
+        @score6  := " . $aConfig['pagerank_46'] . " *(google_rank IS NOT NULL && (google_rank >= 4 && google_rank <=6) )   AS scoreRank46,
+        @score7  := " . $aConfig['pagerank_710'] . " *(google_rank IS NOT NULL && (google_rank >= 7 && google_rank <=10) ) AS scoreRank710,
 
-	@score4  := " . $aConfig['pagerank_0'] . " *(google_rank IS NOT NULL && google_rank = 0)                           AS scoreRank0,
-	@score5  := " . $aConfig['pagerank_13'] . " *(google_rank IS NOT NULL && (google_rank >= 1 && google_rank <=3) )   AS scoreRank13,
-	@score6  := " . $aConfig['pagerank_46'] . " *(google_rank IS NOT NULL && (google_rank >= 4 && google_rank <=6) )   AS scoreRank46,
-	@score7  := " . $aConfig['pagerank_710'] . " *(google_rank IS NOT NULL && (google_rank >= 7 && google_rank <=10) ) AS scoreRank710,
+        @score8  := " . $aConfig['share'] . " *( IFNULL(fb_shares, 0) + IFNULL(fb_comments, 0) + IFNULL(fb_likes, 0) + IFNULL(tweeter, 0) + IFNULL(google_plus, 0) ) AS scoreShare,
 
-	@score8  := " . $aConfig['share'] . " *( IFNULL(fb_shares, 0) + IFNULL(fb_comments, 0) + IFNULL(fb_likes, 0) + IFNULL(tweeter, 0) + IFNULL(google_plus, 0) ) AS scoreShare,
+        @score9  := " . $aConfig['incoming'] . " *( IFNULL(total_back_links, 0) )                          AS scoreIncom,
+        @score10 := " . $aConfig['outgoing'] . " *( IFNULL(follow_links, 0) + IFNULL(no_follow_links, 0) ) AS scoreOutgo,
 
-	@score9  := " . $aConfig['incoming'] . " *( IFNULL(total_back_links, 0) )                          AS scoreIncom,
-	@score10 := " . $aConfig['outgoing'] . " *( IFNULL(follow_links, 0) + IFNULL(no_follow_links, 0) ) AS scoreOutgo,
-
-	(" . $aConfig['keyword_content'] . " + @score1 + @score2 + @score3 + @score4 + @score5 + @score6 + @score7 + @score8 + @score9 + @score10) AS scoreTotal
+        (@score1 + @score2 + @score3 + @score4 + @score5 + @score6 + @score7 + @score8 + @score9 + @score10) AS scoreTotal
 FROM       page_main_info          AS pmi
 INNER JOIN page_main_info_body     AS pmib  ON pmib.page_id = pmi.id
 INNER JOIN page_main_info_headings AS pmih  ON pmih.page_id = pmi.id
 WHERE
-	pmi.DomainURLIDX IN (" . implode( ', ', $list_of_domains ) . ")
-	AND MATCH (body) AGAINST('" . $keywords . "' IN BOOLEAN MODE)
+        pmi.DomainURLIDX IN (" . implode( ', ', $list_of_domains ) . ")
+        AND MATCH (body) AGAINST('" . $keywords . "' IN BOOLEAN MODE)
 ORDER by scoreTotal desc
-LIMIT " . ( count( $list_of_domains ) * $pages_per_domain ) . "
+LIMIT 1000
 ";
-
-        $result = $this->db->fetchAll($query, Db::FETCH_ASSOC);
+        $result = $this->db->fetchAll( $query, Db::FETCH_ASSOC );
 
         if (!count($result)) {
             $output['msg'] = 'No results returned!';
@@ -254,6 +254,27 @@ LIMIT " . ( count( $list_of_domains ) * $pages_per_domain ) . "
         $first = false;
         $min_max = $results_filtered = array();
         $avoid_keys = array_flip(array('page_id', 'PageURL', 'keyword_title', 'keyword_description', 'keyword_headings'));
+
+        // get only X number of links per domain and apply some filtering to links
+        $collectedPerDomain = array();
+        $collectedLinks     = array();
+        $newResult = array();
+        foreach ($result as $s_no => $link) {
+            $domainId = $link['DomainURLIDX'];
+            if ( ! isset( $collectedPerDomain[$domainId] )) {
+                $collectedPerDomain[$domainId] = array();
+            }
+
+            if ( ! isset( $collectedLinks[$link['PageURL']] ) and ! isset( $collectedLinks[$link['PageURL'] . '/'] ) AND count( $collectedPerDomain[$domainId] ) < $pages_per_domain) {
+                $collectedPerDomain[$domainId][]  = '';
+                $collectedLinks[$link['PageURL']] = '';
+                $newResult[] = $link;
+            }
+        }
+
+        // cleanup:
+        $collectedPerDomain = $collectedLinks = array();
+        $result = $newResult;
 
         foreach ($result as $s_no => $link) {
             if (!$first) {

@@ -536,9 +536,9 @@ class ImportController extends BaseController
             'domain_url' => $p_link,
         );
 
-        // domains to crawl:
+        /*// domains to crawl:
         $statement = $this->db->prepare('INSERT INTO domains_to_crawl (idx, DomainURL) VALUES (:idx, :domain_url)');
-        $this->db->executePrepared($statement, $data, array());
+        $this->db->executePrepared($statement, $data, array());*/
 
         // status domain - add main link
         $statement = $this->db->prepare('INSERT INTO page_main_info (DomainURLIDX, PageURL) VALUES (:idx, :domain_url)');
